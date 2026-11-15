@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Kaileigh's Impossible Quiz</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", "Trebuchet MS", Arial, sans-serif;
+    background: linear-gradient(160deg, #ffd6f0 0%, #c9f0ff 50%, #d9ffc9 100%);
+    background-attachment: fixed;
+    color: #3a2a5d;
+    user-select: none; -webkit-user-select: none;
+    touch-action: manipulation;
+    overflow-x: hidden;
+  }
+  #app { max-width: 900px; margin: 0 auto; padding: 12px 14px 30px; min-height: 100%; position: relative; }
+  .screen { display: none; }
+  .screen.on { display: block; animation: pop .35s ease-out; }
+  @keyframes pop { from { transform: scale(.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  #muteBtn {
+    position: fixed; top: 10px; right: 10px; z-index: 50;
+    font-size: 30px; width: 58px; height: 58px; border-radius: 50%;
+    border: 4px solid #fff; background: #ffe066; cursor: pointer;
+    box-shadow: 0 4px 0 #d4a900;
+  }
+
+  /* Title */
+  .title-wrap { text-align: center; padding-top: 40px; }
+  .big-title {
+    font-size: clamp(40px, 9vw, 84px); line-height: 1.05; margin: 10px 0 6px;
+    color: #ff4fa3; text-shadow: 4px 4px 0 #fff, 7px 7px 0 #7b5cff;
+    transform: rotate(-3deg);
+  }
+  .sub { font-size: clamp(22px, 4vw, 32px); margin: 18px 0; }
+  .emoji-row { font-size: 54px; letter-spacing: 8px; }
+  .wiggle { display: inline-block; animation: wig 1.2s ease-in-out infinite; }
+  @keyframes wig { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+
+  .btn {
+    font-family: inherit; font-weight: bold;
+    font-size: clamp(24px, 4.5vw, 36px);
+    border: 5px solid #fff; border-radius: 26px;
+    padding: 18px 26px; cursor: pointer; color: #fff;
+    background: #7b5cff; box-shadow: 0 7px 0 #4b33b8;
+    transition: transform .08s;
+  }
+  .btn:active { transform: translateY(5px); box-shadow: 0 2px 0 #4b33b8; }
+  .btn.go { background: #2fd27a; box-shadow: 0 7px 0 #17984f; font-size: clamp(30px, 6vw, 48px); padding: 20px 50px; }
+  .link { background: none; border: none; color: #7b5cff; font-family: inherit; font-size: 22px; text-decoration: underline; cursor: pointer; margin-top: 16px; padding: 10px; }
+
+  /* Top bar */
+  .topbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 70px 10px 0; }
+  .hearts { font-size: 34px; letter-spacing: 2px; white-space: nowrap; }
+  .hearts .lost { filter: grayscale(1); opacity: .35; }
+  .hearts.shake { animation: shake .4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+  .progress { flex: 1; min-width: 180px; }
+  .progress .label { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+  .bar { height: 22px; background: #fff; border-radius: 12px; overflow: hidden; border: 3px solid #fff; box-shadow: inset 0 2px 4px rgba(0,0,0,.15); }
+  .bar > div { height: 100%; background: linear-gradient(90deg, #ff4fa3, #ffb800, #2fd27a, #3fb5ff, #7b5cff); transition: width .4s; }
+
+  /* Question card */
+  .card {
+    position: relative; background: #fff; border-radius: 30px;
+    padding: 26px 22px 30px; min-height: 160px;
+    box-shadow: 0 8px 0 rgba(123,92,255,.35);
+    text-align: center; margin-bottom: 22px;
+  }
+  .qnum { font-size: 20px; color: #ff4fa3; font-weight: bold; margin-bottom: 8px; }
+  .qtext { font-size: clamp(30px, 6vw, 46px); line-height: 1.25; font-weight: bold; }
+  .hint { font-size: 22px; color: #8a7bb0; margin-top: 10px; }
+  .hit { cursor: pointer; }
+  .qemoji { font-size: 1.3em; display: inline-block; padding: 0 6px; }
+  .bigdot { font-size: 1.6em; line-height: .5; padding: 0 10px; display: inline-block; color: #3a2a5d; cursor: pointer; }
+  .ladybug { position: absolute; right: 12px; bottom: 8px; font-size: 18px; padding: 8px; opacity: .75; cursor: pointer; }
+
+  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .answers.row { display: flex; justify-content: space-between; gap: 12px; }
+  .answers.row .ans { flex: 1; }
+  .answers.one { grid-template-columns: 1fr; }
+  .ans {
+    font-family: inherit; font-weight: bold;
+    font-size: clamp(24px, 4.6vw, 36px);
+    min-height: 100px; padding: 14px 10px;
+    border: 5px solid #fff; border-radius: 26px; cursor: pointer;
+    color: #fff; box-shadow: 0 7px 0 rgba(0,0,0,.2);
+    transition: transform .08s;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+  }
+  .ans:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+  .c0 { background: #ff4fa3; } .c1 { background: #3fb5ff; } .c2 { background: #ffb800; } .c3 { background: #2fd27a; }
+  .plain { background: #fff !important; border-color: #e6ddff; }
+
+  .arena { position: relative; height: 300px; background: rgba(255,255,255,.5); border-radius: 26px; border: 4px dashed #fff; }
+  .arena .ans { position: absolute; width: 170px; transition: left .18s, top .18s; }
+
+  /* Overlays */
+  .overlay {
+    position: fixed; inset: 0; z-index: 40; display: none;
+    align-items: center; justify-content: center; background: rgba(58,42,93,.45); padding: 20px;
+  }
+  .overlay.on { display: flex; }
+  .bubble {
+    background: #fff; border-radius: 34px; padding: 30px 26px; max-width: 560px; width: 100%;
+    text-align: center; border: 6px solid #ffe066; animation: pop .3s ease-out;
+  }
+  .bubble .face { font-size: 80px; }
+  .bubble .msg { font-size: clamp(26px, 5vw, 36px); font-weight: bold; margin: 12px 0 22px; line-height: 1.25; }
+  #yay {
+    position: fixed; left: 50%; top: 40%; transform: translate(-50%,-50%) scale(0);
+    z-index: 45; font-size: clamp(48px, 11vw, 96px); font-weight: bold; color: #2fd27a;
+    text-shadow: 4px 4px 0 #fff, 7px 7px 0 #17984f; pointer-events: none; white-space: nowrap;
+  }
+  #yay.show { animation: yay .9s ease-out forwards; }
+  @keyframes yay { 0%{transform:translate(-50%,-50%) scale(0)} 30%{transform:translate(-50%,-50%) scale(1.15)} 70%{transform:translate(-50%,-50%) scale(1)} 100%{transform:translate(-50%,-50%) scale(1); opacity:0} }
+
+  .end-wrap { text-align: center; padding-top: 30px; }
+  .end-wrap h1 { font-size: clamp(40px, 9vw, 76px); margin: 10px 0; color: #ff4fa3; text-shadow: 4px 4px 0 #fff, 7px 7px 0 #7b5cff; }
+  .end-wrap p { font-size: clamp(24px, 4.5vw, 34px); margin: 14px 0 26px; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; }
+
+  @media (max-width: 520px) {
+    .answers { gap: 12px; }
+    .ans { min-height: 86px; }
+    .arena .ans { width: 130px; }
+  }
+  /* Level picker */
+  .levels { display: grid; gap: 16px; max-width: 640px; margin: 10px auto 0; }
+  .lvl {
+    font-family: inherit; text-align: left; cursor: pointer; color: #fff;
+    border: 5px solid #fff; border-radius: 28px; padding: 14px 20px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 7px 0 rgba(0,0,0,.2); transition: transform .08s;
+  }
+  .lvl:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+  .lvl .num { font-size: 46px; font-weight: bold; min-width: 52px; text-align: center; }
+  .lvl .info { flex: 1; }
+  .lvl .name { font-size: clamp(26px, 5vw, 36px); font-weight: bold; }
+  .lvl .desc { font-size: clamp(18px, 3.4vw, 22px); opacity: .95; }
+  .lvl .meta { font-size: 20px; margin-top: 2px; }
+  .lvl .done { font-size: 42px; min-width: 50px; text-align: center; }
+  .L1 { background: #2fd27a; } .L2 { background: #3fb5ff; } .L3 { background: #ffb800; }
+  .L4 { background: #ff7a3d; } .L5 { background: #b04dff; }
+  .lvltag { display: inline-block; font-size: 20px; padding: 4px 14px; border-radius: 14px; color: #fff; margin-bottom: 6px; }
+  .seqshow { font-size: 40px; letter-spacing: 10px; font-weight: bold; color: #7b5cff; margin-top: 8px; }
+  .wait-btn { background: #b8b0c9 !important; }
+  .wait-btn.amber { background: #ffb800 !important; }
+  .wait-btn.go { background: #2fd27a !important; animation: pop .25s; }
+  .mouse { position: fixed; left: 6px; bottom: 6px; font-size: 18px; padding: 8px; opacity: .7; cursor: pointer; z-index: 20; }
+  #hearts.hit { cursor: pointer; }
+  .btnrow { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<button id="muteBtn" aria-label="Sound on or off">🔊</button>
+<canvas id="confetti"></canvas>
+<div id="app">
+
+  <!-- TITLE / LEVEL PICKER -->
+  <div id="title" class="screen on">
+    <div class="title-wrap" style="padding-top:20px">
+      <div class="emoji-row"><span class="wiggle">🦄</span> <span class="wiggle">🤪</span> <span class="wiggle">🍌</span></div>
+      <div class="big-title">Kaileigh's<br>Impossible Quiz</div>
+      <div class="sub" style="font-size:24px;margin:10px 0">Pick a level! Read every word. Look everywhere! 👀</div>
+      <div class="levels" id="levels"></div>
+      <div style="margin-top:22px"><button class="btn" id="boardBtn">🏆 Leaderboard</button></div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz" class="screen">
+    <div class="topbar">
+      <div class="hearts" id="hearts"></div>
+      <div class="progress">
+        <div class="label"><span id="progLabel">Question 1 of 16</span> &nbsp; <span id="timer">⏱ 00:00</span></div>
+        <div class="bar"><div id="progBar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card" id="card">
+      <div class="lvltag" id="lvltag"></div>
+      <div class="qnum" id="qnum"></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="hint" id="qhint"></div>
+    </div>
+    <div class="answers" id="answers"></div>
+  </div>
+
+  <!-- GAME OVER (friendly) -->
+  <div id="over" class="screen">
+    <div class="end-wrap">
+      <div style="font-size:90px">🐣</div>
+      <h1>Try again!</h1>
+      <p id="overMsg">Oops! No more hearts.</p>
+      <p style="font-size:22px">⏱ The clock keeps ticking while you try again!</p>
+      <button class="btn go" id="retryBtn">Try again! 💪</button><br>
+      <button class="link" id="restartBtn">Start from the very beginning</button><br>
+      <button class="link" id="overLevelsBtn">⬅ Back to levels</button>
+    </div>
+  </div>
+
+  <!-- WIN -->
+  <div id="win" class="screen">
+    <div class="end-wrap">
+      <div style="font-size:80px"><span class="wiggle">🏆</span></div>
+      <h1 id="winTitle">YOU DID IT, KAILEIGH!</h1>
+      <p id="winText">You beat the level!</p>
+      <p id="winStats" style="font-size:28px"></p>
+      <p id="newRecord" style="display:none;font-size:40px;color:#ff4fa3;font-weight:bold"><span class="wiggle">🌟</span> New record! <span class="wiggle">🌟</span></p>
+      <div id="nameBox" style="margin-bottom:20px">
+        <div style="font-size:26px;margin-bottom:8px">What is your name?</div>
+        <input id="nameInput" maxlength="14" autocomplete="off" style="font-family:inherit;font-size:34px;padding:12px 16px;border-radius:20px;border:5px solid #7b5cff;width:min(360px,90%);text-align:center">
+        <div style="margin-top:12px"><button class="btn go" id="saveBtn" style="font-size:30px;padding:14px 34px">Save my score ✅</button></div>
+      </div>
+      <p id="savedMsg" style="display:none;font-size:24px"></p>
+      <div class="btnrow">
+        <button class="btn" id="nextBtn">Next level ▶</button>
+        <button class="btn" id="againBtn" style="background:#ff4fa3;box-shadow:0 7px 0 #b8306f">Play again 🔁</button>
+      </div>
+      <button class="link" id="winLevelsBtn">⬅ Back to levels</button>
+      <button class="link" id="winBoardBtn">🏆 Leaderboard</button>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="board" class="screen">
+    <div class="end-wrap" style="padding-top:10px">
+      <h1 style="font-size:clamp(36px,8vw,60px)">🏆 Leaderboard</h1>
+      <div class="btnrow" id="boardTabs"></div>
+      <div class="card" style="margin-top:16px;padding:16px 10px">
+        <div id="boardTitle" style="font-size:28px;font-weight:bold;margin-bottom:8px"></div>
+        <table id="boardTable" style="width:100%;border-collapse:collapse;font-size:clamp(18px,3.6vw,26px)"></table>
+      </div>
+      <p style="font-size:20px" id="boardNote">Fastest times on this device. 📱</p>
+      <button class="btn" id="boardBack">⬅ Back to levels</button><br>
+      <button class="link" id="clearBtn" style="color:#c0392b">Clear leaderboard</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="wrongBox">
+  <div class="bubble">
+    <div class="face" id="wrongFace">🙈</div>
+    <div class="msg" id="wrongMsg">Oops!</div>
+    <button class="btn" id="wrongOk">Try again!</button>
+  </div>
+</div>
+<div class="overlay" id="confirmBox">
+  <div class="bubble">
+    <div class="face">🗑️</div>
+    <div class="msg">Clear ALL the scores? This can't be undone!</div>
+    <div class="btnrow">
+      <button class="btn" id="confirmYes" style="background:#ff4fa3;box-shadow:0 7px 0 #b8306f">Yes, clear</button>
+      <button class="btn go" id="confirmNo" style="font-size:30px;padding:18px 30px">No, keep</button>
+    </div>
+  </div>
+</div>
+<div id="yay">YAY!</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ================= Storage helpers (fail gracefully) =================
+  var memStore = {};
+  var lsOK = (function () {
+    try { var k = "__kq_test"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; } catch (e) { return false; }
+  })();
+  function getItem(k) { try { if (lsOK) return localStorage.getItem(k); } catch (e) {} return Object.prototype.hasOwnProperty.call(memStore, k) ? memStore[k] : null; }
+  function setItem(k, v) { try { if (lsOK) { localStorage.setItem(k, v); return; } } catch (e) {} memStore[k] = v; }
+  function removeItem(k) { try { if (lsOK) localStorage.removeItem(k); } catch (e) {} delete memStore[k]; }
+  function getJSON(k, def) { try { var v = getItem(k); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
+
+  // ================= Score storage adapter =================
+  // Swap this object for a remote (e.g. Supabase) version later.
+  // Contract: every method returns a Promise.
+  //   saveScore(level, {name, ms, hearts, date}) -> Promise<void>
+  //   getTopScores(level, limit)                 -> Promise<Array<{name, ms, hearts, date}>> (fastest first)
+  //   clearAll()                                 -> Promise<void>
+  var LocalScoreStore = {
+    kind: "local",
+    _key: function (level) { return "kq_scores_L" + level; },
+    _sort: function (list) {
+      return list.sort(function (a, b) { return a.ms - b.ms || b.hearts - a.hearts || a.date - b.date; });
+    },
+    saveScore: function (level, entry) {
+      var list = getJSON(this._key(level), []);
+      if (!Array.isArray(list)) list = [];
+      list.push({ name: entry.name, ms: entry.ms, hearts: entry.hearts, date: entry.date });
+      list = this._sort(list).slice(0, 50);
+      setItem(this._key(level), JSON.stringify(list));
+      return Promise.resolve();
+    },
+    getTopScores: function (level, limit) {
+      var list = getJSON(this._key(level), []);
+      if (!Array.isArray(list)) list = [];
+      return Promise.resolve(this._sort(list).slice(0, limit || 10));
+    },
+    clearAll: function () {
+      for (var l = 1; l <= 5; l++) removeItem(this._key(l));
+      return Promise.resolve();
+    }
+  };
+
+  // Shared online leaderboard (Supabase REST). Public publishable key only; the database
+  // allows anonymous SELECT + INSERT and nothing else (RLS + column grants + CHECKs).
+  var SUPABASE_URL = "https://yjzipkgorsudkugouvba.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_bJdh1REiNeXFwjz_hGGohg_Iz2bSpWs";
+  function apiFetch(path, opts) {
+    opts = opts || {};
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 8000) : null;
+    var headers = { "apikey": SUPABASE_KEY, "Content-Type": "application/json" };
+    for (var h in (opts.headers || {})) headers[h] = opts.headers[h];
+    return fetch(SUPABASE_URL + "/rest/v1/" + path, {
+      method: opts.method || "GET", headers: headers, body: opts.body, signal: ctrl ? ctrl.signal : undefined
+    }).then(function (r) { if (t) clearTimeout(t); return r; }, function (e) { if (t) clearTimeout(t); throw e; });
+  }
+  var RemoteScoreStore = {
+    kind: "remote",
+    shared: true,
+    offline: false, // true when the last call fell back to this device's scores
+    saveScore: function (level, entry) {
+      var self = this;
+      var body = JSON.stringify({ level: level, name: entry.name, time_ms: Math.round(entry.ms), hearts_left: entry.hearts });
+      return apiFetch("quiz_scores", { method: "POST", body: body, headers: { "Prefer": "return=minimal" } }).then(function (r) {
+        if (r.ok) { self.offline = false; return; }
+        if (r.status >= 400 && r.status < 500) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            var err = new Error(j && j.message || "rejected"); err.rejected = true; throw err;
+          });
+        }
+        throw new Error("server " + r.status);
+      }).catch(function (e) {
+        if (e && e.rejected) throw e;
+        self.offline = true; // network problem: keep the score on this device instead
+        return LocalScoreStore.saveScore(level, entry);
+      });
+    },
+    getTopScores: function (level, limit) {
+      var self = this;
+      var q = "quiz_scores?select=name,time_ms,hearts_left,created_at&level=eq." + Number(level) +
+        "&order=time_ms.asc,hearts_left.desc,created_at.asc&limit=" + Number(limit || 10);
+      return apiFetch(q).then(function (r) {
+        if (!r.ok) throw new Error("server " + r.status);
+        return r.json();
+      }).then(function (rows) {
+        self.offline = false;
+        return rows.map(function (x) { return { name: x.name, ms: x.time_ms, hearts: x.hearts_left, date: Date.parse(x.created_at) }; });
+      }).catch(function () {
+        self.offline = true;
+        return LocalScoreStore.getTopScores(level, limit);
+      });
+    },
+    clearAll: function () { return Promise.reject(new Error("The shared leaderboard can only be cleared by the owner.")); }
+  };
+  var forceLocal = /[?&]localboard=1/.test(location.search) || typeof fetch === "undefined";
+  var ScoreStore = forceLocal ? LocalScoreStore : RemoteScoreStore;
+
+  // ================= Name rules =================
+  var NAME_MAX = 12;
+  var BAD_PARTS = ["fuck", "fuk", "shit", "bitch", "cunt", "piss", "wank", "twat", "bollock", "nigg", "faggot",
+    "slut", "whore", "penis", "vagina", "dildo", "porn", "rape", "nazi", "hitler", "idiot", "stupid", "bastard",
+    "boob", "willy", "kill", "dumb", "loser", "hate", "sexy", "poop", "butthole", "arsehole", "asshole"];
+  var BAD_WORDS = ["ass", "arse", "dick", "cock", "fag", "sex", "tit", "tits", "hell", "damn", "crap", "butt",
+    "pee", "fart", "die", "dead", "ugly", "fat", "jerk", "suck", "sucks", "nob", "knob", "prick", "poo"];
+  function cleanName(raw) {
+    return String(raw || "").replace(/[^A-Za-z0-9 ]/g, "").replace(/\s+/g, " ").trim().slice(0, NAME_MAX).trim();
+  }
+  function isRude(name) {
+    var low = name.toLowerCase();
+    var leet = low.replace(/0/g, "o").replace(/1/g, "i").replace(/3/g, "e").replace(/4/g, "a").replace(/5/g, "s").replace(/7/g, "t").replace(/8/g, "b");
+    var squash = leet.replace(/ /g, "");
+    for (var i = 0; i < BAD_PARTS.length; i++) if (squash.indexOf(BAD_PARTS[i]) >= 0) return true;
+    var words = leet.split(" ");
+    for (var j = 0; j < words.length; j++) if (BAD_WORDS.indexOf(words[j]) >= 0) return true;
+    if (BAD_WORDS.indexOf(squash) >= 0) return true;
+    return false;
+  }
+  // returns {ok, name, reason}
+  function checkName(raw) {
+    var n = cleanName(raw);
+    if (!n) return { ok: false, reason: "Please type your name! ✏️" };
+    if (isRude(n)) return { ok: false, reason: "Let's pick a nicer name! 😊" };
+    return { ok: true, name: n };
+  }
+
+  // ================= Sound (WebAudio, no files) =================
+  var actx = null;
+  var muted = getItem("kq_muted") === "1";
+  function ac() {
+    if (!actx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) { try { actx = new AC(); } catch (e) { actx = null; } }
+    }
+    if (actx && actx.state === "suspended") { try { actx.resume(); } catch (e) {} }
+    return actx;
+  }
+  function tone(freq, start, dur, type, vol, slideTo) {
+    if (muted) return;
+    var c = ac(); if (!c) return;
+    try {
+      var t = c.currentTime + start;
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = type || "sine";
+      o.frequency.setValueAtTime(freq, t);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol || 0.25, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(c.destination);
+      o.start(t); o.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+  var sfx = {
+    click: function () { tone(660, 0, 0.08, "square", 0.08); },
+    tick: function () { tone(880, 0, 0.06, "square", 0.06); },
+    right: function () { tone(523, 0, 0.15, "triangle", 0.3); tone(659, 0.12, 0.15, "triangle", 0.3); tone(784, 0.24, 0.3, "triangle", 0.3); },
+    wrong: function () { tone(330, 0, 0.35, "sawtooth", 0.12, 140); tone(200, 0.3, 0.25, "square", 0.08, 120); },
+    boing: function () { tone(200, 0, 0.25, "sine", 0.3, 700); },
+    win: function () {
+      var n = [523, 659, 784, 1047, 784, 1047];
+      for (var i = 0; i < n.length; i++) tone(n[i], i * 0.15, 0.25, "triangle", 0.3);
+      tone(1319, 0.95, 0.6, "triangle", 0.3);
+    },
+    sad: function () { tone(392, 0, 0.3, "triangle", 0.25); tone(349, 0.3, 0.3, "triangle", 0.25); tone(330, 0.6, 0.5, "triangle", 0.25); }
+  };
+  var muteBtn = document.getElementById("muteBtn");
+  function drawMute() { muteBtn.textContent = muted ? "🔇" : "🔊"; }
+  drawMute();
+  muteBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    muted = !muted;
+    setItem("kq_muted", muted ? "1" : "0");
+    drawMute();
+    if (!muted) sfx.click();
+  });
+
+  // ================= Helpers =================
+  function $(id) { return document.getElementById(id); }
+  function show(id) {
+    var s = document.querySelectorAll(".screen");
+    for (var i = 0; i < s.length; i++) s[i].classList.remove("on");
+    $(id).classList.add("on");
+    window.scrollTo(0, 0);
+  }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function fmt(ms) {
+    var s = Math.floor(ms / 1000), m = Math.floor(s / 60); s = s % 60;
+    return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function fmtDate(t) { try { return new Date(t).toLocaleDateString(); } catch (e) { return ""; } }
+  var defaultWrong = ["Nope! Silly goose! 🪿", "Oopsie daisy! 🌼", "Not that one! 🙃", "Ha ha! Tricked you! 😜", "Uh-oh, spaghetti-o! 🍝"];
+  var praise = ["YAY!", "WOW!", "SUPER!", "YES!", "AWESOME!", "COOL!", "GENIUS!", "WAHOO!"];
+  var faces = ["🙈", "🤪", "😜", "🐸", "🙃", "🐵", "🦆", "🤭"];
+
+  // ================= Special question builders =================
+  // Running-away button. opts: {label, doneLabel, need, decoy, decoyMsg}
+  function dodger(opts) {
+    return function (api) {
+      var box = api.box, dodges = 0, NEED = opts.need || 5, lastMove = 0;
+      var target = document.createElement("button");
+      target.className = "ans c3";
+      target.style.zIndex = "3";
+      target.textContent = opts.label;
+      target.setAttribute("data-dodge", String(NEED));
+      var decoy = document.createElement("button");
+      decoy.className = "ans c0";
+      decoy.textContent = opts.decoy;
+      decoy.setAttribute("data-ok", "0");
+      box.appendChild(target); box.appendChild(decoy);
+      function place(el, xf, yf) {
+        var W = box.clientWidth - el.offsetWidth - 10, H = box.clientHeight - el.offsetHeight - 10;
+        el.style.left = Math.max(5, Math.round(W * xf)) + "px";
+        el.style.top = Math.max(5, Math.round(H * yf)) + "px";
+      }
+      place(target, 0.15, 0.5); place(decoy, 0.85, 0.5);
+      var spots = [[0.85, 0.05], [0.05, 0.95], [0.5, 0.05], [0.95, 0.95], [0.1, 0.1], [0.55, 0.95], [0.45, 0.5], [0.3, 0.6]];
+      function dodge() {
+        lastMove = Date.now();
+        var s = spots[dodges % spots.length];
+        dodges++;
+        sfx.boing();
+        place(target, s[0], s[1]);
+        if (dodges >= NEED) target.textContent = opts.doneLabel;
+      }
+      target.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse" && dodges < NEED) dodge(); });
+      target.addEventListener("pointerdown", function (e) { if (dodges < NEED) { e.preventDefault(); dodge(); } });
+      target.addEventListener("click", function () { if (dodges >= NEED && Date.now() - lastMove > 250) api.right(); });
+      decoy.addEventListener("click", function () { api.wrong(opts.decoyMsg); });
+    };
+  }
+  // Don't touch anything for ms. Touching buttons loses a heart; touching elsewhere restarts the wait.
+  function waitTimer(ms) {
+    return function (api) {
+      var timer = null;
+      function startTimer() { clearTimeout(timer); timer = setTimeout(function () { api.right(); }, ms); }
+      function onTouch(e) {
+        if (e.target && e.target.closest && e.target.closest(".ans")) return;
+        startTimer();
+      }
+      document.addEventListener("pointerdown", onTouch, true);
+      startTimer();
+      api.onCleanup(function () { clearTimeout(timer); document.removeEventListener("pointerdown", onTouch, true); });
+    };
+  }
+  // Tap letters in order. letters: all buttons shown; target: string to build.
+  function sequence(letters, target, wrongMsg) {
+    return function (api) {
+      var pos = 0, box = api.box;
+      var show = document.createElement("div");
+      show.className = "seqshow";
+      function draw() {
+        var t = "";
+        for (var i = 0; i < target.length; i++) t += i < pos ? target[i] : "_";
+        show.textContent = t;
+      }
+      draw();
+      $("qhint").appendChild(show);
+      letters.forEach(function (L, i) {
+        var b = document.createElement("button");
+        b.className = "ans c" + (i % 4);
+        b.textContent = L;
+        var tpos = target.indexOf(L);
+        if (tpos >= 0) b.setAttribute("data-seq", String(tpos));
+        b.addEventListener("click", function () {
+          if (L === target[pos]) {
+            pos++; sfx.tick(); b.style.visibility = "hidden"; draw();
+            if (pos >= target.length) api.right();
+          } else {
+            api.wrong(wrongMsg || ("Oops! The next letter is not " + L + "!"));
+          }
+        });
+        box.appendChild(b);
+      });
+    };
+  }
+  // Tap one button n times.
+  function counter(n, emoji, doneMsg) {
+    return function (api) {
+      var left = n, box = api.box;
+      box.className = "answers one";
+      var b = document.createElement("button");
+      b.className = "ans c1";
+      b.style.minHeight = "160px";
+      b.setAttribute("data-count", String(n));
+      function draw() { b.innerHTML = "<span style='font-size:60px'>" + emoji + "</span>&nbsp; " + left; }
+      draw();
+      b.addEventListener("click", function () {
+        left--; sfx.tick();
+        b.style.transform = "scale(" + (left % 2 ? 0.95 : 1.03) + ")";
+        if (left <= 0) { b.innerHTML = doneMsg; api.right(); } else draw();
+      });
+      box.appendChild(b);
+    };
+  }
+  // Wait for green, then tap. amber: show a fake "almost" stage first.
+  function greenLight(ms, amber) {
+    return function (api) {
+      var box = api.box, state = "wait", timers = [];
+      box.className = "answers one";
+      var b = document.createElement("button");
+      b.className = "ans wait-btn";
+      b.style.minHeight = "170px";
+      b.textContent = "Wait... ✋";
+      b.setAttribute("data-green", "1");
+      box.appendChild(b);
+      if (amber) timers.push(setTimeout(function () { b.className = "ans wait-btn amber"; b.textContent = "Almost... 🤏"; }, ms * 0.55));
+      timers.push(setTimeout(function () { state = "go"; b.className = "ans wait-btn go"; b.textContent = "TAP NOW! 🟢"; }, ms));
+      b.addEventListener("click", function () {
+        if (state === "go") api.right(); else api.wrong("Too fast! Wait for GREEN! 🟢");
+      });
+      api.onCleanup(function () { timers.forEach(clearTimeout); });
+    };
+  }
+  // The hearts at the top become the answer.
+  function heartsHit(api) {
+    var h = $("hearts");
+    h.classList.add("hit");
+    function onClick(e) { e.stopPropagation(); api.right(); }
+    h.addEventListener("click", onClick);
+    api.onCleanup(function () { h.classList.remove("hit"); h.removeEventListener("click", onClick); });
+  }
+  // Something tiny hidden in the bottom-left corner of the screen.
+  function hiddenCorner(emoji, label) {
+    return function (api) {
+      var el = document.createElement("span");
+      el.className = "mouse hit";
+      el.textContent = emoji;
+      el.setAttribute("data-ok", "1");
+      el.setAttribute("aria-label", label);
+      el.addEventListener("click", function (e) { e.stopPropagation(); api.right(); });
+      document.body.appendChild(el);
+      api.onCleanup(function () { if (el.parentNode) el.parentNode.removeChild(el); });
+    };
+  }
+
+  // ================= Levels & questions =================
+  // Question: q (HTML), hint, answers [{t, ok, msg, style, cls}] or function(qIndex), layout, extra, setup, kind (for tests)
+  var LEVELS = [
+    { name: "Super Easy", stars: 1, hearts: 5, emoji: "🐣", desc: "A warm-up. Easy peasy!", qs: [
+      { q: "Who is this quiz for?", answers: [
+        { t: "A dog 🐶", msg: "Woof! Dogs can't read! 🐶" }, { t: "Kaileigh! 👧", ok: true },
+        { t: "A robot 🤖", msg: "Beep boop! Wrong! 🤖" }, { t: "A potato 🥔", msg: "Potatoes don't play quizzes! 🥔" }] },
+      { q: "What colour is the sky on a sunny day?", answers: [
+        { t: "Green", msg: "Green? That's grass! 🌱" }, { t: "Spotty", msg: "The sky is not a dog! 🐾" },
+        { t: "Blue", ok: true }, { t: "Pizza", msg: "Pizza is not a colour! 🍕" }] },
+      { q: "What does a cow say?", answers: [
+        { t: "Woof", msg: "That's a dog! 🐶" }, { t: "Quack", msg: "That's a duck! 🦆" },
+        { t: "Hello!", msg: "Cows can't talk! Silly! 🐮" }, { t: "Moo", ok: true }] },
+      { q: "How many legs does a cat have?", answers: [
+        { t: "4", ok: true }, { t: "2", msg: "That's a chicken! 🐔" },
+        { t: "100", msg: "That's a creepy-crawly! 🐛" }, { t: "0", msg: "A cat with no legs? It would roll! 😹" }] },
+      { q: "Which word rhymes with CAT?", answers: [
+        { t: "Dog", msg: "Dog and cat don't rhyme! 🐕" }, { t: "Hat", ok: true },
+        { t: "Sun", msg: "Sun rhymes with fun! ☀️" }, { t: "Cup", msg: "Cup rhymes with pup! ☕" }] },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Dgo", msg: "The letters got mixed up! 🌀" }, { t: "Ddog", msg: "Too many Ds! 🐶🐶" },
+        { t: "Dog", ok: true }, { t: "Odg", msg: "Odg? That's odd! 😄" }] },
+      { q: "How many eyes do you have?", answers: [
+        { t: "3", msg: "Three? Are you a monster? 👹" }, { t: "2", ok: true },
+        { t: "10", msg: "Ten eyes? That's a spider! 🕷️" }, { t: "0", msg: "Then how are you reading this? 👀" }] },
+      { q: "What do bees make?", answers: [
+        { t: "Jam", msg: "Jam comes from fruit! 🍓" }, { t: "Socks", msg: "Bees can't knit! 🧦" },
+        { t: "Honey 🍯", ok: true }, { t: "Pizza", msg: "Mmm, but no! 🍕" }] },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Snu", msg: "Snu? Oops! 🙃" }, { t: "Sun ☀️", ok: true },
+        { t: "Sunn", msg: "One N is enough! ☀️" }, { t: "Sn", msg: "A letter ran away! 🏃" }] },
+      { q: "Which animal says quack?", answers: [
+        { t: "A duck 🦆", ok: true }, { t: "A lion 🦁", msg: "Lions ROAR! 🦁" },
+        { t: "A snake 🐍", msg: "Snakes go hiss! 🐍" }, { t: "A fish 🐟", msg: "Fish go blub blub! 🐟" }] },
+      { q: "Which one is a fruit?", answers: [
+        { t: "A sock 🧦", msg: "Don't eat socks! Yuck! 🧦" }, { t: "A rock 🪨", msg: "Crunch! Ouch! 🪨" },
+        { t: "A car 🚗", msg: "Beep beep! Not a fruit! 🚗" }, { t: "An apple 🍎", ok: true }] },
+      { q: "What letter does APPLE start with?", answers: [
+        { t: "B", msg: "B is for banana! 🍌" }, { t: "A", ok: true },
+        { t: "Z", msg: "Z is for zebra! 🦓" }, { t: "🍎", msg: "That's an apple, not a letter! 😄" }] },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Hta", msg: "Mixed up! 🎩" }, { t: "Haat", msg: "Too many As! 🎩" },
+        { t: "Tah", msg: "That's backwards! 🎩" }, { t: "Hat 🎩", ok: true }] },
+      { q: "What colour is a banana?", answers: [
+        { t: "Blue", msg: "A blue banana? Weird! 💙" }, { t: "Yellow 🍌", ok: true },
+        { t: "Purple", msg: "That's a grape colour! 🍇" }, { t: "Stripy", msg: "That's a zebra! 🦓" }] },
+      { q: "How many fingers are on one hand?", answers: [
+        { t: "2", msg: "Count again! 🖐️" }, { t: "20", msg: "That's fingers AND toes! 🦶" },
+        { t: "5", ok: true }, { t: "100", msg: "That's a LOT of fingers! 😂" }] },
+      { q: "Which is bigger: an elephant or a mouse?", answers: [
+        { t: "The mouse 🐭", msg: "A mouse is tiny! Squeak! 🐭" }, { t: "The elephant 🐘", ok: true },
+        { t: "An ant 🐜", msg: "Ants are teeny tiny! 🐜" }, { t: "A pea 🟢", msg: "Peas are tiny too! 🟢" }] }
+    ] },
+
+    { name: "Easy", stars: 2, hearts: 5, emoji: "🐥", desc: "Silly jokes and easy spelling.", qs: [
+      { q: "Spell CAT backwards.", answers: [
+        { t: "CTA", msg: "Close! Start at the end: T... 🐱" }, { t: "ACT", msg: "A real word, but not backwards! 🎭" },
+        { t: "TAC", ok: true }, { t: "DOG", msg: "A dog is not a backwards cat! 🐕" }] },
+      { q: "What is yellow and goes zzz?", answers: [
+        { t: "A bee 🐝", msg: "Bees go BUZZ! Zzz is snoring! 😴" }, { t: "A banana 🍌", msg: "Bananas don't make noise! Unless... they are sleepy? 🤔" },
+        { t: "A sleepy banana 🍌😴", ok: true }, { t: "A taxi 🚕", msg: "Taxis go BEEP BEEP! 🚕" }] },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Fsh", msg: "Fsh? Where is the I? 🐟" }, { t: "Fihs", msg: "Mixed up! 🐟" },
+        { t: "Fish 🐟", ok: true }, { t: "Fiish", msg: "Too many Is! 🐟" }] },
+      { q: "What is a cat's favourite colour?", answers: [
+        { t: "Red", msg: "Nope! Think of a cat sound... 🐱" }, { t: "Purr-ple! 💜", ok: true },
+        { t: "Green", msg: "Purr... purr... 🐱" }, { t: "Orange", msg: "Close! But cats go purr... 🐱" }] },
+      { q: "Who has more legs: a dog or a chair?", answers: [
+        { t: "The dog 🐕", msg: "Count them! A chair has 4 legs too! 🪑" }, { t: "The chair 🪑", msg: "Count them! A dog has 4 legs too! 🐕" },
+        { t: "They are the same!", ok: true }, { t: "My granny 👵", msg: "Granny has 2 legs! 👵" }] },
+      { q: "Spell TOP backwards.", answers: [
+        { t: "OPT", msg: "Start at the end! P... 🔝" }, { t: "POT 🍯", ok: true },
+        { t: "TOP", msg: "That's forwards! 🔝" }, { t: "PTO", msg: "Close! P - O - T! 🔝" }] },
+      { q: "What has keys but can't open doors?", answers: [
+        { t: "A car 🚗", msg: "Car keys CAN open car doors! 🚗" }, { t: "A house 🏠", msg: "House keys open doors! 🏠" },
+        { t: "A piano 🎹", ok: true }, { t: "A door 🚪", msg: "Ha ha! A door IS a door! 🚪" }] },
+      { q: "Tap the HAPPY face.", answers: [
+        { t: "😢", msg: "That face is sad! 😢" }, { t: "😠", msg: "That face is cross! 😠" },
+        { t: "😴", msg: "That face is sleepy! 😴" }, { t: "😀", ok: true }] },
+      { q: "What gets wetter the more it dries?", answers: [
+        { t: "A towel", ok: true }, { t: "The sun ☀️", msg: "The sun is hot and dry! ☀️" },
+        { t: "A fish 🐟", msg: "Fish are always wet! 🐟" }, { t: "A rock 🪨", msg: "Rocks don't dry things! 🪨" }] },
+      { q: "Which word starts with B?", answers: [
+        { t: "Apple", msg: "Apple starts with A! 🍎" }, { t: "Egg", msg: "Egg starts with E! 🥚" },
+        { t: "Banana", ok: true }, { t: "Orange", msg: "Orange starts with O! 🍊" }] },
+      { q: "What has a face and two hands, but no arms?", answers: [
+        { t: "A clock 🕐", ok: true }, { t: "A doll 🪆", msg: "Dolls have arms! 🪆" },
+        { t: "A teddy 🧸", msg: "Teddies have arms! 🧸" }, { t: "A ghost 👻", msg: "Boo! Not a ghost! 👻" }] },
+      { q: "What do you call a sleeping dinosaur?", answers: [
+        { t: "A T-Rex", msg: "Nope! Think about snoring... 😴" }, { t: "Bob", msg: "Ha! Maybe! But no. 🦖" },
+        { t: "A dino-SNORE! 🦕💤", ok: true }, { t: "Grumpy", msg: "He's not grumpy, he's sleepy! 😴" }] },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Frend", msg: "There's a sneaky I missing! 👭" }, { t: "Freind", msg: "Swap the I and the E! 👭" },
+        { t: "Friend", ok: true }, { t: "Frenid", msg: "Mixed up! 👭" }] },
+      { q: "What is 2 + 2?", answers: [
+        { t: "22", msg: "That's two 2s stuck together! 😄" }, { t: "4", ok: true },
+        { t: "A fish 🐟", msg: "Fish can't count! 🐟" }, { t: "5", msg: "So close! 🤏" }] },
+      { q: "What kind of tree fits in your hand?", answers: [
+        { t: "An apple tree", msg: "Too big! Look at your hand... ✋" }, { t: "A Christmas tree", msg: "Way too big! 🎄" },
+        { t: "An oak tree", msg: "Oaks are HUGE! 🌳" }, { t: "A palm tree 🌴✋", ok: true }] },
+      { q: "Where do fish keep their money?", answers: [
+        { t: "In a piggy bank", msg: "Fish don't have pigs! Think about a river... 🐷" }, { t: "In a river BANK! 🏦", ok: true },
+        { t: "In a shoe", msg: "Fish don't wear shoes! 👟" }, { t: "Under a rock", msg: "Good guess! But no. 🪨" }] }
+    ] },
+
+    { name: "Medium", stars: 3, hearts: 4, emoji: "🐸", desc: "Trick questions! Read carefully.", qs: [
+      { q: "What do cows drink?", answers: [
+        { t: "Milk 🥛", msg: "Tricked you! Cows MAKE milk. They drink water! 🐮" }, { t: "Juice 🧃", msg: "Cows can't hold a juice box! 🧃" },
+        { t: "Lemonade 🍋", msg: "Too sour for a cow! 🍋" }, { t: "Water 💧", ok: true }] },
+      { q: "Tap the BIGGEST number.", hint: "Look closely! 🔍", answers: [
+        { t: "1000", style: "font-size:16px", msg: "1000 is so TINY here! Look at the size! 🔍" }, { t: "9", style: "font-size:22px", msg: "That 9 is teeny! 🐜" },
+        { t: "2", style: "font-size:84px", ok: true }, { t: "50", style: "font-size:20px", msg: "That 50 is itty-bitty! 🐞" }] },
+      { q: "Tap the word RED.", answers: [
+        { t: "BLUE", cls: "plain", style: "color:#ff2a2a", msg: "That word says BLUE! It is just painted red! 🎨" },
+        { t: "GREEN", cls: "plain", style: "color:#ffb800", msg: "That word says GREEN! 🎨" },
+        { t: "RED", cls: "plain", style: "color:#2a7bff", ok: true },
+        { t: "YELLOW", cls: "plain", style: "color:#21b35f", msg: "That word says YELLOW! 🎨" }] },
+      { q: "How many letters are in the word FIVE?", answers: [
+        { t: "5", msg: "Sneaky! Count them: F - I - V - E. 🖐️" }, { t: "4", ok: true },
+        { t: "10", msg: "Way too many! 😄" }, { t: "1", msg: "Just one? Count again! ☝️" }] },
+      { q: "You have 3 apples. You take away 2. How many apples do YOU have?", answers: [
+        { t: "1", msg: "Tricked you! YOU took 2 apples. So YOU have 2! 🍎🍎" }, { t: "2", ok: true },
+        { t: "3", msg: "Hmm, you took some! Who has them now? 🤔" }, { t: "0", msg: "Zero? Where did they go? 🍎" }] },
+      { q: "Spell CAT. Tap the letters in order!", answers: null, kind: "seq", setup: sequence(["T", "C", "A"], "CAT", "Oops! C - A - T! 🐱") },
+      { q: "What goes up but never comes down?", answers: [
+        { t: "A ball ⚽", msg: "Balls come down! Boing! ⚽" }, { t: "Your age 🎂", ok: true },
+        { t: "A bird 🐦", msg: "Birds land on trees! 🐦" }, { t: "A jumping frog 🐸", msg: "Frogs always come down! 🐸" }] },
+      { q: "What colour are these letters: <span style=\"color:#21b35f\">PINK</span>?", answers: [
+        { t: "Pink", msg: "The word SAYS pink. But what colour is it? 🎨" }, { t: "Green", ok: true },
+        { t: "Blue", msg: "Look again! 👀" }, { t: "Purple", msg: "Look again! 👀" }] },
+      { q: "Which is heavier: a box of feathers or a box of rocks? Both boxes weigh 1 kilo!", answers: [
+        { t: "Rocks 🪨", msg: "Both weigh 1 kilo! So they are the same! ⚖️" }, { t: "Feathers 🪶", msg: "Both weigh 1 kilo! So they are the same! ⚖️" },
+        { t: "They weigh the same!", ok: true }, { t: "A hippo 🦛", msg: "There is no hippo! 🦛" }] },
+      { q: "What has to be broken before you can use it?", answers: [
+        { t: "A toy 🧸", msg: "Don't break your toys! 😱" }, { t: "A window 🪟", msg: "Crash! No! 🪟" },
+        { t: "An egg 🥚", ok: true }, { t: "A pencil ✏️", msg: "A broken pencil is no good! ✏️" }] },
+      { q: "How many letters are in the word TEN?", answers: [
+        { t: "10", msg: "Sneaky! Count: T - E - N. 🔟" }, { t: "3", ok: true },
+        { t: "2", msg: "Count again! 🔟" }, { t: "1", msg: "Count again! 🔟" }] },
+      { q: "What has one eye but can't see?", answers: [
+        { t: "A pirate 🏴‍☠️", msg: "Pirates can see with one eye! Arr! 🏴‍☠️" }, { t: "A needle 🪡", ok: true },
+        { t: "A cyclops 👁️", msg: "Cyclops can see! 👁️" }, { t: "A potato 🥔", msg: "Potatoes have lots of eyes! 🥔" }] },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Becuase", msg: "Big Elephants Can Always Understand Small Elephants! 🐘" }, { t: "Becoz", msg: "That's text-speak! 📱" },
+        { t: "Beecause", msg: "Too many Es! 🐝" }, { t: "Because", ok: true }] },
+      { q: "What has lots of teeth but can't bite?", answers: [
+        { t: "A shark 🦈", msg: "Sharks CAN bite! Chomp! 🦈" }, { t: "A comb", ok: true },
+        { t: "A crocodile 🐊", msg: "Snap snap! They bite! 🐊" }, { t: "A baby 👶", msg: "Babies have no teeth yet! 👶" }] },
+      { q: "Wake up the puppy! 🐶💤", hint: "Tap tap tap!", kind: "count", setup: counter(6, "🐶💤", "🐶 WOOF! I'm awake!") },
+      { q: "What do you call a bear with no teeth?", answers: [
+        { t: "A teddy", msg: "Nope! Think about gums... 😁" }, { t: "A gummy bear! 🧸", ok: true },
+        { t: "A grizzly", msg: "Grizzlies have big teeth! 🐻" }, { t: "Bob", msg: "Ha ha! No! 🐻" }] }
+    ] },
+
+    { name: "Tricky", stars: 4, hearts: 4, emoji: "🦊", desc: "Sneaky tricks. Look everywhere!", qs: [
+      { q: "Tap the cheese. <span class=\"qemoji hit\" data-ok=\"1\">🧀</span>", answers: [
+        { t: "🍕", msg: "That's pizza! It HAS cheese, but it's not cheese! 🍕" }, { t: "🍎", msg: "That's an apple! 🍎" },
+        { t: "🍌", msg: "That's a banana! 🍌" }, { t: "🥕", msg: "That's a carrot! 🥕" }] },
+      { q: "Tap the right answer.", hint: "Which one is right? 🤔", layout: "row", answers: [
+        { t: "This one?", msg: "That one is on the LEFT! 👈" }, { t: "This one?", msg: "Think about LEFT and RIGHT! 🤔" },
+        { t: "This one?", ok: true }] },
+      { q: "Which word is spelled WRONG?", answers: [
+        { t: "Cat", msg: "C-A-T. That is right! 🐱" }, { t: "Dog", msg: "D-O-G. That is right! 🐶" },
+        { t: "Wrong", ok: true }, { t: "Fish", msg: "F-I-S-H. That is right! 🐟" }] },
+      { q: "Tap the letter that is NOT a b.", answers: [
+        { t: "b", msg: "That's a b! Look at which way it faces! 👀" }, { t: "b", msg: "That's a b! 👀" },
+        { t: "d", ok: true }, { t: "b", msg: "That's a b! 👀" }] },
+      { q: "Find the ladybug!", hint: "She is very small... 🔍",
+        extra: "<span class=\"ladybug hit\" data-ok=\"1\" aria-label=\"ladybug\">🐞</span>", answers: [
+        { t: "There is no ladybug", msg: "Oh yes there is! Look around! 🔍" }, { t: "In my nose 👃", msg: "Eww! No! 🤧" },
+        { t: "She flew away", msg: "No, she is still here! 🐞" }, { t: "Under the bed", msg: "There's no bed here! 🛏️" }] },
+      { q: "What is the last letter of \"the alphabet\"?", hint: "Read it carefully!", answers: [
+        { t: "Z", msg: "Look at the words \"the alphabet\". What letter is at the end? 🔤" }, { t: "A", msg: "A is first, not last! 🅰️" },
+        { t: "T", ok: true }, { t: "Y", msg: "Why Y? 😄" }] },
+      { q: "Spell DOG. Tap the letters in order!", kind: "seq", setup: sequence(["G", "B", "O", "D"], "DOG", "Oops! D - O - G! 🐶") },
+      { q: "Wait for GREEN, then tap!", kind: "green", setup: greenLight(3000, false) },
+      { q: "Which word has the MOST letters?", answers: [
+        { t: "Cat", msg: "Cat has only 3! 🐱" }, { t: "Elephant", msg: "Elephant has 8! But a MAILBOX is full of letters! 📬" },
+        { t: "Mailbox 📬", ok: true }, { t: "Dinosaur", msg: "Dinosaur has 8! But a MAILBOX is full of letters! 📬" }] },
+      { q: "Tap a RED heart.", hint: "Look everywhere! 👀", kind: "hearts", setup: heartsHit, answers: [
+        { t: "💙", msg: "That heart is blue! 💙" }, { t: "💚", msg: "That heart is green! 💚" },
+        { t: "💛", msg: "That heart is yellow! 💛" }, { t: "💜", msg: "That heart is purple! 💜" }] },
+      { q: "What can you catch but not throw?", answers: [
+        { t: "A ball ⚽", msg: "You can throw a ball! ⚽" }, { t: "A cold 🤧", ok: true },
+        { t: "A fish 🐟", msg: "You can throw a fish back! 🐟" }, { t: "A frisbee 🥏", msg: "Frisbees are for throwing! 🥏" }] },
+      { q: "Which number word has 3 letters?", answers: [
+        { t: "ONE", msg: "Yes... but look at the others too! 👀" }, { t: "SIX", msg: "Yes... but look at the others too! 👀" },
+        { t: "TEN", msg: "Yes... but look at the others too! 👀" }, { t: "All of them!", ok: true }] },
+      { q: "What runs but never walks?", answers: [
+        { t: "A dog 🐕", msg: "Dogs walk too! 🐕" }, { t: "A snail 🐌", msg: "Snails never run! 🐌" },
+        { t: "A river 🏞️", ok: true }, { t: "A chair 🪑", msg: "Chairs don't move at all! 🪑" }] },
+      { q: "What did the 0 say to the 8?", answers: [
+        { t: "Hello!", msg: "Nope! Look at the 8's tummy... 8️⃣" }, { t: "Nice belt! 😎", ok: true },
+        { t: "Go away!", msg: "That's not nice! 😮" }, { t: "Moo", msg: "Numbers don't moo! 🐮" }] },
+      { q: "What can you hold without touching it?", answers: [
+        { t: "A cup ☕", msg: "You have to touch a cup! ☕" }, { t: "A cat 🐱", msg: "Cats like to be touched! Purr! 🐱" },
+        { t: "Your breath 😮‍💨", ok: true }, { t: "A snowball ❄️", msg: "Brrr! You have to touch it! ❄️" }] },
+      { q: "Tap the YES button!", hint: "Easy peasy... right? 😏", layout: "arena", kind: "dodge",
+        setup: dodger({ label: "YES", doneLabel: "OK OK! YES 😅", need: 4, decoy: "NO", decoyMsg: "You tapped NO! I asked for YES! 😄" }) }
+    ] },
+
+    { name: "Impossible", stars: 5, hearts: 3, emoji: "🦄", desc: "The sneakiest ones. Good luck!", qs: [
+      { q: "Tap the dot<span class=\"bigdot hit\" data-ok=\"1\" aria-label=\"dot\">.</span>", answers: [
+        { t: "⭐", msg: "That's a star! ⭐" }, { t: "❤️", msg: "That's a heart! ❤️" },
+        { t: "⬛", msg: "That's a square! ⬛" }, { t: "🔺", msg: "That's a triangle! 🔺" }] },
+      { q: "What number question is this?", hint: "Look everywhere! 👀", answers: function (i) {
+        var n = i + 1;
+        return [{ t: String(n + 1), msg: "Look at the top! 👆" }, { t: "100", msg: "Not THAT many! 😄" },
+          { t: String(n), ok: true }, { t: String(n + 3), msg: "Look at the top! 👆" }]; } },
+      { q: "Find the mouse!", hint: "Squeak squeak... where is she? 🐭", kind: "hidden", setup: hiddenCorner("🐭", "mouse"), answers: [
+        { t: "In the cheese", msg: "No cheese here! Look all over the screen! 👀" }, { t: "There is no mouse", msg: "Oh yes there is! Look everywhere! 👀" },
+        { t: "Under my hat 🎩", msg: "No hats here! 🎩" }, { t: "She went home", msg: "She is still here! 🐭" }] },
+      { q: "Spell SUN backwards. Tap the letters!", kind: "seq", setup: sequence(["S", "M", "U", "N", "O"], "NUS", "Oops! Backwards: N - U - S! ☀️") },
+      { q: "Catch the frog! 🐸", hint: "He is VERY jumpy!", layout: "arena", kind: "dodge",
+        setup: dodger({ label: "🐸", doneLabel: "🐸💤 Tired!", need: 7, decoy: "Give up 🏳️", decoyMsg: "Never give up! Frogs get tired! 🐸" }) },
+      { q: "Where is the question mark<span class=\"bigdot hit\" data-ok=\"1\" aria-label=\"question mark\" style=\"font-size:1.1em\">?</span>", answers: [
+        { t: "Under the bed", msg: "No beds here! Look at the question! 👀" }, { t: "In space 🚀", msg: "Not in space! Look closer! 👀" },
+        { t: "There isn't one", msg: "Oh yes there is! 👀" }, { t: "In my pocket", msg: "Check the question! 👀" }] },
+      { q: "Tap the button 10 times! Go go go!", kind: "count", setup: counter(10, "👆", "🎉 Phew! Done!") },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Elefant", msg: "Elephant uses PH for the F sound! 🐘" }, { t: "Elephent", msg: "So close! Check the end! 🐘" },
+        { t: "Elephant 🐘", ok: true }, { t: "Ellyphant", msg: "Ha! Ellyphant! 🐘" }] },
+      { q: "Wait... wait... then tap on GREEN!", kind: "green", setup: greenLight(4500, true) },
+      { q: "What word rhymes with ORANGE?", answers: [
+        { t: "Door hinge", msg: "Nice try! But it's not quite a rhyme! 🚪" }, { t: "Sponge", msg: "Close, but no! 🧽" },
+        { t: "Nothing does!", ok: true }, { t: "Banana", msg: "Banana rhymes with... nothing either! 🍌" }] },
+      { q: "Which animal is hiding in the word sCATter?", answers: [
+        { t: "A dog 🐶", msg: "Look at the big letters! 👀" }, { t: "A bat 🦇", msg: "Look at the big letters! 👀" },
+        { t: "A cat 🐱", ok: true }, { t: "A rat 🐀", msg: "Look at the big letters! 👀" }] },
+      { q: "What has a neck but no head?", answers: [
+        { t: "A giraffe 🦒", msg: "Giraffes have heads! 🦒" }, { t: "A bottle 🍾", ok: true },
+        { t: "A snake 🐍", msg: "Snakes have heads! 🐍" }, { t: "A swan 🦢", msg: "Swans have heads! 🦢" }] },
+      { q: "How many letters are in the word TWENTY?", answers: [
+        { t: "20", msg: "Sneaky! Count: T - W - E - N - T - Y. 🔢" }, { t: "5", msg: "Count again! 🔢" },
+        { t: "6", ok: true }, { t: "12", msg: "Count again! 🔢" }] },
+      { q: "Tap the word that says CLICK.", hint: "Hmm... 🤔", answers: [
+        { t: "CLOCK", msg: "That says CLOCK! 🕐" }, { t: "CLUCK", msg: "That says CLUCK! 🐔" },
+        { t: "CLICK", ok: true }, { t: "CLACK", msg: "That says CLACK! 👏" }] },
+      { q: "Do NOT touch anything! 🤫", kind: "wait", setup: waitTimer(5000), answers: [
+        { t: "Tap me!", msg: "I said DON'T touch anything! 😄" }, { t: "Press me!", msg: "Hee hee! You touched it! 🙊" },
+        { t: "Click here!", msg: "Hands on your head! 🙌" }, { t: "Touch me!", msg: "Shhh! Don't touch! 🤫" }] },
+      { q: "Last one! Who is super smart?", answers: [
+        { t: "Kaileigh! 🌟", ok: true }, { t: "Kaileigh! 💖", ok: true },
+        { t: "Kaileigh! 🦄", ok: true }, { t: "Kaileigh! 🎉", ok: true }] }
+    ] }
+  ];
+
+  // ================= Progress (completed levels) =================
+  function getDone() { var d = getJSON("kq_done", {}); return d && typeof d === "object" ? d : {}; }
+  function markDone(l) { var d = getDone(); d[l] = true; setItem("kq_done", JSON.stringify(d)); }
+
+  function drawLevels() {
+    var done = getDone(), box = $("levels");
+    box.innerHTML = "";
+    LEVELS.forEach(function (L, i) {
+      var b = document.createElement("button");
+      b.className = "lvl L" + (i + 1);
+      b.setAttribute("data-level", String(i + 1));
+      var stars = "";
+      for (var s = 0; s < 5; s++) stars += s < L.stars ? "⭐" : "☆";
+      b.innerHTML = "<div class='num'>" + L.emoji + "</div><div class='info'><div class='name'>" + (i + 1) + ". " + L.name +
+        "</div><div class='desc'>" + L.desc + "</div><div class='meta'>" + stars + " &nbsp; " + L.qs.length + " questions &nbsp; ❤️×" + L.hearts +
+        "</div></div><div class='done'>" + (done[i + 1] ? "✅" : "") + "</div>";
+      b.addEventListener("click", function () { ac(); sfx.click(); startLevel(i); });
+      box.appendChild(b);
+    });
+  }
+
+  // ================= Game state =================
+  var level = 0, Q = LEVELS[0].qs, idx = 0, hearts = 5, MAXH = 5, busy = false, cleanups = [];
+  var tStart = 0, tEnd = 0, tTimer = null, finalMs = 0;
+
+  function runCleanups() { while (cleanups.length) { try { cleanups.pop()(); } catch (e) {} } }
+
+  function elapsed() { return (tEnd || Date.now()) - tStart; }
+  function drawTimer() { $("timer").textContent = "⏱ " + fmt(elapsed()); }
+  function startClock() { tStart = Date.now(); tEnd = 0; clearInterval(tTimer); tTimer = setInterval(drawTimer, 250); drawTimer(); }
+  function stopClock() { tEnd = Date.now(); clearInterval(tTimer); tTimer = null; drawTimer(); return tEnd - tStart; }
+
+  function drawHearts(shake) {
+    var h = "";
+    for (var i = 0; i < MAXH; i++) h += i < hearts ? "<span>❤️</span>" : "<span class=\"lost\">❤️</span>";
+    var el = $("hearts");
+    el.innerHTML = h;
+    if (shake) { el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+  }
+
+  function render() {
+    runCleanups();
+    busy = false;
+    var q = Q[idx];
+    drawHearts(false);
+    $("lvltag").textContent = "Level " + (level + 1) + ": " + LEVELS[level].name;
+    $("lvltag").className = "lvltag L" + (level + 1);
+    $("progLabel").textContent = "Question " + (idx + 1) + " of " + Q.length;
+    $("progBar").style.width = (idx / Q.length * 100) + "%";
+    $("qnum").textContent = "Question " + (idx + 1);
+    $("qtext").innerHTML = q.q;
+    $("qhint").textContent = q.hint || "";
+    var card = $("card");
+    var old = card.querySelectorAll(".extra");
+    for (var k = 0; k < old.length; k++) old[k].parentNode.removeChild(old[k]);
+    if (q.extra) {
+      var ex = document.createElement("span");
+      ex.className = "extra";
+      ex.innerHTML = q.extra;
+      card.appendChild(ex);
+    }
+    var box = $("answers");
+    box.innerHTML = "";
+    box.className = "answers" + (q.layout === "row" ? " row" : "") + (q.layout === "arena" ? " arena" : "");
+    var answers = typeof q.answers === "function" ? q.answers(idx) : q.answers;
+    if (answers) {
+      answers.forEach(function (a, i) {
+        var b = document.createElement("button");
+        b.className = "ans c" + (i % 4) + (a.cls ? " " + a.cls : "");
+        b.innerHTML = a.t;
+        if (a.style) b.setAttribute("style", a.style);
+        b.setAttribute("data-ok", a.ok ? "1" : "0");
+        b.addEventListener("click", function () { if (a.ok) right(); else wrong(a.msg); });
+        box.appendChild(b);
+      });
+    }
+    var hits = card.querySelectorAll(".hit");
+    for (var j = 0; j < hits.length; j++) {
+      (function (el) {
+        el.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (el.getAttribute("data-ok") === "1") right(); else wrong(el.getAttribute("data-msg"));
+        });
+      })(hits[j]);
+    }
+    if (q.setup) q.setup({ box: box, card: card, right: right, wrong: wrong, onCleanup: function (f) { cleanups.push(f); } });
+  }
+
+  function right() {
+    if (busy) return;
+    busy = true;
+    runCleanups();
+    sfx.right();
+    var y = $("yay");
+    y.textContent = pick(praise);
+    y.classList.remove("show"); void y.offsetWidth; y.classList.add("show");
+    $("progBar").style.width = ((idx + 1) / Q.length * 100) + "%";
+    if (idx + 1 >= Q.length) finalMs = stopClock();
+    setTimeout(function () {
+      idx++;
+      if (idx >= Q.length) winLevel(); else render();
+    }, 950);
+  }
+
+  function wrong(msg) {
+    if (busy) return;
+    busy = true;
+    runCleanups();
+    hearts--;
+    sfx.wrong();
+    drawHearts(true);
+    if (hearts <= 0) { setTimeout(gameOver, 700); return; }
+    $("wrongFace").textContent = pick(faces);
+    $("wrongMsg").textContent = (msg || pick(defaultWrong)) + (hearts === 1 ? " (Last heart! Be careful!)" : "");
+    $("wrongBox").classList.add("on");
+  }
+
+  $("wrongOk").addEventListener("click", function () {
+    sfx.click();
+    $("wrongBox").classList.remove("on");
+    render();
+  });
+
+  function startLevel(l) {
+    stopConfetti();
+    level = l; Q = LEVELS[l].qs; MAXH = LEVELS[l].hearts; hearts = MAXH; idx = 0;
+    show("quiz"); startClock(); render();
+  }
+  function toLevels() { runCleanups(); clearInterval(tTimer); tTimer = null; stopConfetti(); drawLevels(); show("title"); }
+
+  function gameOver() {
+    runCleanups();
+    sfx.sad();
+    $("overMsg").innerHTML = "Oops! No more hearts.<br>You got to question " + (idx + 1) + " of " + Q.length + "! 🌟<br>Have another go!";
+    show("over");
+  }
+
+  var pendingScore = null;
+  function winLevel() {
+    runCleanups();
+    sfx.win();
+    markDone(level + 1);
+    var h = ""; for (var i = 0; i < hearts; i++) h += "❤️";
+    $("winTitle").textContent = "YOU DID IT!";
+    $("winText").innerHTML = "You beat Level " + (level + 1) + ": " + LEVELS[level].name + "! " + LEVELS[level].emoji;
+    $("winStats").innerHTML = "⏱ Time: <b id='finalTime'>" + fmt(finalMs) + "</b> &nbsp; Hearts left: " + (h || "0");
+    $("newRecord").style.display = "none";
+    $("savedMsg").style.display = "none";
+    $("nameBox").style.display = "";
+    $("saveBtn").disabled = false;
+    $("nameInput").value = getItem("kq_lastname") || "Kaileigh";
+    $("nextBtn").style.display = level < LEVELS.length - 1 ? "" : "none";
+    pendingScore = { level: level + 1, ms: finalMs, hearts: hearts };
+    show("win");
+    confetti(5000);
+    ScoreStore.getTopScores(level + 1, 1).then(function (top) {
+      if (!top.length || finalMs < top[0].ms) $("newRecord").style.display = "";
+    }).catch(function () {});
+  }
+
+  function saveScore() {
+    if (!pendingScore) return;
+    var c = checkName($("nameInput").value);
+    var msg = $("savedMsg");
+    msg.style.display = "";
+    if (!c.ok) { msg.textContent = c.reason; sfx.boing(); return; }
+    $("nameInput").value = c.name;
+    setItem("kq_lastname", c.name);
+    var entry = { name: c.name, ms: pendingScore.ms, hearts: pendingScore.hearts, date: Date.now() };
+    var lv = pendingScore.level;
+    pendingScore = null;
+    $("saveBtn").disabled = true;
+    ScoreStore.saveScore(lv, entry).then(function () {
+      $("nameBox").style.display = "none";
+      if (ScoreStore.shared && !ScoreStore.offline) msg.textContent = "Saved to the shared leaderboard! Great job, " + c.name + "! 🎉";
+      else if (ScoreStore.shared) msg.textContent = "Saved on this device. (We couldn't reach the shared leaderboard.) Great job, " + c.name + "! 🎉";
+      else msg.textContent = "Saved! Great job, " + c.name + "! 🎉" + (lsOK ? "" : " (Scores can't be kept on this device after closing.)");
+      sfx.click();
+    }).catch(function (e) {
+      $("saveBtn").disabled = false;
+      pendingScore = { level: lv, ms: entry.ms, hearts: entry.hearts };
+      msg.textContent = e && e.rejected ? "Hmm, that name didn't work. Try a different one! 😊" : "Oops! Could not save the score. 😕";
+    });
+  }
+  $("saveBtn").addEventListener("click", saveScore);
+  $("nameInput").addEventListener("input", function () {
+    var v = $("nameInput").value, c = v.replace(/[^A-Za-z0-9 ]/g, "").slice(0, NAME_MAX);
+    if (c !== v) $("nameInput").value = c;
+  });
+  $("nameInput").addEventListener("keydown", function (e) { if (e.key === "Enter") saveScore(); });
+
+  // ================= Leaderboard screen =================
+  var boardLevel = 1;
+  function openBoard(l) {
+    boardLevel = l || boardLevel;
+    stopConfetti();
+    show("board");
+    drawBoard();
+  }
+  function drawBoard() {
+    var tabs = $("boardTabs");
+    tabs.innerHTML = "";
+    LEVELS.forEach(function (L, i) {
+      var b = document.createElement("button");
+      b.className = "btn L" + (i + 1);
+      b.setAttribute("data-tab", String(i + 1));
+      b.style.cssText = "font-size:22px;padding:10px 16px;box-shadow:0 5px 0 rgba(0,0,0,.2);" + (boardLevel === i + 1 ? "outline:5px solid #3a2a5d;" : "opacity:.8;");
+      b.textContent = (i + 1) + ". " + L.name;
+      b.addEventListener("click", function () { sfx.click(); boardLevel = i + 1; drawBoard(); });
+      tabs.appendChild(b);
+    });
+    $("boardTitle").textContent = LEVELS[boardLevel - 1].emoji + " Level " + boardLevel + ": " + LEVELS[boardLevel - 1].name + " — Top 10";
+    var table = $("boardTable");
+    table.innerHTML = "<tr><td>Loading...</td></tr>";
+    ScoreStore.getTopScores(boardLevel, 10).then(function (list) {
+      if (!list.length) { table.innerHTML = "<tr><td style='padding:20px'>No scores yet. Be the first! 🚀</td></tr>"; note(); return; }
+      var medals = ["🥇", "🥈", "🥉"];
+      var h = "<tr style='color:#7b5cff'><th>#</th><th>Name</th><th>Time</th><th>❤️</th><th>Date</th></tr>";
+      list.forEach(function (s, i) {
+        h += "<tr class='score-row' style='border-top:2px solid #eee'><td style='padding:6px'>" + (medals[i] || (i + 1)) + "</td><td>" + esc(s.name) +
+          "</td><td>" + fmt(s.ms) + "</td><td>" + s.hearts + "</td><td style='font-size:.8em'>" + esc(fmtDate(s.date)) + "</td></tr>";
+      });
+      table.innerHTML = h;
+    }).then(function () { note(); }).catch(function () { table.innerHTML = "<tr><td>Could not load scores. 😕</td></tr>"; });
+    function note() {
+      if (ScoreStore.shared && !ScoreStore.offline) $("boardNote").textContent = "🌍 Shared leaderboard: fastest players everywhere!";
+      else if (ScoreStore.shared) $("boardNote").textContent = "Can't reach the shared leaderboard right now. Showing scores from this device. 📱";
+      else $("boardNote").textContent = lsOK ? "Fastest times saved on this device. 📱" : "Scores only last until this page is closed on this device. 📱";
+    }
+    note();
+    $("clearBtn").style.display = ScoreStore.shared ? "none" : "";
+  }
+  $("boardBtn").addEventListener("click", function () { sfx.click(); openBoard(1); });
+  $("winBoardBtn").addEventListener("click", function () { sfx.click(); openBoard(level + 1); });
+  $("boardBack").addEventListener("click", function () { sfx.click(); toLevels(); });
+  $("clearBtn").addEventListener("click", function () { sfx.click(); $("confirmBox").classList.add("on"); });
+  $("confirmNo").addEventListener("click", function () { sfx.click(); $("confirmBox").classList.remove("on"); });
+  $("confirmYes").addEventListener("click", function () {
+    sfx.click();
+    $("confirmBox").classList.remove("on");
+    ScoreStore.clearAll().then(drawBoard);
+  });
+
+  // ================= Buttons =================
+  $("retryBtn").addEventListener("click", function () { sfx.click(); hearts = MAXH; show("quiz"); render(); });
+  $("restartBtn").addEventListener("click", function () { sfx.click(); startLevel(level); });
+  $("overLevelsBtn").addEventListener("click", function () { sfx.click(); toLevels(); });
+  $("winLevelsBtn").addEventListener("click", function () { sfx.click(); toLevels(); });
+  $("againBtn").addEventListener("click", function () { sfx.click(); startLevel(level); });
+  $("nextBtn").addEventListener("click", function () { sfx.click(); if (level < LEVELS.length - 1) startLevel(level + 1); });
+
+  // ================= Confetti =================
+  var cv = $("confetti"), cx = cv.getContext("2d"), parts = [], raf = null, endAt = 0;
+  function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+  window.addEventListener("resize", resize); resize();
+  var colors = ["#ff4fa3", "#3fb5ff", "#ffb800", "#2fd27a", "#7b5cff", "#ff7a3d"];
+  function confetti(ms) {
+    resize(); parts = [];
+    for (var i = 0; i < 180; i++) parts.push(newPart(true));
+    endAt = Date.now() + ms;
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function newPart(initial) {
+    return { x: Math.random() * cv.width, y: initial ? -Math.random() * cv.height : -20,
+      vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 4, s: 6 + Math.random() * 8,
+      r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.3, c: pick(colors) };
+  }
+  function tick() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    var going = Date.now() < endAt, alive = 0;
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if (p.y > cv.height + 20) { if (going) parts[i] = p = newPart(false); else continue; }
+      alive++;
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r);
+      cx.fillStyle = p.c; cx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+      cx.restore();
+    }
+    if (alive > 0) raf = requestAnimationFrame(tick); else { raf = null; cx.clearRect(0, 0, cv.width, cv.height); }
+  }
+  function stopConfetti() { endAt = 0; parts = []; }
+
+  drawLevels();
+
+  // Test hooks (harmless in production)
+  window.__kq = {
+    levels: LEVELS, store: ScoreStore, checkName: checkName,
+    state: function () { return { level: level, idx: idx, hearts: hearts, elapsed: elapsed(), kind: Q[idx] && Q[idx].kind || "" }; }
+  };
+})();
+</script>
+</body>
+</html>
