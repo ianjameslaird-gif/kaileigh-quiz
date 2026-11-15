@@ -54,6 +54,8 @@
 
   /* Top bar */
   .topbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 70px 10px 0; }
+  .homebtn { font-size: 28px; width: 56px; height: 56px; border-radius: 50%; border: 4px solid #fff; background: #3fb5ff; box-shadow: 0 4px 0 #1f86c7; cursor: pointer; flex: none; padding: 0; line-height: 1; }
+  .homebtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1f86c7; }
   .hearts { font-size: 34px; letter-spacing: 2px; white-space: nowrap; }
   .hearts .lost { filter: grayscale(1); opacity: .35; }
   .hearts.shake { animation: shake .4s; }
@@ -75,8 +77,9 @@
   .hint { font-size: 22px; color: #8a7bb0; margin-top: 10px; }
   .hit { cursor: pointer; }
   .qemoji { font-size: 1.3em; display: inline-block; padding: 0 6px; }
-  .bigdot { font-size: 1.6em; line-height: .5; padding: 0 10px; display: inline-block; color: #3a2a5d; cursor: pointer; }
-  .ladybug { position: absolute; right: 12px; bottom: 8px; font-size: 18px; padding: 8px; opacity: .75; cursor: pointer; }
+  /* tiny targets: small glyph, big invisible tap area (padding + matching negative margin keeps layout) */
+  .bigdot { font-size: 1.6em; line-height: 1; padding: 12px 22px; margin: -12px -16px -12px -18px; display: inline-block; vertical-align: baseline; color: #3a2a5d; cursor: pointer; position: relative; z-index: 2; }
+  .ladybug { position: absolute; right: 2px; bottom: 0; font-size: 22px; line-height: 1; padding: 18px; opacity: .85; cursor: pointer; z-index: 2; }
 
   .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .answers.row { display: flex; justify-content: space-between; gap: 12px; }
@@ -150,7 +153,7 @@
   .wait-btn { background: #b8b0c9 !important; }
   .wait-btn.amber { background: #ffb800 !important; }
   .wait-btn.go { background: #2fd27a !important; animation: pop .25s; }
-  .mouse { position: fixed; left: 6px; bottom: 6px; font-size: 18px; padding: 8px; opacity: .7; cursor: pointer; z-index: 20; }
+  .mouse { position: absolute; left: 4px; top: 4px; font-size: 22px; line-height: 1; padding: 18px; opacity: .85; cursor: pointer; z-index: 2; display: inline-block; transform: scaleX(-1); }
   #hearts.hit { cursor: pointer; }
   .btnrow { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 </style>
@@ -174,6 +177,7 @@
   <!-- QUIZ -->
   <div id="quiz" class="screen">
     <div class="topbar">
+      <button class="homebtn" id="homeBtn" aria-label="Home" title="Home">🏠</button>
       <div class="hearts" id="hearts"></div>
       <div class="progress">
         <div class="label"><span id="progLabel">Question 1 of 16</span> &nbsp; <span id="timer">⏱ 00:00</span></div>
@@ -255,6 +259,16 @@
     <div class="btnrow">
       <button class="btn" id="confirmYes" style="background:#ff4fa3;box-shadow:0 7px 0 #b8306f">Yes, clear</button>
       <button class="btn go" id="confirmNo" style="font-size:30px;padding:18px 30px">No, keep</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="homeBox">
+  <div class="bubble">
+    <div class="face">🏠</div>
+    <div class="msg">Leave this level?<br>Your progress will be lost.</div>
+    <div class="btnrow">
+      <button class="btn" id="homeYes" style="background:#3fb5ff;box-shadow:0 7px 0 #1f86c7">Yes, go home</button>
+      <button class="btn go" id="homeNo" style="font-size:30px;padding:18px 30px">No, keep playing</button>
     </div>
   </div>
 </div>
@@ -585,16 +599,17 @@
     h.addEventListener("click", onClick);
     api.onCleanup(function () { h.classList.remove("hit"); h.removeEventListener("click", onClick); });
   }
-  // Something tiny hidden in the bottom-left corner of the screen.
+  // Something small hidden in the top-left corner of the question card
+  // (inside the card so it is always on screen at every size, with a big invisible tap area).
   function hiddenCorner(emoji, label) {
     return function (api) {
       var el = document.createElement("span");
-      el.className = "mouse hit";
+      el.className = "mouse hit extra";
       el.textContent = emoji;
       el.setAttribute("data-ok", "1");
       el.setAttribute("aria-label", label);
       el.addEventListener("click", function (e) { e.stopPropagation(); api.right(); });
-      document.body.appendChild(el);
+      api.card.appendChild(el);
       api.onCleanup(function () { if (el.parentNode) el.parentNode.removeChild(el); });
     };
   }
@@ -808,7 +823,7 @@
         var n = i + 1;
         return [{ t: String(n + 1), msg: "Look at the top! 👆" }, { t: "100", msg: "Not THAT many! 😄" },
           { t: String(n), ok: true }, { t: String(n + 3), msg: "Look at the top! 👆" }]; } },
-      { q: "Find the mouse!", hint: "Squeak squeak... where is she? 🐭", kind: "hidden", setup: hiddenCorner("🐭", "mouse"), answers: [
+      { q: "Find the mouse!", hint: "Squeak squeak... where is she hiding?", kind: "hidden", setup: hiddenCorner("🐭", "mouse"), answers: [
         { t: "In the cheese", msg: "No cheese here! Look all over the screen! 👀" }, { t: "There is no mouse", msg: "Oh yes there is! Look everywhere! 👀" },
         { t: "Under my hat 🎩", msg: "No hats here! 🎩" }, { t: "She went home", msg: "She is still here! 🐭" }] },
       { q: "Spell SUN backwards. Tap the letters!", kind: "seq", setup: sequence(["S", "M", "U", "N", "O"], "NUS", "Oops! Backwards: N - U - S! ☀️") },
@@ -1089,6 +1104,26 @@
     ScoreStore.clearAll().then(drawBoard);
   });
 
+  // ================= Home button (during questions) =================
+  $("homeBtn").addEventListener("click", function (e) {
+    e.stopPropagation();
+    if (busy) return;
+    sfx.click();
+    runCleanups(); // pause sneaky timers (wait / green light) while asking
+    $("homeBox").classList.add("on");
+  });
+  $("homeNo").addEventListener("click", function () {
+    sfx.click();
+    $("homeBox").classList.remove("on");
+    render(); // restart the current question fresh
+  });
+  $("homeYes").addEventListener("click", function () {
+    sfx.click();
+    $("homeBox").classList.remove("on");
+    tEnd = Date.now();
+    toLevels();
+  });
+
   // ================= Buttons =================
   $("retryBtn").addEventListener("click", function () { sfx.click(); hearts = MAXH; show("quiz"); render(); });
   $("restartBtn").addEventListener("click", function () { sfx.click(); startLevel(level); });
@@ -1134,7 +1169,7 @@
   // Test hooks (harmless in production)
   window.__kq = {
     levels: LEVELS, store: ScoreStore, checkName: checkName,
-    state: function () { return { level: level, idx: idx, hearts: hearts, elapsed: elapsed(), kind: Q[idx] && Q[idx].kind || "" }; }
+    state: function () { return { level: level, idx: idx, hearts: hearts, elapsed: elapsed(), clockRunning: !!tTimer, kind: Q[idx] && Q[idx].kind || "" }; }
   };
 })();
 </script>
