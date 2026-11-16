@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Which Animal Are You? · Kai's Kool Kwiz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🦁%3C/text%3E%3C/svg%3E">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Fredoka", "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", Arial, sans-serif;
+    background: radial-gradient(rgba(123,92,255,.13) 1.5px, transparent 1.6px) 0 0/26px 26px, linear-gradient(160deg, #ffd9ef 0%, #dcdcff 40%, #c9f0ff 70%, #dcffd0 100%);
+    background-attachment: fixed;
+    color: #3a2a5d; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  .screen { display: none; min-height: 100vh; min-height: 100svh; flex-direction: column; align-items: center; padding: 12px 14px 34px; }
+  .screen.on { display: flex; }
+  .blob { position: fixed; border-radius: 50%; z-index: -1; pointer-events: none; }
+  .blob.b1 { width: 340px; height: 340px; left: -120px; top: -140px; background: #ffb3dc; opacity: .7; }
+  .blob.b2 { width: 300px; height: 300px; left: 40%; bottom: -170px; background: #bfeefa; opacity: .8; }
+  .blob.b3 { width: 220px; height: 220px; right: -90px; top: 45%; background: #e6d4ff; opacity: .6; }
+  .roundbtn { font-size: 26px; width: 54px; height: 54px; border-radius: 50%; border: 4px solid #fff; background: #ffe066; box-shadow: 0 4px 0 #d4a900; flex: none; padding: 0; line-height: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; color: inherit; }
+  .roundbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #d4a900; }
+  .roundbtn.home { background: #fff; box-shadow: 0 4px 0 #d4c8ff; }
+  .pill { display: inline-block; text-decoration: none; font-weight: 700; font-size: 20px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 18px; padding: 8px 14px; box-shadow: 0 5px 0 #d4c8ff; }
+  .pill:active { transform: translateY(4px); box-shadow: 0 1px 0 #d4c8ff; }
+  .topline { width: 100%; max-width: 760px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .big-title { font-weight: 700; font-size: clamp(50px, 12vw, 96px); line-height: .98; margin: 18px 0 8px; text-align: center; color: #ff4fa3; text-shadow: 3px 3px 0 #fff, 6px 6px 0 #9b7bff; }
+  .tagline { font-size: clamp(21px, 4vw, 28px); font-weight: 600; color: #2d2350; margin: 8px 0 14px; text-align: center; line-height: 1.3; max-width: 640px; }
+  .parade { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 520px; margin: 6px 0 18px; }
+  .parade span { font-size: 50px; display: inline-block; animation: wig 1.4s ease-in-out infinite; }
+  .parade span:nth-child(2n) { animation-delay: .35s; } .parade span:nth-child(3n) { animation-delay: .7s; }
+  @keyframes wig { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg) translateY(-4px); } }
+  .playbtn { font-weight: 700; font-size: clamp(30px, 6vw, 40px); color: #fff; background: #2fd27a; border: 5px solid #fff; border-radius: 24px; padding: 14px 40px; box-shadow: 0 7px 0 #17984f; }
+  .playbtn:active { transform: translateY(5px); box-shadow: 0 2px 0 #17984f; }
+  .note { font-size: 19px; font-weight: 600; color: #7b5cff; margin-top: 20px; text-align: center; }
+
+  /* ===== Quiz ===== */
+  #dots { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; flex: 1; }
+  .dot { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid #fff; box-shadow: 0 3px 0 #d4c8ff; transition: transform .25s, background .25s; }
+  .dot.done { background: #ff4fa3; }
+  .dot.now { background: #ffe066; transform: scale(1.3); }
+  .qcard { width: 100%; max-width: 720px; background: #fff; border-radius: 30px; border: 6px solid #fff; box-shadow: 0 10px 0 #c9b8ff, 0 14px 30px rgba(123,92,255,.18); padding: 18px 16px 20px; margin-top: 16px; text-align: center; animation: pop .35s ease-out; }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .qnum { font-weight: 700; color: #7b5cff; font-size: 20px; }
+  .qemoji { font-size: 78px; line-height: 1.1; margin: 4px 0; }
+  .qtext { font-weight: 700; font-size: clamp(26px, 6vw, 38px); line-height: 1.2; color: #2d2350; margin: 4px 6px 4px; }
+  .speak { font-size: 20px; font-weight: 700; color: #7b5cff; background: #f1ecff; border: 3px solid #e0d6ff; border-radius: 16px; padding: 6px 14px; margin-top: 6px; }
+  #answers { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 720px; margin-top: 18px; }
+  .ans { border: 5px solid #fff; border-radius: 24px; padding: 12px 8px 14px; color: #fff; font-weight: 700; font-size: clamp(21px, 4.6vw, 27px); line-height: 1.15; display: flex; flex-direction: column; align-items: center; gap: 6px; box-shadow: 0 7px 0 rgba(0,0,0,.2); min-height: 150px; justify-content: center; transition: transform .1s; text-shadow: 0 2px 0 rgba(0,0,0,.15); }
+  .ans .ae { font-size: 56px; line-height: 1; text-shadow: none; }
+  .ans:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+  .ans.picked { transform: scale(1.06); box-shadow: 0 0 0 6px #ffe066, 0 7px 0 rgba(0,0,0,.2); }
+  .ans.fade { opacity: .35; }
+  .ans:nth-child(1) { background: #ff4fa3; } .ans:nth-child(2) { background: #7b5cff; }
+  .ans:nth-child(3) { background: #2bb3ff; } .ans:nth-child(4) { background: #ff8a3d; }
+  #answers.three .ans:nth-child(3) { grid-column: 1 / -1; }
+  @media (max-width: 360px) { .ans { min-height: 128px; } .ans .ae { font-size: 46px; } }
+
+  /* ===== Result ===== */
+  .rcard { width: 100%; max-width: 720px; background: #fff; border-radius: 30px; border: 6px solid #fff; box-shadow: 0 10px 0 #ffc59e, 0 14px 30px rgba(123,92,255,.18); overflow: hidden; text-align: center; margin-top: 14px; }
+  .rhead { padding: 18px 12px 16px; color: #fff; }
+  .rhead .youare { font-size: 24px; font-weight: 700; }
+  .rhead .remoji { font-size: 110px; line-height: 1.15; width: 160px; height: 160px; margin: 6px 0 8px; border-radius: 50%; background: rgba(255,255,255,.85); border: 5px solid #fff; display: inline-flex; align-items: center; justify-content: center; animation: bounce 1.2s ease-in-out infinite; }
+  @keyframes bounce { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-12px) rotate(5deg); } }
+  .rhead .rname { font-weight: 700; font-size: clamp(40px, 10vw, 66px); line-height: 1; text-shadow: 3px 3px 0 rgba(0,0,0,.15); }
+  .rdesc { font-size: clamp(21px, 4.4vw, 26px); font-weight: 600; color: #2d2350; margin: 16px 16px 8px; line-height: 1.3; }
+  .great { margin: 6px 16px 18px; text-align: left; display: inline-block; }
+  .great h3 { margin: 6px 0; font-size: 23px; color: #7b5cff; text-align: center; }
+  .great li { font-size: 22px; font-weight: 600; list-style: none; margin: 6px 0; }
+  .great ul { padding: 0; margin: 0; }
+  .meter { width: 100%; max-width: 720px; background: #fff; border-radius: 30px; border: 6px solid #fff; box-shadow: 0 10px 0 #b8e6ff, 0 14px 30px rgba(43,179,255,.18); padding: 16px 14px 20px; margin-top: 22px; }
+  .meter h2 { margin: 0 0 4px; text-align: center; font-size: clamp(28px, 6.5vw, 40px); color: #ff4fa3; text-shadow: 2px 2px 0 #ffe0f0; }
+  .meter .sub { text-align: center; font-size: 19px; font-weight: 600; color: #6b5d8f; margin: 0 0 14px; }
+  .bar { display: flex; align-items: center; gap: 8px; margin: 9px 0; opacity: .25; transition: opacity .3s; }
+  .bar.lit { opacity: 1; }
+  .bar .be { font-size: 38px; width: 46px; text-align: center; flex: none; }
+  .bar .bt { flex: 1; min-width: 0; }
+  .bar .bn { font-size: 18px; font-weight: 700; color: #2d2350; line-height: 1.1; }
+  .bar .track { height: 24px; background: #f1ecff; border-radius: 14px; overflow: hidden; margin-top: 3px; box-shadow: inset 0 2px 0 rgba(0,0,0,.06); }
+  .bar .fill { height: 100%; width: 0; border-radius: 14px; transition: width .7s cubic-bezier(.3,1.4,.6,1); background-image: linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,0) 60%); }
+  .bar .bp { font-size: 24px; font-weight: 700; width: 64px; text-align: right; flex: none; color: #2d2350; }
+  .bar.top .bn::after { content: " ⭐"; }
+  .traits { margin-top: 18px; border-top: 4px dashed #eee6ff; padding-top: 12px; }
+  .traits h3 { text-align: center; font-size: clamp(24px, 5.4vw, 32px); margin: 4px 0 10px; color: #7b5cff; }
+  .slider { margin: 16px 4px 22px; }
+  .slider .ends { display: flex; justify-content: space-between; font-size: 19px; font-weight: 700; color: #2d2350; }
+  .slider .rail { position: relative; height: 26px; border-radius: 16px; margin: 30px 18px 6px; background: linear-gradient(90deg, #ff5a5a, #ffb020, #ffe066, #2fd27a, #2bb3ff, #7b5cff, #ff4fa3); border: 3px solid #fff; box-shadow: 0 3px 0 #e0d6ff; }
+  .slider .mark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -62%); font-size: 46px; line-height: 1; transition: left 1.1s cubic-bezier(.3,1.5,.6,1); filter: drop-shadow(0 3px 0 rgba(0,0,0,.18)); }
+  .slider .say { text-align: center; font-size: 20px; font-weight: 600; color: #6b5d8f; margin-top: 4px; min-height: 26px; }
+  .rbtns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 80; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<canvas id="confetti"></canvas>
+
+<!-- HOME -->
+<div id="home" class="screen on">
+  <div class="topline">
+    <a class="pill" href="../">🏠 Kai's Kool Kwiz</a>
+    <button class="roundbtn" id="muteBtn" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div class="big-title">Which Animal<br>Are You?</div>
+  <p class="tagline">Answer 10 fun questions and find out which animal is just like you!</p>
+  <div class="parade" id="parade"></div>
+  <button class="playbtn" id="startBtn">▶ Let's Go!</button>
+  <p class="note">New questions every time you play! 🎲</p>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="topline">
+    <a class="roundbtn home" href="../" id="homeBtn" aria-label="Back to home">🏠</a>
+    <div id="dots"></div>
+    <button class="roundbtn" id="muteBtn2" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div class="qcard" id="qcard">
+    <div class="qnum" id="qnum"></div>
+    <div class="qemoji" id="qemoji"></div>
+    <div class="qtext" id="qtext"></div>
+    <button class="speak" id="speakBtn">🔊 Read it to me</button>
+  </div>
+  <div id="answers"></div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="topline">
+    <a class="roundbtn home" href="../" aria-label="Back to home">🏠</a>
+    <button class="roundbtn" id="muteBtn3" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div class="rcard">
+    <div class="rhead" id="rhead">
+      <div class="youare">You are a…</div>
+      <div class="remoji" id="remoji"></div>
+      <div class="rname" id="rname"></div>
+    </div>
+    <p class="rdesc" id="rdesc"></p>
+    <div class="great"><h3>You're great at:</h3><ul id="rgreat"></ul></div>
+  </div>
+  <div class="meter" id="meter">
+    <h2>🌈 Your Animal Meter</h2>
+    <p class="sub">You are a mix of lots of animals! Here's your mix:</p>
+    <div id="bars"></div>
+    <div class="traits">
+      <h3>✨ Your Super Sliders</h3>
+      <div id="sliders"></div>
+    </div>
+  </div>
+  <div class="rbtns">
+    <button class="playbtn" id="againBtn">🔄 Play again</button>
+    <a class="pill" href="../" style="font-size:24px;padding:12px 20px">🏠 Home</a>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= Animals ================= */
+/* traits: [calm(-) .. wild(+), quiet(-) .. chatty(+), careful(-) .. daring(+)] */
+const ANIMALS = {
+  M: { name: "Cheeky Monkey", emoji: "🐒", color: "#ffb020", traits: [2, 2, 1],
+       desc: "You are full of fun and giggles! You love jokes, games and making everyone smile.",
+       great: ["😂 Making people laugh", "🤪 Thinking up silly ideas", "🎉 Turning boring into fun"] },
+  L: { name: "Brave Lion", emoji: "🦁", color: "#ff7a3d", traits: [1, 1, 2],
+       desc: "You are brave and strong inside! You try new things and help your friends feel brave too.",
+       great: ["🚀 Trying new things", "🧢 Being a great leader", "🤝 Sticking up for friends"] },
+  O: { name: "Clever Owl", emoji: "🦉", color: "#7b5cff", traits: [-2, -2, -2],
+       desc: "You are curious and clever! You love finding out how things work and solving puzzles.",
+       great: ["🧩 Solving puzzles", "❓ Asking great questions", "💡 Knowing cool facts"] },
+  P: { name: "Kind Panda", emoji: "🐼", color: "#2fbf71", traits: [-2, 0, -1],
+       desc: "You have the biggest heart! You love helping, sharing and giving the best hugs.",
+       great: ["🤗 Being a caring friend", "🍪 Sharing with others", "😊 Making people feel happy"] },
+  C: { name: "Speedy Cheetah", emoji: "🐆", color: "#ff5a5a", traits: [2, -1, 2],
+       desc: "You are full of zoom! You love to run, race and get things done super fast.",
+       great: ["🏃 Running and racing", "⚡ Having lots of energy", "💪 Never giving up"] },
+  B: { name: "Creative Butterfly", emoji: "🦋", color: "#ff4fa3", traits: [0, -1, 0],
+       desc: "You are full of colour and ideas! You love making, drawing and dreaming up new things.",
+       great: ["🎨 Art and making things", "🌈 A big imagination", "🌸 Seeing pretty things everywhere"] },
+  S: { name: "Chill Sloth", emoji: "🦥", color: "#7cc444", traits: [-2, -1, -2],
+       desc: "You are calm and cosy! You stay relaxed and help everyone around you feel calm too.",
+       great: ["😌 Staying calm", "👂 Being a great listener", "🌼 Enjoying the little things"] },
+  D: { name: "Playful Dolphin", emoji: "🐬", color: "#2bb3ff", traits: [1, 2, 0],
+       desc: "You are friendly and playful! You love splashing, playing and being with your friends.",
+       great: ["👋 Making new friends", "🎈 Playing with everyone", "🤝 Being a super team player"] }
+};
+const CODES = Object.keys(ANIMALS);
+/* Each answer gives 2 points to its animal and 1 point to that animal's buddy */
+const BUDDY = { M: "D", D: "M", L: "C", C: "L", O: "B", B: "O", P: "S", S: "P" };
+const TRAITS = [
+  { left: "😌 Calm", right: "Wild 🤪", say: ["You are super calm and peaceful", "You are nice and calm", "You can be calm AND wild!", "You love a bit of wild fun", "You are WILD and full of fun!"] },
+  { left: "🤫 Quiet", right: "Chatty 🗣️", say: ["You are a lovely quiet thinker", "You like quiet time", "You can be quiet AND chatty!", "You love to chat", "You are a super chatterbox!"] },
+  { left: "🧐 Careful", right: "Daring 🚀", say: ["You are super careful and smart", "You like to think first", "You can be careful AND daring!", "You love to try new things", "You are super daring!"] }
+];
+
+/* ================= 100 questions ================= */
+/* [emoji, question, [[emoji, answer, animal], ...]] */
+const BANK = [
+["🍦","Pick an ice cream!",[["🌈","Rainbow swirl","B"],["🤪","A crazy mix of ALL of them","M"],["🍓","Strawberry to share","P"],["🧊","An ice pop I can eat fast","C"]]],
+["🏖️","A day at the beach! What do you do?",[["🐬","Swim and splash","D"],["🏰","Build a giant sand castle","B"],["😴","Nap under the umbrella","S"],["🐚","Collect shells for my family","P"]]],
+["🎉","It's party time! You…",[["🛋️","Chill on a comfy beanbag","S"],["🎤","Lead the party games","L"],["🍰","Help hand out cake","P"],["🎈","Play with all the balloons","D"]]],
+["🌧️","It's a rainy day. You…",[["🍪","Bake cookies with family","P"],["🎨","Paint a picture","B"],["🛋️","Snuggle in a blanket","S"],["💦","Jump in the puddles!","M"]]],
+["🦸","Pick a super power!",[["⚡","Super speed","C"],["💪","Super strength","L"],["🧠","Super brain","O"],["💖","Magic healing hugs","P"]]],
+["🎒","What's in your school bag?",[["✏️","Lots of colour pens","B"],["🏀","A ball for playtime","C"],["🍪","Snacks to share","P"],["🤡","A funny joke book","M"]]],
+["⛰️","You see a big hill. You…",[["🏃","Race to the top!","C"],["🧗","Climb the steepest side","L"],["🤸","Roll all the way down","D"],["🧺","Have a picnic at the bottom","S"]]],
+["🎮","Pick a game!",[["🧩","A puzzle","O"],["🏁","A racing game","C"],["🤝","A game with friends","D"],["🏗️","A building game","B"]]],
+["👋","A new kid joins your class. You…",[["🙋","Say hi first","L"],["🤗","Show them around","P"],["😜","Make them laugh","M"],["🙂","Smile and wave","S"]]],
+["🍕","Pick a pizza topping!",[["🍍","Pineapple, why not!","M"],["🍄","Mushroom smiley faces","B"],["🧀","Just cheese, nice and easy","S"],["🌶️","Spicy peppers","L"]]],
+["🌙","Bedtime! You…",[["📖","Want one more story","O"],["😴","Fall asleep super fast","S"],["🗣️","Chat and chat and chat","D"],["🧸","Hug your teddy tight","P"]]],
+["🖍️","Art time! You draw…",[["🐉","A dragon","L"],["🌈","Rainbows and flowers","B"],["🚀","A super fast rocket","C"],["🤪","Something super silly","M"]]],
+["🌳","You see a big tree. You…",[["🐒","Climb it!","M"],["🏡","Plan a tree house","B"],["🐦","Look for birds","O"],["💤","Sit in its shade","S"]]],
+["🐶","Pick a pet!",[["🐕","A bouncy puppy","D"],["🐢","A slow turtle","S"],["🦜","A talking parrot","M"],["🐱","A cuddly kitten","P"]]],
+["🏫","Your best thing at school?",[["🔢","Maths","O"],["🍎","Helping my teacher","P"],["⚽","Sport","C"],["👫","Working with friends","D"]]],
+["🎁","Pick a present!",[["🛼","Roller skates","C"],["🔬","A science kit","O"],["🖍️","A big art box","B"],["🎲","A family board game","D"]]],
+["🦕","You meet a friendly dinosaur! You…",[["🐎","Ride it!","L"],["🤝","Make friends with it","P"],["❓","Ask it 100 questions","O"],["🎩","Teach it a trick","M"]]],
+["🧁","Baking time! You…",[["🎨","Decorate it super fancy","B"],["🥄","Lick the spoon!","M"],["📋","Read the recipe carefully","O"],["🎁","Bake some for a friend","P"]]],
+["🏊","At the swimming pool you…",[["🤽","Splash everyone","D"],["🏊","Race a lap","C"],["🤿","Jump off the big board","L"],["🛟","Float on a ring","S"]]],
+["🌟","You're a superhero! Your name is…",[["⚡","Captain Zoom","C"],["🦁","Brave Heart","L"],["💡","Doctor Brain","O"],["🌈","Rainbow Star","B"]]],
+["💛","Your friend is sad. You…",[["🤗","Give a big hug","P"],["🤡","Make a funny face","M"],["💌","Draw them a card","B"],["🎮","Ask them to play","D"]]],
+["🚗","Long car trip! You…",[["🎶","Sing songs","D"],["😴","Sleep the whole way","S"],["🔍","Play I Spy","O"],["❓","Ask \"are we there yet?\" a LOT","M"]]],
+["🍳","Pick a breakfast!",[["🥞","Pancakes with a smiley face","B"],["🥣","Quick cereal, then GO!","C"],["🍳","A big breakfast with family","P"],["🛏️","Breakfast in bed","S"]]],
+["🎪","At the circus you want to be…",[["🤹","The juggler","B"],["🤸","The super fast acrobat","C"],["🤡","The clown","M"],["🍿","In a comfy seat watching","S"]]],
+["🔦","Explore a cave?",[["🙋","Yes! I'll go first","L"],["🗺️","I'll make a map of it","O"],["🏃","I'll race through the tunnel","C"],["🏕️","I'll wait outside with snacks","S"]]],
+["🌊","Pick a sea animal!",[["🐬","A dolphin","D"],["🐋","A friendly whale","P"],["🐠","A clownfish","M"],["🐢","A sea turtle","S"]]],
+["🎵","Pick an instrument!",[["🥁","Drums! Loud!","M"],["🎸","Guitar on a big stage","L"],["🎻","Violin","B"],["🎤","Singing with friends","D"]]],
+["⛄","Snow day! You…",[["☃️","Build a snowman with friends","D"],["🛷","Zoom down on a sled","C"],["❄️","Have a snowball fight","M"],["☕","Drink hot cocoa inside","S"]]],
+["🧸","Your teddy is lost! You…",[["🔍","Look for clues","O"],["🏃","Search really fast","C"],["🦸","Go on a brave rescue","L"],["🤗","Ask friends to help look","P"]]],
+["🍉","Pick a fruit!",[["🍌","A banana","M"],["🍉","Watermelon to share","P"],["🍓","Strawberries","B"],["🍇","Grapes, one by one, slowly","S"]]],
+["🎢","At the fun park you go on…",[["🎢","The biggest roller coaster","L"],["🎠","The merry-go-round","B"],["🚗","The bumper cars","M"],["💦","The water slide","D"]]],
+["⚽","In a team game you like to…",[["🧢","Be the captain","L"],["🏃","Run the fastest","C"],["📣","Cheer everyone on","P"],["🤔","Make a clever plan","O"]]],
+["🎨","Pick a colour!",[["🔴","Red","L"],["🟣","Purple","B"],["🟢","Green","S"],["🔵","Blue","O"]]],
+["🛏️","Your dream bedroom has…",[["🛝","A slide to go down","M"],["🏀","A basketball hoop","C"],["😴","The comfiest bed ever","S"],["🎨","Paint all over the walls","B"]]],
+["👽","A friendly alien lands! You…",[["👋","Say hello!","D"],["🛸","Ask for a ride","L"],["📝","Take notes","O"],["🍪","Give it a cookie","P"]]],
+["🕐","You have one free hour. You…",[["🛋️","Chill on the couch","S"],["🏃","Run around outside","C"],["✂️","Make something new","B"],["🧪","Do an experiment","O"]]],
+["🐸","You see a frog. You…",[["🐸","Hop like it!","M"],["🔍","Look really close","O"],["🫶","Help it get to the pond","P"],["🏃","Race it!","C"]]],
+["😄","What makes you happiest?",[["🤝","Playing with friends","D"],["🏆","Winning a race","C"],["💡","Learning new stuff","O"],["🎨","Making things","B"]]],
+["🎂","Your birthday party is…",[["🏊","A pool party","D"],["🦸","A superhero party","L"],["🎨","An art party","B"],["🍿","A movie night in PJs","S"]]],
+["👩‍🚒","When you grow up you want to be…",[["🚒","A firefighter","L"],["🩺","An animal doctor","P"],["🧑‍🚀","A space scientist","O"],["🎭","A funny actor","M"]]],
+["🍪","You have 2 cookies. You…",[["🎁","Give one to a friend","P"],["😋","Eat both super fast!","C"],["🫙","Save one for later","O"],["👀","Make cookie eyes and be silly","M"]]],
+["🎈","Your balloon floats away. You…",[["🏃","Chase it!","C"],["👋","Wave bye bye to it","D"],["💭","Imagine where it will go","B"],["😌","No worries, it's okay","S"]]],
+["🧩","A tricky puzzle! You…",[["🧐","Keep trying till it's done","O"],["🤝","Ask a friend to help","D"],["🦁","Never give up!","L"],["☕","Take a break, then try again","S"]]],
+["📺","Pick a show!",[["🦸","Superhero action","L"],["😂","Silly cartoons","M"],["🐾","Cute animal shows","P"],["🔬","How things work","O"]]],
+["🦄","Pick a magic creature!",[["🦄","A unicorn","B"],["🐉","A dragon","L"],["🧜","A mermaid","D"],["🧚","A kind fairy","P"]]],
+["🏕️","Camping! You…",[["🔥","Toast marshmallows for everyone","P"],["⭐","Count the stars","O"],["⛺","Get cosy in the tent","S"],["🌲","Go exploring","L"]]],
+["🚲","Pick a ride!",[["🚲","A speedy bike","C"],["🛴","A scooter for tricks","M"],["🐴","A pony","P"],["🛶","A boat","D"]]],
+["🎤","Talent show! You…",[["🎤","Sing a song","D"],["🤹","Do a funny act","M"],["🖼️","Show your art","B"],["🪄","Do a magic trick","O"]]],
+["📚","Pick a book!",[["🐉","A big adventure","L"],["😂","A joke book","M"],["🧚","A fairy tale","B"],["🔬","A fact book","O"]]],
+["🙋","Someone is left out of a game. You…",[["🫶","Ask them to join in","P"],["📣","Tell everyone to let them play","L"],["🎈","Start a new game with them","D"],["🖐️","Give them a high five","M"]]],
+["☀️","Saturday morning! You…",[["😴","Sleep in","S"],["🌞","Up early, ready to GO","C"],["📖","Read in bed","O"],["🐾","Cuddle the family pet","P"]]],
+["🍔","Pick a lunch!",[["🌮","Tacos, messy and fun","M"],["🌯","A wrap to eat on the go","C"],["🍜","Noodles, slurp!","D"],["🥗","A rainbow salad","B"]]],
+["🗺️","Where would you go?",[["🌋","A volcano","L"],["🏝️","A sunny island","S"],["🌴","The jungle","M"],["🌊","Under the sea","D"]]],
+["🏅","Sports day! You want…",[["🥇","First place!","C"],["🎽","To try every race","L"],["🤸","Just to have fun","D"],["📣","To cheer for your friends","P"]]],
+["✂️","Your favourite thing to make?",[["🧱","Tall block towers","O"],["✨","Glitter crafts","B"],["🏰","Pillow forts","S"],["🎭","Funny puppet shows","M"]]],
+["🐣","You find a baby bird. You…",[["🫶","Help take care of it","P"],["📚","Find out what it eats","O"],["🦸","Help it get home","L"]]],
+["⏰","You're running late! You…",[["🏃","Zoom out the door","C"],["😌","Stay calm, it's okay","S"],["📝","Plan to be faster next time","O"]]],
+["🌻","In the garden you…",[["🌱","Plant seeds","P"],["🐛","Look for bugs","O"],["🌸","Pick flowers","B"],["💦","Play with the hose","D"]]],
+["🎭","Dress-up day! You go as…",[["🦸","A superhero","L"],["🧚","A fairy or wizard","B"],["🤡","A funny clown","M"],["🐼","A cosy animal onesie","S"]]],
+["🛝","At the playground you go to…",[["🛝","The big slide","D"],["🧗","The climbing wall","L"],["🏃","The chasing game","C"],["🌤️","The swings, nice and slow","S"]]],
+["🥤","Pick a drink!",[["🫧","Fizzy and bubbly","M"],["🧃","A juice box to go!","C"],["🥛","Warm milk","S"],["🍹","A fancy rainbow drink","B"]]],
+["🌠","You see a shooting star! You wish for…",[["🐶","Lots of puppies to love","P"],["🚀","A trip to space","O"],["🏰","My own castle","L"],["🎉","A party that never ends","D"]]],
+["🚶","How do you walk?",[["🏃","Super fast","C"],["💃","Dancing all the way","M"],["🐌","Nice and slow","S"],["🦁","Big proud steps","L"]]],
+["✋","Your teacher asks a question. You…",[["🙋","Shoot your hand up","L"],["🤔","Think hard first","O"],["💬","Talk it over with a friend","D"],["🫶","Help a friend answer","P"]]],
+["🌍","How do you help the planet?",[["♻️","Recycle everything","O"],["🌳","Plant a tree","P"],["🖍️","Make posters about it","B"],["🚲","Ride a bike, not a car","C"]]],
+["🎬","In a movie you'd be…",[["🦸","The hero","L"],["😂","The funny sidekick","M"],["🧠","The clever helper","O"],["🐉","The magic dragon","B"]]],
+["🍭","You're in a sweet shop! You…",[["🍬","Try one of everything","M"],["🎁","Buy treats for friends","P"],["🍭","Pick the most colourful","B"],["🏃","Grab your fave super fast","C"]]],
+["🌊","A big wave is coming! You…",[["🏄","Surf it!","L"],["🐬","Dive under it","D"],["🏃","Run up the beach","C"],["🏖️","Watch from your towel","S"]]],
+["💌","How do you say thank you?",[["🤗","A big hug","P"],["💌","A home-made card","B"],["📣","Say it loud and proud","L"],["💃","A silly happy dance","M"]]],
+["🔭","What do you want to find out?",[["🌌","What is in space","O"],["🐠","What lives in the sea","D"],["🦖","How big dinosaurs were","L"],["🎨","How colours mix","B"]]],
+["🛁","Bath time! You…",[["🧔","Make a bubble beard","M"],["🦆","Play with bath toys","D"],["😌","Relax in the warm water","S"],["⏱️","In and out super quick","C"]]],
+["🌤️","Pick the weather!",[["☀️","Sunny, let's run!","C"],["🌈","A rainbow after rain","B"],["❄️","Snow to play in","D"],["☁️","Cloudy and cosy","S"]]],
+["🎈","You make a balloon into…",[["🐶","A balloon dog","B"],["🚀","A rocket! Let it zoom","C"],["⚽","A ball to play with","D"],["👑","A crown to wear","L"]]],
+["🎲","Family game night! You…",[["🏆","Want to win!","C"],["🧠","Make clever moves","O"],["😂","Make everyone laugh","M"],["🍿","Bring snacks for everyone","P"]]],
+["📦","You get a big empty box. It becomes…",[["🚀","A rocket ship","O"],["🏰","A castle","L"],["🛌","A cosy bed","S"],["🤖","A painted robot","B"]]],
+["🦋","You see a butterfly. You…",[["🤩","Follow it around","D"],["🎨","Draw it later","B"],["🤫","Stay still so it lands on you","S"],["📖","Find out its name","O"]]],
+["👫","Your friends say you are…",[["😂","Funny","M"],["💪","Brave","L"],["🧡","Kind","P"],["⚡","Fast","C"]]],
+["🌴","Jungle time! You…",[["🌿","Swing on vines","M"],["🦜","Talk to the parrots","D"],["🏃","Race through the trees","C"],["🛶","Float down the river","S"]]],
+["🌜","You can't sleep. You…",[["🤸","Do star jumps till you're tired","C"],["💭","Make up a story in your head","B"],["🧸","Hug your teddy","P"],["😌","Just close your eyes and relax","S"]]],
+["🏆","You win a prize! You…",[["🎉","Do a victory dance","M"],["🤝","Share it with your team","D"],["🙌","Hold it up high","L"],["😊","Say thank you","P"]]],
+["🍽️","Trying a new food. You…",[["😋","Try it right away","L"],["👃","Sniff it first","O"],["😜","Make a funny face, then try","M"],["🤏","Try a tiny bit","S"]]],
+["🚀","Going to space! Your job?",[["👩‍🚀","Fly the rocket","L"],["🧪","Do space science","O"],["🪐","Float around for fun","D"],["📸","Take pretty photos","B"]]],
+["🎶","Pick a song to sing!",[["🎉","A loud party song","D"],["💤","A soft sleepy song","S"],["😂","A silly song","M"],["🦁","A big brave song","L"]]],
+["🧹","Tidy-up time! You…",[["🏃","Race to finish first","C"],["💃","Make it a dance party","M"],["🤝","Help others tidy too","P"],["📦","Put things in neat groups","O"]]],
+["🐳","If you lived in the sea you'd…",[["🐬","Jump over the waves","D"],["🐠","Hide in pretty coral","B"],["🐢","Drift along slowly","S"],["💨","Swim super fast","C"]]],
+["🎆","Fireworks! You…",[["🤩","Shout \"WOW!\"","D"],["🎨","Want to paint them","B"],["🎧","Cover your ears and smile","S"],["🤗","Hug your family close","P"]]],
+["🌱","What kind of friend are you?",[["🫶","A caring friend","P"],["🧭","An adventure friend","L"],["😂","A funny friend","M"],["🎉","A party friend","D"]]],
+["🍿","At the movies you…",[["🍿","Eat ALL the popcorn","M"],["🤫","Watch super quietly","O"],["🫶","Share your snacks","P"],["💤","Get sleepy and snuggly","S"]]],
+["🔔","The playtime bell rings! You…",[["🏃","Race outside first","C"],["⚽","Start a game for everyone","L"],["📖","Find a quiet spot to read","O"],["🤗","Find your best friend","D"]]],
+["🐾","Design a pet! It has…",[["🌈","Rainbow wings","B"],["⚡","Rocket feet","C"],["🧠","A big brain that can talk","O"],["🧸","The softest fur","P"]]],
+["⛵","On a boat you…",[["🎣","Fish quietly","S"],["🧭","Steer the boat","L"],["🐬","Look for dolphins","D"],["🗺️","Read the map","O"]]],
+["🧺","Picnic time! You bring…",[["🥪","Sandwiches for everyone","P"],["🪁","A kite to run with","C"],["⚽","A ball to play with","D"],["🛌","A blanket for a nap","S"]]],
+["🖌️","Oops, you spill some paint! You…",[["🖐️","Make hand prints","B"],["😂","Laugh and keep going","M"],["🧽","Clean it up fast","C"]]],
+["🔊","Your favourite sound?",[["🎶","Music","B"],["😂","Laughing","M"],["🌧️","Rain on the roof","S"],["🦁","A big ROAR!","L"]]],
+["🏆","Pick a trophy!",[["🥇","Fastest runner","C"],["🧠","Super thinker","O"],["💖","Kindest kid","P"],["🎨","Best maker","B"]]],
+["🌈","Your perfect day ends with…",[["🛁","A bubble bath and bed","S"],["🎉","A big party","D"],["📖","A bedtime story","O"],["🍦","Ice cream with family","P"]]],
+["🗣️","Which animal sound can you do best?",[["🦁","ROAR!","L"],["🐒","Ooh ooh aah aah!","M"],["🦉","Hoo hoo!","O"],["🐬","Click click squeak!","D"]]],
+["🧳","Going on a trip! You pack…",[["🎨","Art stuff","B"],["🩹","Plasters for everyone","P"],["👟","Running shoes","C"]]],
+["🏫","What's the best part of school?",[["👫","Seeing friends","D"],["📚","Learning","O"],["🏃","Running at playtime","C"]]],
+["😊","How do you feel today?",[["🤪","Silly!","M"],["😎","Super chill","S"],["💪","Strong!","L"]]]
+];
+
+/* ================= Helpers ================= */
+const $ = id => document.getElementById(id);
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const PER_GAME = 10, DECK_KEY = "kkk_animal_deck_v1";
+
+/* ---- Question deck: shuffled 100, deal 10 per game, reshuffle only when used up ---- */
+function loadDeck() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DECK_KEY) || "null");
+    if (Array.isArray(d) && d.every(n => Number.isInteger(n) && n >= 0 && n < BANK.length) && new Set(d).size === d.length) return d;
+  } catch (e) {}
+  return null;
+}
+function saveDeck(d) { try { localStorage.setItem(DECK_KEY, JSON.stringify(d)); } catch (e) {} }
+let memDeck = null;
+function dealQuestions() {
+  let deck = loadDeck(); if (deck === null) deck = memDeck || [];
+  let hand = deck.splice(0, PER_GAME);
+  if (hand.length < PER_GAME) {           // deck used up: shuffle a fresh one (all 100)
+    deck = shuffle([...Array(BANK.length).keys()].filter(n => !hand.includes(n)));
+    hand = hand.concat(deck.splice(0, PER_GAME - hand.length));
+  }
+  memDeck = deck; saveDeck(deck);
+  return hand;
+}
+
+/* ================= Sound ================= */
+let AC = null, muted = false;
+try { muted = localStorage.getItem("kkk_animal_muted") === "1"; } catch (e) {}
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); return AC; }
+function tone(f, t0, dur, type, vol, f2) {
+  const a = ac(); if (!a || muted) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(f, a.currentTime + t0);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, a.currentTime + t0 + dur);
+  g.gain.setValueAtTime(0.0001, a.currentTime + t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.2, a.currentTime + t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + t0 + dur);
+  o.connect(g); g.connect(a.destination); o.start(a.currentTime + t0); o.stop(a.currentTime + t0 + dur + 0.05);
+}
+const SFX = {
+  click() { tone(660, 0, 0.06, "square", 0.05); },
+  pick() { tone(523, 0, 0.1, "triangle", 0.2, 784); tone(1047, 0.09, 0.14, "sine", 0.12); },
+  bar(i) { const f = 392 * Math.pow(2, i / 6); tone(f, 0, 0.18, "triangle", 0.18, f * 1.5); tone(f * 2, 0.08, 0.12, "sine", 0.07); },
+  slide() { tone(300, 0, 0.5, "sine", 0.1, 900); },
+  win() { [523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.13, 0.25, "triangle", 0.22)); tone(1047, 0.8, 0.6, "sine", 0.15); }
+};
+function say(text) {
+  if (!window.speechSynthesis) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text.replace(/…/g, "...")); u.rate = 0.9; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
+}
+function setMute(m) {
+  muted = m; try { localStorage.setItem("kkk_animal_muted", m ? "1" : "0"); } catch (e) {}
+  ["muteBtn", "muteBtn2", "muteBtn3"].forEach(id => $(id).textContent = m ? "🔇" : "🔊");
+}
+["muteBtn", "muteBtn2", "muteBtn3"].forEach(id => $(id).addEventListener("click", () => { setMute(!muted); SFX.click(); }));
+setMute(muted);
+
+/* ================= Game ================= */
+let hand = [], qi = 0, picks = [], locked = false, showing = [];
+function show(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id === id)); window.scrollTo(0, 0); }
+
+function startGame() {
+  confetti.run++; if (window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
+  hand = dealQuestions(); qi = 0; picks = []; show("quiz"); renderQ();
+}
+function renderQ() {
+  locked = false;
+  const q = BANK[hand[qi]];
+  $("dots").innerHTML = hand.map((_, i) => `<span class="dot ${i < qi ? "done" : i === qi ? "now" : ""}"></span>`).join("");
+  $("qnum").textContent = `Question ${qi + 1} of ${PER_GAME}`;
+  $("qemoji").textContent = q[0]; $("qtext").textContent = q[1];
+  const card = $("qcard"); card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+  showing = shuffle(q[2].slice());
+  const box = $("answers"); box.className = showing.length === 3 ? "three" : ""; box.innerHTML = "";
+  showing.forEach((a, i) => {
+    const b = document.createElement("button"); b.className = "ans";
+    b.innerHTML = `<span class="ae">${a[0]}</span><span></span>`; b.lastChild.textContent = a[1];
+    b.addEventListener("click", () => choose(i, b)); box.appendChild(b);
+  });
+}
+function choose(i, btn) {
+  if (locked) return; locked = true;
+  SFX.pick(); picks.push(showing[i][2]);
+  document.querySelectorAll(".ans").forEach(b => b.classList.add(b === btn ? "picked" : "fade"));
+  setTimeout(() => { qi++; if (qi < PER_GAME) renderQ(); else finish(); }, 450);
+}
+$("speakBtn").addEventListener("click", () => {
+  const q = BANK[hand[qi]]; say(q[1] + " " + showing.map(a => a[1]).join(". Or, ") + "?");
+});
+
+/* ---- scoring ---- */
+function score(pk) {
+  const pts = {}; CODES.forEach(c => pts[c] = 0);
+  const tr = [0, 0, 0];
+  pk.forEach(c => { pts[c] += 2; pts[BUDDY[c]] += 1; ANIMALS[c].traits.forEach((v, k) => tr[k] += v); });
+  const best = Math.max(...CODES.map(c => pts[c]));
+  const tied = CODES.filter(c => pts[c] === best);
+  const winner = tied[Math.floor(Math.random() * tied.length)];
+  return { pts, winner, tr };
+}
+/* Largest-remainder rounding so the meter always adds up to exactly 100 */
+function percents(pts) {
+  const total = CODES.reduce((s, c) => s + pts[c], 0) || 1;
+  const raw = CODES.map(c => ({ c, v: pts[c] * 100 / total }));
+  raw.forEach(r => { r.p = Math.floor(r.v); r.rem = r.v - r.p; });
+  let left = 100 - raw.reduce((s, r) => s + r.p, 0);
+  raw.slice().sort((a, b) => b.rem - a.rem || pts[b.c] - pts[a.c]).forEach(r => { if (left > 0) { r.p++; left--; } });
+  const out = {}; raw.forEach(r => out[r.c] = r.p); return out;
+}
+/* trait sum -> 0..100 slider position (10 answers, each -2..+2 per trait) */
+function traitPos(sum) { const v = Math.max(-1, Math.min(1, sum / 12)); return Math.round(50 + v * 44); }
+
+let lastResult = null;
+function finish() {
+  const r = score(picks), A = ANIMALS[r.winner], pc = percents(r.pts);
+  lastResult = { picks: picks.slice(), pts: r.pts, winner: r.winner, percents: pc, traits: r.tr };
+  $("rhead").style.background = A.color;
+  $("remoji").textContent = A.emoji; $("rname").textContent = A.name + "!";
+  $("rdesc").textContent = A.desc;
+  $("rgreat").innerHTML = A.great.map(g => `<li></li>`).join("");
+  [...$("rgreat").children].forEach((li, i) => li.textContent = A.great[i]);
+  // meter bars, highest first (winner on top)
+  const order = CODES.slice().sort((a, b) => (b === r.winner) - (a === r.winner) || pc[b] - pc[a] || r.pts[b] - r.pts[a]);
+  $("bars").innerHTML = order.map(c => `<div class="bar${c === r.winner ? " top" : ""}" data-c="${c}"><span class="be">${ANIMALS[c].emoji}</span><div class="bt"><div class="bn">${ANIMALS[c].name}</div><div class="track"><div class="fill" style="background-color:${ANIMALS[c].color}"></div></div></div><span class="bp">0%</span></div>`).join("");
+  $("sliders").innerHTML = TRAITS.map((t, k) => `<div class="slider"><div class="ends"><span>${t.left}</span><span>${t.right}</span></div><div class="rail"><span class="mark">${A.emoji}</span></div><div class="say"></div></div>`).join("");
+  show("result"); SFX.win(); confetti(); say("You are a " + A.name + "!");
+  const run = confetti.run;
+  const bars = [...document.querySelectorAll(".bar")];
+  const maxP = Math.max(1, ...CODES.map(c => pc[c]));  // biggest bar fills the whole track
+  bars.forEach((b, i) => setTimeout(() => {
+    if (run !== confetti.run) return;
+    const c = b.dataset.c, p = pc[c];
+    b.classList.add("lit"); b.querySelector(".fill").style.width = (p ? Math.max(6, Math.round(p / maxP * 100)) : 0) + "%";
+    countUp(b.querySelector(".bp"), p); if (p > 0) SFX.bar(i);
+  }, 900 + i * 420));
+  const tStart = 900 + bars.length * 420 + 200;
+  [...document.querySelectorAll(".slider")].forEach((s, k) => setTimeout(() => {
+    if (run !== confetti.run) return;
+    const pos = traitPos(r.tr[k]); s.querySelector(".mark").style.left = pos + "%";
+    s.querySelector(".say").textContent = TRAITS[k].say[pos < 25 ? 0 : pos < 42 ? 1 : pos <= 58 ? 2 : pos <= 75 ? 3 : 4];
+    SFX.slide();
+  }, tStart + k * 600));
+}
+function countUp(el, to) { let n = 0; const step = Math.max(1, Math.ceil(to / 12)); (function f() { n = Math.min(to, n + step); el.textContent = n + "%"; if (n < to) setTimeout(f, 40); })(); }
+
+/* ---------- confetti ---------- */
+function confetti() {
+  const cv = $("confetti"), x = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ["#ff4fa3", "#7b5cff", "#2fd27a", "#ffb800", "#3fb5ff"], P = [];
+  for (let i = 0; i < 160; i++) P.push({ x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5, vx: (Math.random() - .5) * 4, vy: 2 + Math.random() * 4, r: 4 + Math.random() * 6, c: cols[i % 5], a: Math.random() * 6 });
+  const run = ++confetti.run; let n = 0; (function f() { if (run !== confetti.run) { x.clearRect(0, 0, cv.width, cv.height); return; } x.clearRect(0, 0, cv.width, cv.height); for (const q of P) { q.x += q.vx; q.y += q.vy; q.a += .1; x.fillStyle = q.c; x.save(); x.translate(q.x, q.y); x.rotate(q.a); x.fillRect(-q.r, -q.r / 2, q.r * 2, q.r); x.restore(); } if (++n < 200) requestAnimationFrame(f); else x.clearRect(0, 0, cv.width, cv.height); })();
+}
+confetti.run = 0;
+
+$("parade").innerHTML = CODES.map(c => `<span>${ANIMALS[c].emoji}</span>`).join("");
+$("startBtn").addEventListener("click", () => { SFX.click(); startGame(); });
+$("againBtn").addEventListener("click", () => { SFX.click(); startGame(); });
+
+/* ---------- test hook (used by automated checks only) ---------- */
+window.__pq = { BANK, ANIMALS, BUDDY, score, percents, traitPos, dealQuestions, get hand() { return hand; }, get qi() { return qi; }, get lastResult() { return lastResult; } };
+</script>
+</body>
+</html>

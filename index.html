@@ -201,6 +201,11 @@
   .gamecard svg { display: block; width: 100%; height: auto; }
   .gamecard .gdesc { font-size: clamp(20px, 4vw, 25px); font-weight: 600; color: #2d2350; margin: 16px 14px 6px; line-height: 1.3; }
   .zoomplay { display: inline-block; text-decoration: none; font-family: inherit; font-weight: 700; font-size: clamp(30px, 6vw, 40px); color: #fff; background: #2fd27a; border: 5px solid #fff; border-radius: 24px; padding: 14px 40px; box-shadow: 0 7px 0 #17984f; margin: 10px 0 24px; }
+  .gamegrid { display: flex; flex-wrap: wrap; gap: 34px 28px; justify-content: center; align-items: stretch; width: 100%; max-width: 1300px; }
+  .gamegrid .gamecard { flex: 1 1 340px; display: flex; flex-direction: column; }
+  .gamegrid .gamecard .gfoot { margin-top: auto; }
+  .gamecard.pq { transform: rotate(1deg); box-shadow: 0 10px 0 #d4c8ff, 0 14px 30px rgba(123,92,255,.18); }
+  .gamecard.pq .gtitle { background: #7b5cff; }
   .zoomplay:active { transform: translateY(5px); box-shadow: 0 2px 0 #17984f; }
   #scrollHint { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 40; display: none; flex-direction: column; align-items: center; font-family: inherit; font-weight: 700; font-size: 17px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 22px; padding: 6px 14px 4px; box-shadow: 0 5px 0 #d4c8ff; cursor: pointer; animation: bob 1.1s ease-in-out infinite; }
   #scrollHint.show { display: flex; }
@@ -259,6 +264,7 @@
     <!-- PAGE 2: MORE GAMES -->
     <div class="page2" id="moreGames">
       <div class="more">🎮 More games!</div>
+      <div class="gamegrid">
       <div class="gamecard">
         <div class="gtitle">🔍 Zoom &amp; Find <span class="newtag">NEW!</span></div>
         <a href="zoom/" aria-label="Play Zoom and Find"><svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" role="img">
@@ -274,8 +280,23 @@
           <circle cx="420" cy="140" r="92" fill="none" stroke="#7b5cff" stroke-width="14"/><circle cx="420" cy="140" r="99" fill="none" stroke="#fff" stroke-width="4"/>
           <path d="M488 210 L560 282" stroke="#7b5cff" stroke-width="26" stroke-linecap="round"/>
         </svg></a>
-        <p class="gdesc">Zoom in close to big pictures.<br>Find the hidden things! 🐷 🚀 🦄</p>
-        <a class="zoomplay" href="zoom/">▶ Play!</a>
+        <div class="gfoot"><p class="gdesc">Zoom in close to big pictures.<br>Find the hidden things! 🐷 🚀 🦄</p>
+        <a class="zoomplay" href="zoom/">▶ Play!</a></div>
+      </div>
+      <div class="gamecard pq">
+        <div class="gtitle">🦁 Which Animal Are You? <span class="newtag">NEW!</span></div>
+        <a href="personality/" aria-label="Play Which Animal Are You"><svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" role="img">
+          <defs><linearGradient id="pqsky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd9ef"/><stop offset=".5" stop-color="#dcdcff"/><stop offset="1" stop-color="#c9f0ff"/></linearGradient></defs>
+          <rect width="600" height="300" fill="url(#pqsky)"/>
+          <path d="M40 300 A260 260 0 0 1 560 300" fill="none" stroke="#ff5a5a" stroke-width="16"/><path d="M60 300 A240 240 0 0 1 540 300" fill="none" stroke="#ffb020" stroke-width="16"/><path d="M80 300 A220 220 0 0 1 520 300" fill="none" stroke="#ffe066" stroke-width="16"/><path d="M100 300 A200 200 0 0 1 500 300" fill="none" stroke="#2fd27a" stroke-width="16"/><path d="M120 300 A180 180 0 0 1 480 300" fill="none" stroke="#2bb3ff" stroke-width="16"/><path d="M140 300 A160 160 0 0 1 460 300" fill="none" stroke="#7b5cff" stroke-width="16"/>
+          <text x="300" y="215" font-size="110" text-anchor="middle">🦁</text>
+          <text x="80" y="110" font-size="56" text-anchor="middle">🐒</text><text x="175" y="70" font-size="50" text-anchor="middle">🦉</text><text x="425" y="70" font-size="50" text-anchor="middle">🦋</text><text x="520" y="110" font-size="56" text-anchor="middle">🐬</text>
+          <text x="70" y="250" font-size="52" text-anchor="middle">🐼</text><text x="530" y="250" font-size="52" text-anchor="middle">🦥</text><text x="300" y="70" font-size="46" text-anchor="middle">🐆</text>
+          <text x="180" y="190" font-size="54" text-anchor="middle" fill="#ff4fa3" font-weight="700">?</text><text x="420" y="190" font-size="54" text-anchor="middle" fill="#7b5cff" font-weight="700">?</text>
+        </svg></a>
+        <div class="gfoot"><p class="gdesc">Answer 10 fun questions.<br>Find out which animal you are! 🐼 🦋 🐬</p>
+        <a class="zoomplay" href="personality/">▶ Play!</a></div>
+      </div>
       </div>
     </div>
   </div>
