@@ -1,5 +1,5 @@
-# Kaileigh's Impossible Quiz
+# Kai's Kool Kwiz
 
 A silly trick-question quiz game for kids. Single file: `index.html`.
 
-Play: https://ianjameslaird-gif.github.io/kaileigh-quiz/
+Play: https://kaiskoolkwiz.com/
