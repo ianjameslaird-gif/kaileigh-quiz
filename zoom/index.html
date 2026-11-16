@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Zoom &amp; Find · Kai's Kool Kwiz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔍%3C/text%3E%3C/svg%3E">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Fredoka", "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", Arial, sans-serif;
+    background: radial-gradient(rgba(123,92,255,.13) 1.5px, transparent 1.6px) 0 0/26px 26px, linear-gradient(160deg, #ffd9ef 0%, #dcdcff 40%, #c9f0ff 70%, #dcffd0 100%);
+    background-attachment: fixed;
+    color: #3a2a5d; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    overflow: hidden;
+  }
+  button { font-family: inherit; }
+  .screen { display: none; position: fixed; inset: 0; }
+  .screen.on { display: flex; }
+  #muteBtn { font-size: 26px; width: 52px; height: 52px; border-radius: 50%; border: 4px solid #fff; background: #ffe066; cursor: pointer; box-shadow: 0 4px 0 #d4a900; flex: none; padding: 0; line-height: 1; }
+  #muteBtn.float { position: fixed; top: 10px; right: 10px; z-index: 60; }
+
+  /* ===== Home ===== */
+  #home { flex-direction: column; align-items: center; overflow-y: auto; padding: 14px 14px 30px; }
+  .blob { position: fixed; border-radius: 50%; z-index: -1; pointer-events: none; }
+  .blob.b1 { width: 340px; height: 340px; left: -120px; top: -140px; background: #ffb3dc; opacity: .7; }
+  .blob.b2 { width: 300px; height: 300px; left: 40%; bottom: -170px; background: #bfeefa; opacity: .8; }
+  .blob.b3 { width: 220px; height: 220px; right: -90px; top: 45%; background: #e6d4ff; opacity: .6; }
+  .backquiz { align-self: flex-start; display: inline-block; text-decoration: none; font-weight: 700; font-size: 20px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 18px; padding: 8px 14px; box-shadow: 0 5px 0 #d4c8ff; }
+  .big-title { font-weight: 700; font-size: clamp(54px, 13vw, 100px); line-height: .98; margin: 14px 0 6px; text-align: center; color: #ff4fa3; text-shadow: 3px 3px 0 #fff, 6px 6px 0 #9b7bff; }
+  .tagline { font-size: clamp(21px, 4vw, 28px); font-weight: 600; color: #2d2350; margin: 6px 0 18px; text-align: center; line-height: 1.3; }
+  .emoji-row { font-size: 50px; letter-spacing: 6px; }
+  .wiggle { display: inline-block; animation: wig 1.2s ease-in-out infinite; }
+  .wiggle:nth-child(2) { animation-delay: .3s; } .wiggle:nth-child(3) { animation-delay: .6s; }
+  @keyframes wig { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+  #cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; width: 100%; max-width: 1000px; }
+  .card { border: 5px solid #fff; border-radius: 24px; padding: 14px 16px; color: #fff; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 14px; box-shadow: 0 7px 0 rgba(0,0,0,.2); transition: transform .1s; }
+  .card:nth-child(odd) { transform: rotate(1.2deg); } .card:nth-child(even) { transform: rotate(-1.2deg); }
+  .card:active { transform: translateY(5px); }
+  .card .ic { font-size: 54px; line-height: 1; }
+  .card .nm { font-size: clamp(25px, 4.5vw, 30px); font-weight: 700; line-height: 1.1; }
+  .card .ds { font-size: 18px; font-weight: 600; opacity: .95; margin-top: 2px; }
+  .card .st { font-size: 17px; font-weight: 600; margin-top: 4px; background: rgba(255,255,255,.25); border-radius: 12px; padding: 2px 8px; display: inline-block; }
+  .S1 { background: #2fd27a; } .S2 { background: #3fb5ff; } .S3 { background: #ffb800; } .S4 { background: #ff7a3d; } .S5 { background: #b04dff; }
+  .howbtn { margin-top: 22px; font-weight: 600; font-size: 20px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 18px; padding: 8px 16px; box-shadow: 0 5px 0 #d4c8ff; cursor: pointer; }
+
+  /* ===== Play ===== */
+  #play { flex-direction: column; }
+  .topbar { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 10px; padding-top: max(8px, env(safe-area-inset-top)); background: rgba(255,255,255,.75); border-bottom: 4px solid #fff; }
+  .rbtn { font-size: 26px; width: 52px; height: 52px; border-radius: 50%; border: 4px solid #fff; background: #3fb5ff; box-shadow: 0 4px 0 #1f86c7; cursor: pointer; flex: none; padding: 0; line-height: 1; }
+  .rbtn:active, #muteBtn:active { transform: translateY(3px); box-shadow: none; }
+  #sceneName { font-weight: 700; font-size: clamp(18px, 4vw, 26px); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pill { font-weight: 700; font-size: clamp(17px, 3.6vw, 22px); background: #fff; border-radius: 16px; padding: 6px 10px; box-shadow: 0 3px 0 #d4c8ff; white-space: nowrap; }
+  #hintBtn { font-weight: 700; font-size: clamp(17px, 3.6vw, 22px); color: #fff; background: #ffb800; border: 4px solid #fff; border-radius: 18px; padding: 6px 12px; box-shadow: 0 4px 0 #c98f00; cursor: pointer; white-space: nowrap; height: 52px; }
+  #hintBtn:disabled { background: #c9c3d9; box-shadow: 0 4px 0 #9a93ad; cursor: default; }
+  #view { flex: 1; position: relative; overflow: hidden; touch-action: none; background: #fff; cursor: grab; }
+  #view.drag { cursor: grabbing; }
+  #view svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .zoombar { position: absolute; right: 10px; bottom: 12px; display: flex; flex-direction: column; gap: 12px; z-index: 5; }
+  .zbtn { width: 60px; height: 60px; border-radius: 50%; border: 4px solid #fff; background: #7b5cff; color: #fff; font-size: 34px; font-weight: 700; box-shadow: 0 5px 0 #4b33b8; cursor: pointer; padding: 0; line-height: 1; }
+  .zbtn.all { background: #2fd27a; box-shadow: 0 5px 0 #17984f; font-size: 26px; }
+  .zbtn:active { transform: translateY(4px); box-shadow: 0 1px 0 #4b33b8; }
+  #tray { flex: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 8px 6px; padding-bottom: max(8px, env(safe-area-inset-bottom)); background: rgba(255,255,255,.85); border-top: 4px solid #fff; max-height: 34vh; overflow-y: auto; }
+  .chip { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 70px; min-height: 66px; border-radius: 16px; background: #fff; border: 3px solid #d4c8ff; box-shadow: 0 3px 0 #d4c8ff; cursor: pointer; position: relative; padding: 2px; }
+  .chip .ce { font-size: 32px; line-height: 1.1; }
+  .chip .cw { font-size: 15px; font-weight: 700; line-height: 1.1; text-align: center; }
+  .chip .deep { position: absolute; top: -6px; right: -6px; font-size: 16px; background: #ffe066; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
+  .chip.long .cw { font-size: 12px; }
+  @media (max-width: 500px) {
+    #sceneName .nm { display: none; }
+    .chip { width: calc((100vw - 48px) / 6); min-height: 58px; border-radius: 14px; }
+    .chip .ce { font-size: 27px; }
+    .chip .cw { font-size: 13px; }
+    .chip.long .cw { font-size: 10.5px; }
+    .chip.got::after { font-size: 36px; }
+    .zbtn { width: 54px; height: 54px; font-size: 30px; }
+    .zbtn.all { font-size: 22px; }
+  }
+  .chip.got { background: #c9f7dc; border-color: #2fd27a; box-shadow: 0 3px 0 #17984f; }
+  .chip.got .ce { opacity: .45; }
+  .chip.got::after { content: "✔"; position: absolute; font-size: 44px; color: #17a85a; font-weight: 700; top: 4px; text-shadow: 0 0 4px #fff, 0 0 4px #fff; }
+  .chip.bump { animation: bump .5s; }
+  @keyframes bump { 0%,100% { transform: scale(1); } 40% { transform: scale(1.3); } }
+  .fx { position: absolute; pointer-events: none; z-index: 8; }
+  .ring { border-radius: 50%; border: 6px solid #ffb800; box-shadow: 0 0 0 4px #fff, 0 0 18px #ffb800; transform: translate(-50%,-50%); animation: ringpulse .8s ease-in-out infinite; }
+  @keyframes ringpulse { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 1; } 50% { transform: translate(-50%,-50%) scale(1.25); opacity: .6; } }
+  .spark { font-size: 30px; transform: translate(-50%,-50%); animation: fly .9s ease-out forwards; }
+  @keyframes fly { from { transform: translate(-50%,-50%) scale(.4); opacity: 1; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.2); opacity: 0; } }
+  .miss { width: 40px; height: 40px; border-radius: 50%; border: 4px solid rgba(255,255,255,.9); transform: translate(-50%,-50%); animation: missa .45s ease-out forwards; }
+  @keyframes missa { from { transform: translate(-50%,-50%) scale(.3); opacity: 1; } to { transform: translate(-50%,-50%) scale(1.4); opacity: 0; } }
+  #toast { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); background: #fff; color: #7b5cff; font-weight: 700; font-size: clamp(20px, 4.5vw, 28px); border-radius: 20px; padding: 10px 18px; box-shadow: 0 5px 0 #d4c8ff; z-index: 9; pointer-events: none; opacity: 0; transition: opacity .25s; white-space: nowrap; }
+  #toast.show { opacity: 1; }
+
+  /* ===== Overlays ===== */
+  .overlay { position: fixed; inset: 0; background: rgba(58,42,93,.55); display: none; align-items: center; justify-content: center; z-index: 70; padding: 16px; }
+  .overlay.on { display: flex; }
+  .box { background: #fff; border: 6px solid #ffe066; border-radius: 30px; padding: 22px 20px; text-align: center; max-width: 520px; width: 100%; max-height: 96vh; overflow-y: auto; animation: pop .35s ease-out; }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .box h1 { font-size: clamp(34px, 8vw, 52px); margin: 6px 0 10px; color: #ff4fa3; text-shadow: 3px 3px 0 #ffe066; line-height: 1.05; }
+  .box p { font-size: clamp(21px, 4.5vw, 26px); margin: 10px 0; font-weight: 600; }
+  .how { text-align: left; font-size: clamp(20px, 4.4vw, 25px); font-weight: 600; line-height: 1.5; margin: 6px auto 10px; display: inline-block; }
+  .btn { font-weight: 700; font-size: clamp(22px, 4.5vw, 30px); border: 5px solid #fff; border-radius: 24px; padding: 14px 24px; cursor: pointer; color: #fff; background: #7b5cff; box-shadow: 0 7px 0 #4b33b8; margin: 8px 4px; }
+  .btn.go { background: #2fd27a; box-shadow: 0 7px 0 #17984f; }
+  .btn.blue { background: #3fb5ff; box-shadow: 0 7px 0 #1f86c7; }
+  .btn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+  .bigtime { font-size: clamp(40px, 10vw, 60px); font-weight: 700; color: #7b5cff; margin: 4px 0; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 80; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<!-- HOME -->
+<div id="home" class="screen on">
+  <a class="backquiz" href="../" id="quizLink">🏠 Kai's Kool Kwiz</a>
+  <div class="emoji-row" style="margin-top:8px"><span class="wiggle">🔍</span> <span class="wiggle">🐷</span> <span class="wiggle">🚀</span></div>
+  <div class="big-title">Zoom<br>&amp; Find</div>
+  <p class="tagline">Pick a picture. Zoom in close.<br>Find the hidden things!</p>
+  <div id="cards"></div>
+  <button class="howbtn" id="howBtn">❓ How to play</button>
+</div>
+
+<!-- PLAY -->
+<div id="play" class="screen">
+  <div class="topbar">
+    <button class="rbtn" id="homeBtn" aria-label="Home" title="Home">🏠</button>
+    <div id="sceneName">Farm</div>
+    <div class="pill" id="count">0/8</div>
+    <div class="pill" id="timer">⏱ 00:00</div>
+    <button id="hintBtn">💡 3</button>
+    <button id="muteBtn" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div id="view">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"></svg>
+    <div class="zoombar">
+      <button class="zbtn" id="zin" aria-label="Zoom in">+</button>
+      <button class="zbtn" id="zout" aria-label="Zoom out">−</button>
+      <button class="zbtn all" id="zall" aria-label="See the whole picture">🖼️</button>
+    </div>
+    <div id="toast"></div>
+  </div>
+  <div id="tray"></div>
+</div>
+
+<!-- HOW TO -->
+<div class="overlay" id="howBox">
+  <div class="box">
+    <h1>How to play</h1>
+    <div class="how">
+      🤏 Pinch or ➕ to zoom in<br>
+      👆 Drag to move around<br>
+      🎯 Tap a thing to find it<br>
+      🔍 Some things hide deep inside!<br>
+      💡 Stuck? Tap the hint
+    </div><br>
+    <button class="btn go" id="howOk">OK, let's go!</button>
+  </div>
+</div>
+
+<!-- WIN -->
+<div class="overlay" id="winBox">
+  <div class="box">
+    <div style="font-size:60px">🏆</div>
+    <h1>You did it, Kaileigh!</h1>
+    <p id="winSub">You found everything!</p>
+    <div class="bigtime" id="winTime">⏱ 00:00</div>
+    <p id="winBest"></p>
+    <button class="btn go" id="winNext">Next picture ▶</button><br>
+    <button class="btn blue" id="winHome">🏠 Pick a picture</button>
+    <button class="btn" id="winAgain">🔁 Play again</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= Sound ================= */
+let AC = null, muted = false;
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); return AC; }
+function tone(f, t0, dur, type, vol, f2) {
+  const a = ac(); if (!a || muted) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(f, a.currentTime + t0);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, a.currentTime + t0 + dur);
+  g.gain.setValueAtTime(0.0001, a.currentTime + t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.2, a.currentTime + t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + t0 + dur);
+  o.connect(g); g.connect(a.destination); o.start(a.currentTime + t0); o.stop(a.currentTime + t0 + dur + 0.05);
+}
+const SFX = {
+  found() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.07, 0.22, "triangle", 0.22)); tone(1568, 0.3, 0.3, "sine", 0.1); },
+  miss() { tone(220, 0, 0.12, "sine", 0.08, 180); },
+  hint() { tone(880, 0, 0.15, "sine", 0.15, 1320); tone(1320, 0.15, 0.2, "sine", 0.12, 990); },
+  secret() { tone(300, 0, 0.6, "sine", 0.12, 1200); tone(600, 0.1, 0.6, "triangle", 0.08, 2000); },
+  click() { tone(660, 0, 0.06, "square", 0.05); },
+  win() { [523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.13, 0.25, "triangle", 0.22)); tone(1047, 0.8, 0.6, "sine", 0.15); }
+};
+function say(text) {
+  if (muted || !window.speechSynthesis) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.9; u.pitch = 1.2; speechSynthesis.speak(u); } catch (e) {}
+}
+
+/* ================= Save ================= */
+const KEY = "kaiZoomFind_v1";
+let save = { mute: false, seenHow: false, scenes: {} };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === "object") save = Object.assign(save, s); } catch (e) {}
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} }
+function sc(id) { return save.scenes[id] || (save.scenes[id] = { found: [], elapsed: 0, hints: 3, done: false, best: 0 }); }
+muted = !!save.mute;
+
+/* ================= SVG helpers ================= */
+const r = (x, y, w, h, f, extra) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" ${extra || ""}/>`;
+const c = (x, y, rr, f, extra) => `<circle cx="${x}" cy="${y}" r="${rr}" fill="${f}" ${extra || ""}/>`;
+const el = (x, y, rx, ry, f, extra) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${f}" ${extra || ""}/>`;
+const p = (d, f, extra) => `<path d="${d}" fill="${f}" ${extra || ""}/>`;
+// emoji centred at x,y, roughly `size` wide. Drawn at font-size 100 and scaled, so it stays crisp at any zoom.
+const em = (ch, x, y, size, rot, extra) => `<g transform="translate(${x} ${y}) rotate(${rot || 0}) scale(${(size / 100).toFixed(4)})" ${extra || ""}><text x="0" y="0" font-size="100" text-anchor="middle" dominant-baseline="central">${ch}</text></g>`;
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+// scatter filler emoji in a region, keeping clear of target objects and "avoid" rectangles
+function scatter(seed, chars, n, reg, smin, smax, avoidObjs, avoidRects) {
+  const R = rng(seed); let out = ""; let tries = 0, placed = 0;
+  while (placed < n && tries < n * 40) {
+    tries++;
+    const x = reg[0] + R() * reg[2], y = reg[1] + R() * reg[3], s = smin + R() * (smax - smin);
+    let ok = true;
+    for (const o of avoidObjs) { if (Math.hypot(o.x - x, o.y - y) < o.size * 0.75 + s * 0.6) { ok = false; break; } }
+    if (ok && avoidRects) for (const a of avoidRects) { if (x + s / 2 > a[0] && x - s / 2 < a[0] + a[2] && y + s / 2 > a[1] && y - s / 2 < a[1] + a[3]) { ok = false; break; } }
+    if (!ok) continue;
+    out += em(chars[Math.floor(R() * chars.length)], x.toFixed(1), y.toFixed(1), s.toFixed(1), Math.round((R() - 0.5) * 30));
+    placed++;
+  }
+  return out;
+}
+function stars(seed, n, reg, rmax, color) { const R = rng(seed); let o = ""; for (let i = 0; i < n; i++) o += c((reg[0] + R() * reg[2]).toFixed(1), (reg[1] + R() * reg[3]).toFixed(1), (0.6 + R() * rmax).toFixed(1), color || "#fff", `opacity="${(0.4 + R() * 0.6).toFixed(2)}"`); return o; }
+function twinkle(x, y, size) { return `<g opacity="1">${em("✨", x, y, size)}<animate attributeName="opacity" values="1;0.2;1" dur="1.6s" repeatCount="indefinite"/></g>`; }
+
+/* ================= Scenes =================
+   World is 1600 x 1000. Object: {id, ch, word, x, y, size, layer}.
+   Portals ("secret worlds"): local 800 x 600 picture squeezed into a tiny frame: world = (px,py) + local * s.
+*/
+const W = 1600, H = 1000;
+const SCENES = [];
+
+/* ---------- 1. Farm ---------- */
+SCENES.push((() => {
+  const objs = [
+    { id: "pig", ch: "🐷", word: "pig", x: 760, y: 700, size: 80 },
+    { id: "chick", ch: "🐤", word: "chick", x: 430, y: 890, size: 62 },
+    { id: "tractor", ch: "🚜", word: "tractor", x: 880, y: 545, size: 110 },
+    { id: "apple", ch: "🍎", word: "apple", x: 190, y: 400, size: 55 },
+    { id: "cat", ch: "🐱", word: "cat", x: 1090, y: 262, size: 58 },
+    { id: "sunflower", ch: "🌻", word: "sunflower", x: 1470, y: 580, size: 80 },
+    { id: "egg", ch: "🥚", word: "egg", x: 1390, y: 720, size: 48 },
+    { id: "carrot", ch: "🥕", word: "carrot", x: 250, y: 830, size: 58 }
+  ];
+  let s = `<defs><linearGradient id="g1sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd3ff"/><stop offset="1" stop-color="#d6f3ff"/></linearGradient></defs>`;
+  s += r(0, 0, W, H, "url(#g1sky)");
+  s += c(1460, 130, 80, "#ffe14d") + c(1460, 130, 100, "#ffe14d", 'opacity=".3"');
+  for (const [x, y, k] of [[300, 120, 1], [820, 90, 1.2], [1150, 170, .9]]) s += `<g transform="translate(${x} ${y}) scale(${k})">${el(0, 0, 80, 35, "#fff")}${el(-50, 10, 50, 28, "#fff")}${el(55, 8, 55, 28, "#fff")}</g>`;
+  s += el(380, 540, 640, 170, "#9ddc77") + el(1250, 560, 620, 190, "#86d064");
+  s += r(0, 520, W, 480, "#6cc04a");
+  s += p("M700 1000 C 760 860, 980 820, 1060 700 S 1150 600, 1150 560", "none", 'stroke="#e8c98a" stroke-width="70" stroke-linecap="round"');
+  // barn
+  s += r(990, 330, 320, 230, "#e2453c") + p("M970 335 L1150 200 L1330 335 Z", "#a8302a") + r(1100, 420, 100, 140, "#fff") + p("M1100 420 L1200 560 M1200 420 L1100 560", "none", 'stroke="#e2453c" stroke-width="12"') + r(1020, 360, 50, 45, "#fff3c4") + r(1240, 360, 50, 45, "#fff3c4");
+  // fence
+  for (let x = 20; x < 920; x += 60) s += r(x, 600, 14, 80, "#c98a4b");
+  s += r(0, 615, 940, 12, "#b5773b") + r(0, 650, 940, 12, "#b5773b");
+  // field
+  s += r(80, 760, 640, 220, "#9b6a3f", 'rx="20"');
+  for (let y = 790; y < 980; y += 40) s += r(95, y, 610, 8, "#7d522d", 'rx="4"');
+  // pond
+  s += el(1240, 840, 230, 95, "#4cb8f5") + el(1210, 820, 120, 35, "#9be0ff", 'opacity=".6"');
+  // trees
+  s += r(170, 430, 40, 140, "#8a5a2b") + c(190, 400, 110, "#3fa34d") + c(130, 430, 70, "#4bb35a") + c(250, 430, 70, "#4bb35a");
+  s += r(585, 450, 30, 110, "#8a5a2b") + c(600, 420, 80, "#3fa34d");
+  const avoid = [[960, 190, 380, 380], [80, 760, 640, 220], [1010, 745, 460, 190]];
+  s += scatter(11, ["🐄", "🐑", "🐓", "🌼", "🐴", "🌷", "🍄", "🦆"], 26, [40, 560, 1520, 420], 45, 80, objs, avoid);
+  s += scatter(12, ["🦆"], 4, [1060, 790, 360, 90], 40, 55, objs);
+  s += scatter(13, ["🌱", "🌾"], 14, [100, 770, 600, 200], 35, 50, objs);
+  s += scatter(14, ["🐦"], 5, [100, 60, 1200, 300], 30, 45, objs);
+  return { id: "farm", name: "Sunny Farm", icon: "🐮", cls: "S1", stars: "⭐", desc: "Easy", bg: "#d6f3ff", art: s, objs, portals: [] };
+})());
+
+/* ---------- 2. Under the Sea ---------- */
+SCENES.push((() => {
+  const objs = [
+    { id: "crab", ch: "🦀", word: "crab", x: 520, y: 930, size: 55 },
+    { id: "octopus", ch: "🐙", word: "octopus", x: 1235, y: 655, size: 58 },
+    { id: "shell", ch: "🐚", word: "shell", x: 905, y: 930, size: 42 },
+    { id: "turtle", ch: "🐢", word: "turtle", x: 290, y: 300, size: 70 },
+    { id: "crown", ch: "👑", word: "crown", x: 300, y: 838, size: 42 },
+    { id: "key", ch: "🔑", word: "key", x: 1430, y: 925, size: 38 },
+    { id: "whale", ch: "🐳", word: "whale", x: 1310, y: 150, size: 90 },
+    { id: "squid", ch: "🦑", word: "squid", x: 700, y: 470, size: 55 },
+    { id: "dolphin", ch: "🐬", word: "dolphin", x: 860, y: 190, size: 68 }
+  ];
+  let s = `<defs><linearGradient id="g2sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fe0ff"/><stop offset=".6" stop-color="#2f9be0"/><stop offset="1" stop-color="#1d6bbd"/></linearGradient></defs>`;
+  s += r(0, 0, W, H, "url(#g2sea)");
+  for (const x of [150, 520, 980, 1350]) s += p(`M${x} 0 L${x + 90} 0 L${x + 260} 800 L${x + 120} 800 Z`, "#fff", 'opacity=".12"');
+  s += p("M0 860 C 200 820, 400 880, 600 850 S 1000 820, 1200 860 S 1500 840, 1600 850 L1600 1000 L0 1000 Z", "#f5d28a");
+  s += el(80, 900, 120, 70, "#8b8fa3") + el(1540, 880, 110, 80, "#7d8196") + el(700, 900, 70, 40, "#9a9eb2");
+  // seaweed
+  const R = rng(21);
+  for (let i = 0; i < 18; i++) { const x = 40 + R() * 1520, h = 120 + R() * 220, col = ["#2fbf71", "#24a35d", "#55d68a"][i % 3]; s += p(`M${x} 880 C ${x - 30} ${880 - h / 3}, ${x + 30} ${880 - h * 2 / 3}, ${x} ${880 - h}`, "none", `stroke="${col}" stroke-width="${10 + R() * 8}" stroke-linecap="round"`); }
+  // coral
+  for (const [x, y, col] of [[620, 840, "#ff7aa8"], [1020, 850, "#ff9d4d"], [180, 860, "#c86bff"]]) s += c(x, y, 26, col) + c(x - 30, y - 30, 20, col) + c(x + 28, y - 34, 22, col) + c(x, y - 60, 18, col);
+  // ship wreck
+  s += p("M1080 760 L1470 740 L1430 880 L1120 890 Z", "#7a4b2a") + r(1250, 520, 16, 240, "#5e3a20") + p("M1266 540 L1380 600 L1266 660 Z", "#e9dcc0", 'opacity=".8"') + c(1180, 805, 18, "#3b2414") + c(1260, 800, 18, "#3b2414") + c(1340, 795, 18, "#3b2414");
+  // treasure chest
+  s += r(250, 850, 100, 60, "#9b5b26", 'rx="8"') + p("M250 852 Q300 800 350 852 Z", "#b86e30") + r(292, 860, 16, 20, "#ffd23f");
+  // bubbles
+  s += stars(22, 40, [0, 0, W, 820], 9, "none").replace(/fill="none"/g, 'fill="none" stroke="#fff" stroke-width="3"');
+  const avoid = [[230, 800, 140, 120], [1070, 520, 420, 380]];
+  s += scatter(23, ["🐟", "🐠", "🐡"], 34, [40, 40, 1520, 760], 32, 64, objs, avoid);
+  s += scatter(24, ["🌿"], 8, [40, 820, 1520, 140], 40, 60, objs, avoid);
+  return { id: "sea", name: "Under the Sea", icon: "🐠", cls: "S2", stars: "⭐⭐", desc: "A bit harder", bg: "#2f9be0", art: s, objs, portals: [] };
+})());
+
+/* ---------- 3. Busy Town (with a secret room) ---------- */
+SCENES.push((() => {
+  const P1 = { id: "room", x: 330, y: 500, s: 0.1, w: 800, h: 600 }; // window 80 x 60
+  const objs = [
+    { id: "bus", ch: "🚌", word: "bus", x: 230, y: 790, size: 90 },
+    { id: "bike", ch: "🚲", word: "bike", x: 1120, y: 905, size: 50 },
+    { id: "dog", ch: "🐶", word: "dog", x: 760, y: 915, size: 44 },
+    { id: "balloon", ch: "🎈", word: "balloon", x: 1360, y: 300, size: 44 },
+    { id: "icecream", ch: "🍦", word: "ice cream", x: 1460, y: 655, size: 40 },
+    { id: "umbrella", ch: "🌂", word: "umbrella", x: 640, y: 660, size: 40 },
+    { id: "firetruck", ch: "🚒", word: "fire truck", x: 1010, y: 775, size: 92 },
+    { id: "postbox", ch: "📮", word: "post box", x: 905, y: 645, size: 44 },
+    { id: "ball", ch: "⚽", word: "ball", x: 1290, y: 610, size: 36 },
+    { id: "teddy", ch: "🧸", word: "teddy", x: 190, y: 440, size: 110, layer: "room" },
+    { id: "cake", ch: "🎂", word: "cake", x: 600, y: 400, size: 100, layer: "room" }
+  ];
+  let s = r(0, 0, W, H, "#a6e3ff");
+  for (const [x, y] of [[200, 90], [900, 70], [1400, 120]]) s += el(x, y, 70, 28, "#fff") + el(x + 50, y + 8, 50, 22, "#fff");
+  // tall buildings
+  const B = [[560, 140, 180, 500, "#ff9eb5"], [760, 220, 160, 420, "#b7a6ff"], [940, 100, 200, 540, "#7fd3a8"], [1160, 200, 170, 440, "#ffcf6b"]];
+  for (const [x, y, w, h, col] of B) { s += r(x, y, w, h, col); for (let yy = y + 20; yy < y + h - 40; yy += 50) for (let xx = x + 18; xx < x + w - 30; xx += 42) s += r(xx, yy, 26, 32, "#fff7c9", 'rx="4"'); }
+  // little house with the secret window
+  s += r(260, 430, 300, 240, "#ffd6a5") + p("M240 435 L410 320 L580 435 Z", "#e96d5a") + r(470, 560, 60, 110, "#8a5a2b") + c(518, 615, 5, "#ffd23f");
+  s += r(P1.x - 8, P1.y - 8, 96, 76, "#fff", 'rx="6"');
+  // park
+  s += r(1180, 640, 420, 80, "#7ccf5c");
+  s += r(1520, 520, 26, 130, "#8a5a2b") + c(1533, 500, 60, "#3fa34d");
+  // pavement, road
+  s += r(0, 670, W, 60, "#d9d3e8") + r(0, 730, W, 140, "#5d5a6b");
+  for (let x = 20; x < W; x += 120) s += r(x, 795, 60, 10, "#fff");
+  s += r(0, 870, W, 130, "#d9d3e8");
+  for (let x = 30; x < W; x += 80) s += r(x, 870, 4, 130, "#c4bdd8");
+  // secret room
+  let m = r(0, 0, 800, 600, "#ffe3f1");
+  for (let x = 40; x < 800; x += 80) m += c(x, 60, 10, "#ffb3d6") + c(x + 40, 140, 10, "#ffb3d6");
+  m += r(0, 470, 800, 130, "#c98a4b") + r(80, 120, 160, 120, "#7fd3ff", 'stroke="#fff" stroke-width="12"') + r(430, 420, 280, 30, "#8a5a2b") + r(450, 450, 20, 70, "#8a5a2b") + r(670, 450, 20, 70, "#8a5a2b");
+  m += em("📚", 330, 520, 70) + em("🌷", 720, 380, 60) + em("💡", 400, 70, 60) + em("🎁", 90, 530, 60);
+  const room = `<g transform="translate(${P1.x} ${P1.y}) scale(${P1.s})"><clipPath id="clip3"><rect width="800" height="600"/></clipPath><g clip-path="url(#clip3)">${m}__ROOM__</g></g>`;
+  s += room;
+  s += r(P1.x + 38, P1.y, 4, 60, "#fff") + r(P1.x, P1.y + 28, 80, 4, "#fff"); // window bars
+  s += twinkle(P1.x + 92, P1.y - 6, 28);
+  const avoid = [[250, 320, 340, 360], [P1.x - 20, P1.y - 20, 120, 100]];
+  s += scatter(31, ["🚗", "🚕", "🚙"], 6, [300, 745, 1300, 110], 60, 80, objs.filter(o => !o.layer), avoid);
+  s += scatter(32, ["🚶", "🐦", "🌷", "🚦", "🌳", "🐈"], 18, [20, 600, 1560, 390], 36, 60, objs.filter(o => !o.layer), avoid.concat([[0, 735, 1600, 130]]));
+  s += scatter(33, ["🐦", "☁️"], 6, [40, 20, 1520, 120], 30, 50, objs.filter(o => !o.layer), avoid);
+  return { id: "town", name: "Busy Town", icon: "🏙️", cls: "S3", stars: "⭐⭐⭐", desc: "Has a secret room!", bg: "#a6e3ff", art: s, objs, portals: [P1] };
+})());
+
+/* ---------- 4. Jungle (with a secret flower world) ---------- */
+SCENES.push((() => {
+  const P1 = { id: "flower", x: 1252, y: 742, s: 0.12, w: 800, h: 600, round: true }; // 96 x 72, centre (1300,778)
+  const objs = [
+    { id: "monkey", ch: "🐒", word: "monkey", x: 420, y: 255, size: 52 },
+    { id: "parrot", ch: "🦜", word: "parrot", x: 985, y: 175, size: 44 },
+    { id: "snake", ch: "🐍", word: "snake", x: 700, y: 610, size: 48 },
+    { id: "frog", ch: "🐸", word: "frog", x: 200, y: 885, size: 38 },
+    { id: "butterfly", ch: "🦋", word: "butterfly", x: 1150, y: 420, size: 34 },
+    { id: "banana", ch: "🍌", word: "banana", x: 565, y: 335, size: 34 },
+    { id: "elephant", ch: "🐘", word: "elephant", x: 1490, y: 520, size: 44 },
+    { id: "tiger", ch: "🐅", word: "tiger", x: 860, y: 820, size: 60 },
+    { id: "pineapple", ch: "🍍", word: "pineapple", x: 95, y: 500, size: 40 },
+    { id: "ladybug", ch: "🐞", word: "ladybug", x: 300, y: 330, size: 90, layer: "flower" },
+    { id: "bee", ch: "🐝", word: "bee", x: 540, y: 250, size: 90, layer: "flower" }
+  ];
+  let s = `<defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bff5b0"/><stop offset="1" stop-color="#2f8f4e"/></linearGradient></defs>`;
+  s += r(0, 0, W, H, "url(#g4)");
+  for (const x of [120, 470, 830, 1180, 1420]) s += r(x, 0, 50 + (x % 30), 1000, "#7a5230");
+  const R = rng(41);
+  for (let i = 0; i < 70; i++) { const x = R() * W, y = R() * 760, rx = 60 + R() * 90, col = ["#2e9b4f", "#45b765", "#1f7f3f", "#5fcf7a"][i % 4]; s += el(x.toFixed(0), y.toFixed(0), rx.toFixed(0), (rx * 0.4).toFixed(0), col, `transform="rotate(${Math.round(R() * 180)} ${x.toFixed(0)} ${y.toFixed(0)})" opacity=".85"`); }
+  for (let i = 0; i < 9; i++) { const x = 60 + R() * 1480; s += p(`M${x} 0 C ${x + 40} 150, ${x - 40} 300, ${x + 10} ${380 + R() * 200}`, "none", 'stroke="#3d7a2a" stroke-width="7"'); }
+  s += p("M0 920 C 300 860, 600 960, 900 900 S 1400 930, 1600 880 L1600 1000 L0 1000 Z", "#4fb8e8");
+  s += r(0, 760, W, 130, "#3c9a4a", 'opacity=".6"');
+  // giant flower = secret world
+  const cx = 1300, cy = 778;
+  for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; s += el((cx + Math.cos(a) * 95).toFixed(0), (cy + Math.sin(a) * 95).toFixed(0), 70, 40, "#ff5fa8", `transform="rotate(${k * 45} ${(cx + Math.cos(a) * 95).toFixed(0)} ${(cy + Math.sin(a) * 95).toFixed(0)})"`); }
+  s += c(cx, cy, 64, "#ffd23f");
+  let m = r(0, 0, 800, 600, "#bdf0ff") + el(400, 560, 520, 200, "#8fdc6a") + c(680, 90, 50, "#ffe14d");
+  for (let i = 0; i < 6; i++) m += em(["🌼", "🌸", "🍄"][i % 3], 120 + i * 120, 470 + (i % 2) * 40, 70);
+  m += em("🐌", 640, 410, 70);
+  s += `<g transform="translate(${P1.x} ${P1.y}) scale(${P1.s})"><clipPath id="clip4"><circle cx="400" cy="300" r="430"/></clipPath><g clip-path="url(#clip4)">${m}__FLOWER__</g></g>`;
+  s += c(cx, cy, 58, "none", 'stroke="#ffd23f" stroke-width="12"');
+  s += twinkle(cx + 80, cy - 70, 32);
+  const avoid = [[1170, 650, 260, 260]];
+  s += scatter(42, ["🌿", "🍃", "🌺", "🍄", "🦎", "🐛", "🌸", "🌴", "🐊"], 46, [30, 30, 1540, 940], 34, 70, objs.filter(o => !o.layer), avoid);
+  return { id: "jungle", name: "Jungle", icon: "🌴", cls: "S4", stars: "⭐⭐⭐⭐", desc: "Tricky! Look in a flower", bg: "#6fcf7f", art: s, objs, portals: [P1] };
+})());
+
+/* ---------- 5. Outer Space (secret world inside a secret world!) ---------- */
+SCENES.push((() => {
+  const P1 = { id: "cabin", x: 1060, y: 470, s: 0.075, w: 800, h: 600 };            // window 60 x 45
+  const P2 = { id: "picture", x: 330, y: 90, s: 0.15, w: 800, h: 600, parent: "cabin" }; // frame inside the cabin 120 x 90
+  const objs = [
+    { id: "rocket", ch: "🚀", word: "rocket", x: 250, y: 760, size: 50 },
+    { id: "alien", ch: "👽", word: "alien", x: 1450, y: 840, size: 36 },
+    { id: "ufo", ch: "🛸", word: "UFO", x: 700, y: 210, size: 46 },
+    { id: "moon", ch: "🌙", word: "moon", x: 160, y: 160, size: 46 },
+    { id: "comet", ch: "☄️", word: "comet", x: 1220, y: 130, size: 40 },
+    { id: "satellite", ch: "🛰️", word: "satellite", x: 500, y: 460, size: 36 },
+    { id: "earth", ch: "🌍", word: "Earth", x: 880, y: 830, size: 52 },
+    { id: "robot", ch: "🤖", word: "robot", x: 1290, y: 640, size: 30 },
+    { id: "pizza", ch: "🍕", word: "pizza", x: 390, y: 900, size: 30 },
+    { id: "cat2", ch: "🐱", word: "cat", x: 190, y: 430, size: 100, layer: "cabin" },
+    { id: "cupcake", ch: "🧁", word: "cupcake", x: 610, y: 440, size: 90, layer: "cabin" },
+    { id: "unicorn", ch: "🦄", word: "unicorn", x: 400, y: 330, size: 170, layer: "picture" }
+  ];
+  let s = `<defs><radialGradient id="g5" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#3b2a7a"/><stop offset="1" stop-color="#0d0a24"/></radialGradient></defs>`;
+  s += r(0, 0, W, H, "url(#g5)");
+  s += el(400, 300, 380, 160, "#ff4fa3", 'opacity=".12"') + el(1200, 700, 420, 180, "#3fb5ff", 'opacity=".12"');
+  s += stars(51, 260, [0, 0, W, H], 2.4);
+  // planets
+  s += c(1450, 900, 170, "#ff9d4d") + el(1400, 860, 60, 25, "#ffb878") + c(1500, 950, 20, "#e07a30");
+  s += c(330, 560, 70, "#7fd3a8") + el(330, 560, 120, 22, "none", 'stroke="#c9ffe6" stroke-width="8" transform="rotate(-15 330 560)"');
+  s += c(1450, 280, 45, "#b7a6ff");
+  // space station
+  s += r(880, 520, 420, 40, "#9aa6c4") + r(1010, 420, 220, 220, "#d9def0", 'rx="40"') + r(830, 470, 60, 140, "#3fb5ff") + r(1290, 470, 60, 140, "#3fb5ff");
+  for (let y = 480; y < 610; y += 28) s += r(830, y, 60, 3, "#1f86c7") + r(1290, y, 60, 3, "#1f86c7");
+  s += r(1140, 560, 50, 50, "#9aa6c4", 'rx="10"') + c(1100, 600, 12, "#ff4fa3") + c(1180, 450, 8, "#2fd27a");
+  // cabin window (secret world 1)
+  s += r(P1.x - 6, P1.y - 6, 72, 57, "#5d5a6b", 'rx="10"');
+  let m2 = r(0, 0, 800, 600, "#fff3c4") + el(400, 520, 420, 160, "#9ddc77") + c(640, 120, 70, "#ffe14d") + em("🌈", 200, 160, 200) + em("🌼", 680, 470, 80) + em("🌳", 120, 420, 150);
+  let m1 = r(0, 0, 800, 600, "#cfd8ff");
+  for (let x = 0; x < 800; x += 100) m1 += r(x, 0, 50, 470, "#bfcaf7");
+  m1 += r(0, 470, 800, 130, "#8a7fb8") + r(500, 480, 240, 24, "#5d5a6b");
+  m1 += r(P2.x - 14, P2.y - 14, 148, 118, "#c98a4b", 'rx="6"');
+  m1 += `<g transform="translate(${P2.x} ${P2.y}) scale(${P2.s})"><clipPath id="clip5b"><rect width="800" height="600"/></clipPath><g clip-path="url(#clip5b)">${m2}__PICTURE__</g></g>`;
+  m1 += em("🎮", 690, 400, 70) + em("🧃", 90, 540, 60) + em("🔭", 730, 240, 80);
+  m1 += twinkle(P2.x + 140, P2.y - 10, 40);
+  s += `<g transform="translate(${P1.x} ${P1.y}) scale(${P1.s})"><clipPath id="clip5"><rect width="800" height="600" rx="80"/></clipPath><g clip-path="url(#clip5)">${m1}__CABIN__</g></g>`;
+  s += twinkle(P1.x + 70, P1.y - 12, 24);
+  const avoid = [[820, 410, 540, 240]];
+  s += scatter(52, ["✨", "🌟", "💫"], 22, [20, 20, 1560, 960], 22, 40, objs.filter(o => !o.layer), avoid);
+  s += scatter(53, ["🌑"], 4, [20, 20, 1560, 960], 30, 50, objs.filter(o => !o.layer), avoid);
+  return { id: "space", name: "Outer Space", icon: "🚀", cls: "S5", stars: "⭐⭐⭐⭐⭐", desc: "Super hard! Secrets inside secrets", bg: "#1a1440", art: s, objs, portals: [P1, P2] };
+})());
+
+/* ---------- prepare geometry ---------- */
+for (const S of SCENES) {
+  const pmap = {};
+  for (const P of S.portals) {
+    const par = P.parent ? pmap[P.parent] : { ox: 0, oy: 0, k: 1 };
+    P.ox = par.ox + P.x * par.k; P.oy = par.oy + P.y * par.k; P.k = par.k * P.s; // world transform of local coords
+    P.wx = P.ox; P.wy = P.oy; P.ww = P.w * P.k; P.wh = P.h * P.k;
+    pmap[P.id] = P;
+  }
+  let minSize = 1e9;
+  for (const o of S.objs) {
+    const L = o.layer ? pmap[o.layer] : { ox: 0, oy: 0, k: 1 };
+    o.wx = L.ox + o.x * L.k; o.wy = L.oy + o.y * L.k; o.ws = o.size * L.k;
+    minSize = Math.min(minSize, o.ws);
+  }
+  S.maxScale = 130 / minSize; // smallest thing can be shown ~130px wide
+  // draw targets on top of their layer
+  let art = S.art;
+  const layers = ["", ...S.portals.map(P => P.id)];
+  for (const lid of layers) {
+    const g = S.objs.filter(o => (o.layer || "") === lid).map(o => `<g id="obj-${o.id}">${em(o.ch, o.x, o.y, o.size)}</g>`).join("");
+    if (lid) art = art.replace(`__${lid.toUpperCase()}__`, g); else art += g;
+  }
+  S.svg = art;
+}
+
+/* ================= Home screen ================= */
+const $ = id => document.getElementById(id);
+function fmt(ms) { const t = Math.floor(ms / 1000); return String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0"); }
+function show(id) { for (const s of document.querySelectorAll(".screen")) s.classList.toggle("on", s.id === id); }
+function renderHome() {
+  $("cards").innerHTML = "";
+  SCENES.forEach((S, i) => {
+    const st = sc(S.id);
+    let status = "";
+    if (st.found.length && !(st.found.length >= S.objs.length)) status = `▶ ${st.found.length} of ${S.objs.length} found`;
+    else if (st.done) status = `✅ Best ⏱ ${fmt(st.best)}`;
+    else status = `${S.objs.length} things to find`;
+    const b = document.createElement("button");
+    b.className = "card " + S.cls; b.id = "card-" + S.id;
+    b.innerHTML = `<div class="ic">${S.icon}</div><div><div class="nm">${i + 1}. ${S.name}</div><div class="ds">${S.stars} ${S.desc}</div><div class="st">${status}</div></div>`;
+    b.onclick = () => { SFX.click(); startScene(i); };
+    $("cards").appendChild(b);
+  });
+  syncMute();
+}
+function syncMute() { $("muteBtn").textContent = muted ? "🔇" : "🔊"; }
+$("muteBtn").onclick = () => { muted = !muted; save.mute = muted; persist(); syncMute(); if (!muted) SFX.click(); else if (window.speechSynthesis) speechSynthesis.cancel(); };
+$("howBtn").onclick = () => { SFX.click(); $("howBox").classList.add("on"); };
+$("howOk").onclick = () => { SFX.click(); $("howBox").classList.remove("on"); save.seenHow = true; persist(); };
+
+/* ================= Play ================= */
+const view = $("view"), svg = $("svg");
+let S = null, SI = 0, st = null, V = { cx: 800, cy: 500, s: 1 }, VW = 1, VH = 1, minS = 1;
+let timerStart = 0, timerBase = 0, timerId = 0, playing = false, secretsSeen = {};
+let fxRing = null, anim = null;
+
+function startScene(i) { confetti.run = (confetti.run || 0) + 1;
+  SI = i; S = SCENES[i]; st = sc(S.id);
+  if (st.done && st.found.length >= S.objs.length) { st.found = []; st.elapsed = 0; st.hints = 3; }
+  if (st.found.length === 0) { st.elapsed = 0; st.hints = 3; }
+  persist();
+  show("play");
+  $("sceneName").innerHTML = S.icon + ' <span class="nm">' + S.name + "</span>";
+  view.style.background = S.bg;
+  svg.innerHTML = S.svg;
+  for (const id of st.found) markFound(S.objs.find(o => o.id === id), false);
+  buildTray(); secretsSeen = {};
+  measure(); fitAll(false); V.s = Math.min(Math.max(VW / W, VH / H), minS * 1.8); render();
+  updateHint(); updateCount();
+  timerBase = st.elapsed; timerStart = performance.now(); playing = true;
+  clearInterval(timerId); timerId = setInterval(tick, 250); tick();
+  if (!save.seenHow) $("howBox").classList.add("on");
+}
+function tick() { if (!playing) return; const ms = timerBase + (performance.now() - timerStart); $("timer").textContent = "⏱ " + fmt(ms); }
+function elapsedNow() { return timerBase + (performance.now() - timerStart); }
+function pauseTimer() { if (!playing) return; st.elapsed = elapsedNow(); persist(); playing = false; clearInterval(timerId); }
+document.addEventListener("visibilitychange", () => {
+  if (!S || !$("play").classList.contains("on") || $("winBox").classList.contains("on")) return;
+  if (document.hidden) pauseTimer(); else { timerBase = st.elapsed; timerStart = performance.now(); playing = true; clearInterval(timerId); timerId = setInterval(tick, 250); }
+});
+function goHome() { confetti.run = (confetti.run || 0) + 1; if (S && playing) pauseTimer(); clearFx(); show("home"); renderHome(); }
+$("homeBtn").onclick = () => { SFX.click(); goHome(); };
+
+function buildTray() {
+  const t = $("tray"); t.innerHTML = "";
+  for (const o of S.objs) {
+    const d = document.createElement("div");
+    d.className = "chip" + (o.word.length > 7 ? " long" : "") + (st.found.includes(o.id) ? " got" : ""); d.id = "chip-" + o.id;
+    d.innerHTML = `<div class="ce">${o.ch}</div><div class="cw">${o.word}</div>` + (o.layer ? `<div class="deep" title="Hiding deep inside!">🔍</div>` : "");
+    d.onclick = () => { say((st.found.includes(o.id) ? "You found the " : "Find the ") + o.word + (o.layer && !st.found.includes(o.id) ? ". It is hiding deep inside!" : "")); d.classList.remove("bump"); void d.offsetWidth; d.classList.add("bump"); };
+    t.appendChild(d);
+  }
+}
+function updateCount() { $("count").textContent = `${st.found.length}/${S.objs.length}`; }
+function updateHint() { $("hintBtn").textContent = "💡 " + st.hints; $("hintBtn").disabled = st.hints <= 0 || st.found.length >= S.objs.length; }
+
+/* ---------- view maths ---------- */
+function measure() { const b = view.getBoundingClientRect(); VW = Math.max(1, b.width); VH = Math.max(1, b.height); minS = Math.min(VW / W, VH / H) * 0.98; }
+function clampV() {
+  V.s = Math.max(minS, Math.min(S.maxScale, V.s));
+  const vw = VW / V.s, vh = VH / V.s, px = vw * 0.38, py = vh * 0.38;
+  const lox = Math.min(W / 2, vw / 2 - px), hix = Math.max(W / 2, W - vw / 2 + px);
+  const loy = Math.min(H / 2, vh / 2 - py), hiy = Math.max(H / 2, H - vh / 2 + py);
+  V.cx = vw >= W ? W / 2 : Math.max(lox, Math.min(hix, V.cx));
+  V.cy = vh >= H ? H / 2 : Math.max(loy, Math.min(hiy, V.cy));
+}
+function render() {
+  clampV();
+  const vw = VW / V.s, vh = VH / V.s;
+  svg.setAttribute("viewBox", `${V.cx - vw / 2} ${V.cy - vh / 2} ${vw} ${vh}`);
+  if (fxRing) placeRing();
+  checkSecret();
+}
+function toScreen(wx, wy) { return { x: (wx - V.cx) * V.s + VW / 2, y: (wy - V.cy) * V.s + VH / 2 }; }
+function toWorld(sx, sy) { return { x: (sx - VW / 2) / V.s + V.cx, y: (sy - VH / 2) / V.s + V.cy }; }
+function zoomAt(sx, sy, f) { const w = toWorld(sx, sy); V.s = Math.max(minS, Math.min(S.maxScale, V.s * f)); V.cx = w.x - (sx - VW / 2) / V.s; V.cy = w.y - (sy - VH / 2) / V.s; render(); }
+function fitAll(animated) { const T = { cx: W / 2, cy: H / 2, s: minS }; if (animated) animateTo(T, 600); else { stopAnim(); V = T; render(); } }
+function stopAnim() { if (anim) { cancelAnimationFrame(anim.raf); anim = null; } }
+function animateTo(T, dur, done) {
+  stopAnim();
+  const A = { cx: V.cx, cy: V.cy, s: V.s }, t0 = performance.now();
+  anim = { raf: 0 };
+  const step = now => {
+    let t = Math.min(1, (now - t0) / dur); const e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const s = Math.exp(Math.log(A.s) * (1 - e) + Math.log(T.s) * e);
+    // keep the zoom feeling natural: interpolate the target point's screen position
+    const p0 = { x: (T.cx - A.cx) * A.s, y: (T.cy - A.cy) * A.s }; // target offset from centre at start, in px
+    V.s = s; V.cx = T.cx - p0.x * (1 - e) / s; V.cy = T.cy - p0.y * (1 - e) / s;
+    render();
+    if (t < 1) anim.raf = requestAnimationFrame(step); else { anim = null; if (done) done(); }
+  };
+  anim.raf = requestAnimationFrame(step);
+}
+$("zin").onclick = () => { SFX.click(); zoomSmooth(1.8); };
+$("zout").onclick = () => { SFX.click(); zoomSmooth(1 / 1.8); };
+$("zall").onclick = () => { SFX.click(); fitAll(true); };
+function zoomSmooth(f) { const T = { cx: V.cx, cy: V.cy, s: Math.max(minS, Math.min(S.maxScale, V.s * f)) }; animateTo(T, 280); }
+window.addEventListener("resize", () => { if (!S || !$("play").classList.contains("on")) return; const k = V.s / minS; measure(); V.s = minS * k; render(); });
+
+/* ---------- pointer: drag, pinch, tap ---------- */
+const ptrs = new Map(); let gesture = null;
+function localPt(e) { const b = view.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
+view.addEventListener("pointerdown", e => {
+  if (e.target.closest(".zoombar")) return;
+  ac(); stopAnim();
+  try { view.setPointerCapture(e.pointerId); } catch (err) {}
+  ptrs.set(e.pointerId, localPt(e));
+  if (ptrs.size === 1) { const q = localPt(e); gesture = { type: "drag", sx: q.x, sy: q.y, lx: q.x, ly: q.y, t: performance.now(), moved: 0 }; }
+  else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; gesture = { type: "pinch", d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
+});
+view.addEventListener("pointermove", e => {
+  if (!ptrs.has(e.pointerId) || !gesture) return;
+  const q = localPt(e); ptrs.set(e.pointerId, q);
+  if (gesture.type === "drag" && ptrs.size === 1) {
+    const dx = q.x - gesture.lx, dy = q.y - gesture.ly; gesture.lx = q.x; gesture.ly = q.y;
+    gesture.moved = Math.max(gesture.moved, Math.hypot(q.x - gesture.sx, q.y - gesture.sy));
+    if (gesture.moved > 8) { view.classList.add("drag"); V.cx -= dx / V.s; V.cy -= dy / V.s; render(); }
+  } else if (gesture.type === "pinch" && ptrs.size >= 2) {
+    const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    V.cx -= (mx - gesture.mx) / V.s; V.cy -= (my - gesture.my) / V.s;
+    if (gesture.d > 10) zoomAt(mx, my, d / gesture.d); else render();
+    gesture.d = d; gesture.mx = mx; gesture.my = my;
+  }
+});
+function endPtr(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  const q = localPt(e); ptrs.delete(e.pointerId);
+  if (gesture && gesture.type === "drag" && ptrs.size === 0 && gesture.moved <= 10 && performance.now() - gesture.t < 700 && e.type === "pointerup") tapAt(q.x, q.y);
+  if (ptrs.size === 1) { const [a] = [...ptrs.values()]; gesture = { type: "drag", sx: a.x, sy: a.y, lx: a.x, ly: a.y, t: 0, moved: 99 }; }
+  else if (ptrs.size === 0) { gesture = null; view.classList.remove("drag"); }
+}
+view.addEventListener("pointerup", endPtr); view.addEventListener("pointercancel", endPtr);
+view.addEventListener("wheel", e => { e.preventDefault(); stopAnim(); const q = localPt(e); const dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY; zoomAt(q.x, q.y, Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0018))); }, { passive: false });
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("dblclick", e => e.preventDefault());
+
+/* ---------- finding ---------- */
+// An object can be tapped once it is drawn at least ~14px wide; its tap circle is never smaller than 56px across.
+function hitTest(sx, sy) {
+  let best = null, bd = 1e9;
+  for (const o of S.objs) {
+    if (st.found.includes(o.id)) continue;
+    const half = o.ws / 2 * V.s; if (half < 7) continue;
+    const q = toScreen(o.wx, o.wy), d = Math.hypot(q.x - sx, q.y - sy), hr = Math.max(half * 1.25, 28);
+    if (d <= hr && d < bd) { bd = d; best = o; }
+  }
+  return best;
+}
+function tapAt(sx, sy) {
+  const o = hitTest(sx, sy);
+  if (!o) { SFX.miss(); fx("miss", sx, sy); return; }
+  st.found.push(o.id); st.elapsed = elapsedNow(); persist();
+  SFX.found(); markFound(o, true);
+  const q = toScreen(o.wx, o.wy);
+  for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2, d = 60 + Math.random() * 40; fx("spark", q.x, q.y, ["✨", "⭐", "💖", "🌟"][i % 4], Math.cos(a) * d, Math.sin(a) * d); }
+  const chip = $("chip-" + o.id); chip.classList.add("got"); chip.classList.remove("bump"); void chip.offsetWidth; chip.classList.add("bump");
+  chip.scrollIntoView && chip.scrollIntoView({ block: "nearest", inline: "nearest" });
+  if (fxRing && fxRing.obj === o) clearFx();
+  updateCount(); updateHint();
+  if (st.found.length >= S.objs.length) setTimeout(win, 1100);
+}
+function markFound(o, anim) {
+  const g = svg.querySelector("#obj-" + o.id); if (!g) return;
+  const halo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  halo.setAttribute("cx", o.x); halo.setAttribute("cy", o.y); halo.setAttribute("r", o.size * 0.62);
+  halo.setAttribute("fill", "rgba(47,210,122,.25)"); halo.setAttribute("stroke", "#2fd27a"); halo.setAttribute("stroke-width", o.size * 0.08);
+  g.insertBefore(halo, g.firstChild);
+  const tick = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  tick.innerHTML = em("✅", o.x + o.size * 0.45, o.y - o.size * 0.45, o.size * 0.42);
+  g.appendChild(tick);
+}
+function fx(kind, x, y, ch, dx, dy) {
+  const d = document.createElement("div"); d.className = "fx " + kind; d.style.left = x + "px"; d.style.top = y + "px";
+  if (ch) d.textContent = ch; if (dx !== undefined) { d.style.setProperty("--dx", dx + "px"); d.style.setProperty("--dy", dy + "px"); }
+  view.appendChild(d); setTimeout(() => d.remove(), 1000);
+}
+function toast(t, ms) { const e = $("toast"); e.textContent = t; e.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("show"), ms || 1800); }
+function checkSecret() {
+  if (!S) return;
+  for (const P of S.portals) {
+    if (secretsSeen[P.id]) continue;
+    const vw = VW / V.s;
+    const inside = V.cx > P.wx && V.cx < P.wx + P.ww && V.cy > P.wy && V.cy < P.wy + P.wh;
+    if (inside && P.ww > vw * 0.5) { secretsSeen[P.id] = 1; SFX.secret(); toast(P.parent ? "🤯 A secret inside a secret!" : "✨ A secret world! ✨", 2200); }
+  }
+}
+
+/* ---------- hints ---------- */
+function clearFx() { if (fxRing) { fxRing.el.remove(); clearTimeout(fxRing.t); fxRing = null; } }
+function placeRing() { const o = fxRing.obj, q = toScreen(o.wx, o.wy), d = Math.max(70, o.ws * V.s * 1.6); Object.assign(fxRing.el.style, { left: q.x + "px", top: q.y + "px", width: d + "px", height: d + "px" }); }
+$("hintBtn").onclick = () => {
+  if (st.hints <= 0) return;
+  const left = S.objs.filter(o => !st.found.includes(o.id)); if (!left.length) return;
+  // pick the left-over thing that is easiest to miss: prefer ones not currently tappable/visible
+  const o = left[Math.floor(Math.random() * left.length)];
+  st.hints--; persist(); updateHint(); SFX.hint(); clearFx();
+  say("Look here! Find the " + o.word);
+  const ring = document.createElement("div"); ring.className = "fx ring"; view.appendChild(ring);
+  fxRing = { el: ring, obj: o, t: setTimeout(clearFx, 4500) };
+  const target = { cx: o.wx, cy: o.wy, s: Math.max(minS, Math.min(S.maxScale, 75 / o.ws)) };
+  const q = toScreen(o.wx, o.wy), onScreen = q.x > 0 && q.y > 0 && q.x < VW && q.y < VH;
+  if (!onScreen && V.s > minS * 1.5) animateTo({ cx: W / 2, cy: H / 2, s: minS }, 500, () => animateTo(target, 1100));
+  else animateTo(target, 1100);
+};
+
+/* ---------- win ---------- */
+function win() {
+  const ms = elapsedNow(); playing = false; clearInterval(timerId); clearFx();
+  const first = !st.done || !st.best, better = first || ms < st.best;
+  st.done = true; if (better) st.best = Math.round(ms); st.elapsed = 0; persist();
+  $("winTime").textContent = "⏱ " + fmt(ms);
+  $("winSub").textContent = `You found all ${S.objs.length} things!`;
+  $("winBest").textContent = first ? "🌟 Your first time!" : better ? "🎉 New best time!" : `Best time: ${fmt(st.best)}`;
+  $("winNext").style.display = SI < SCENES.length - 1 ? "" : "none";
+  $("winBox").classList.add("on"); SFX.win(); say("You did it, Kaileigh!"); confetti();
+}
+$("winNext").onclick = () => { SFX.click(); $("winBox").classList.remove("on"); startScene(SI + 1); };
+$("winHome").onclick = () => { SFX.click(); $("winBox").classList.remove("on"); goHome(); };
+$("winAgain").onclick = () => { SFX.click(); $("winBox").classList.remove("on"); startScene(SI); };
+
+/* ---------- confetti ---------- */
+function confetti() {
+  const cv = $("confetti"), x = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ["#ff4fa3", "#7b5cff", "#2fd27a", "#ffb800", "#3fb5ff"], P = [];
+  for (let i = 0; i < 160; i++) P.push({ x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5, vx: (Math.random() - .5) * 4, vy: 2 + Math.random() * 4, r: 4 + Math.random() * 6, c: cols[i % 5], a: Math.random() * 6 });
+  const run = ++confetti.run; let n = 0; (function f() { if (run !== confetti.run) { x.clearRect(0, 0, cv.width, cv.height); return; } x.clearRect(0, 0, cv.width, cv.height); for (const q of P) { q.x += q.vx; q.y += q.vy; q.a += .1; x.fillStyle = q.c; x.save(); x.translate(q.x, q.y); x.rotate(q.a); x.fillRect(-q.r, -q.r / 2, q.r * 2, q.r); x.restore(); } if (++n < 200) requestAnimationFrame(f); else x.clearRect(0, 0, cv.width, cv.height); })();
+}
+
+confetti.run = 0;
+/* ---------- test hook (used by automated checks only) ---------- */
+window.__zf = { SCENES, get V() { return V; }, get st() { return st; }, toScreen, startScene, hitTest, render, measure };
+
+renderHome();
+</script>
+</body>
+</html>

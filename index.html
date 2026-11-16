@@ -177,6 +177,20 @@
   .playbtn:active { transform: translateY(5px); box-shadow: 0 2px 0 #17984f; }
   .home-links { margin-top: 18px; display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; }
   .trophybtn { font-family: inherit; font-weight: 600; font-size: 22px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 18px; padding: 8px 16px; box-shadow: 0 5px 0 #d4c8ff; cursor: pointer; }
+  /* ===== Page 2: more games ===== */
+  .page2 { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 0 30px; }
+  .page2 .more { font-weight: 700; font-size: clamp(30px, 6vw, 44px); color: #7b5cff; text-shadow: 3px 3px 0 #fff; margin: 0 0 18px; text-align: center; }
+  .gamecard { width: 100%; max-width: 620px; background: #fff; border: 6px solid #fff; border-radius: 30px; box-shadow: 0 10px 0 #ffc59e, 0 14px 30px rgba(123,92,255,.18); overflow: hidden; text-align: center; transform: rotate(-1deg); }
+  .gamecard .gtitle { background: #ff7a3d; color: #fff; font-weight: 700; font-size: clamp(34px, 8.5vw, 60px); line-height: 1.05; padding: 26px 12px 12px; position: relative; }
+  .gamecard .gtitle .newtag { position: absolute; top: 6px; left: 8px; font-size: 15px; background: #ff4fa3; color: #fff; border: 3px solid #fff; border-radius: 12px; padding: 1px 8px; transform: rotate(-8deg); }
+  .gamecard svg { display: block; width: 100%; height: auto; }
+  .gamecard .gdesc { font-size: clamp(20px, 4vw, 25px); font-weight: 600; color: #2d2350; margin: 16px 14px 6px; line-height: 1.3; }
+  .zoomplay { display: inline-block; text-decoration: none; font-family: inherit; font-weight: 700; font-size: clamp(30px, 6vw, 40px); color: #fff; background: #2fd27a; border: 5px solid #fff; border-radius: 24px; padding: 14px 40px; box-shadow: 0 7px 0 #17984f; margin: 10px 0 24px; }
+  .zoomplay:active { transform: translateY(5px); box-shadow: 0 2px 0 #17984f; }
+  #scrollHint { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 40; display: none; flex-direction: column; align-items: center; font-family: inherit; font-weight: 700; font-size: 17px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 22px; padding: 6px 14px 4px; box-shadow: 0 5px 0 #d4c8ff; cursor: pointer; animation: bob 1.1s ease-in-out infinite; }
+  #scrollHint.show { display: flex; }
+  #scrollHint .arr { font-size: 26px; line-height: 1; }
+  @keyframes bob { 0%,100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -10px); } }
   .domain { font-weight: 600; font-size: 22px; color: #7b5cff; margin-top: 18px; }
   .deco { position: absolute; font-size: 40px; pointer-events: none; }
   .deco.star { right: 4%; top: -6px; animation: wig 2s ease-in-out infinite; }
@@ -210,6 +224,7 @@
 <button id="muteBtn" aria-label="Sound on or off">🔊</button>
 <canvas id="confetti"></canvas>
 <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<button id="scrollHint" aria-label="Scroll down for more games"><span>More games</span><span class="arr">⬇️</span></button>
 <div id="app">
 
   <!-- TITLE / LEVEL PICKER -->
@@ -225,6 +240,28 @@
         <div class="domain">kaiskoolkwiz.com</div>
       </div>
       <div class="levels" id="levels"></div>
+    </div>
+    <!-- PAGE 2: MORE GAMES -->
+    <div class="page2" id="moreGames">
+      <div class="more">🎮 More games!</div>
+      <div class="gamecard">
+        <div class="gtitle">🔍 Zoom &amp; Find <span class="newtag">NEW!</span></div>
+        <a href="zoom/" aria-label="Play Zoom and Find"><svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" role="img">
+          <defs><clipPath id="pvlens"><circle cx="420" cy="140" r="92"/></clipPath><linearGradient id="pvsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd3ff"/><stop offset="1" stop-color="#d6f3ff"/></linearGradient></defs>
+          <rect width="600" height="300" fill="url(#pvsky)"/>
+          <circle cx="540" cy="50" r="30" fill="#ffe14d"/>
+          <ellipse cx="150" cy="60" rx="50" ry="20" fill="#fff"/><ellipse cx="190" cy="68" rx="34" ry="16" fill="#fff"/>
+          <ellipse cx="160" cy="200" rx="300" ry="80" fill="#9ddc77"/><rect y="190" width="600" height="110" fill="#6cc04a"/>
+          <rect x="300" y="120" width="120" height="90" fill="#e2453c"/><path d="M290 122 L360 70 L430 122 Z" fill="#a8302a"/><rect x="345" y="160" width="32" height="50" fill="#fff"/>
+          <rect x="70" y="140" width="16" height="60" fill="#8a5a2b"/><circle cx="78" cy="130" r="42" fill="#3fa34d"/>
+          <text x="140" y="250" font-size="34" text-anchor="middle">🐄</text><text x="230" y="235" font-size="26" text-anchor="middle">🐑</text><text x="500" y="260" font-size="30" text-anchor="middle">🦆</text><text x="60" y="275" font-size="24" text-anchor="middle">🌼</text>
+          <g clip-path="url(#pvlens)"><rect x="320" y="40" width="200" height="200" fill="#ffe3f1"/><rect x="320" y="180" width="200" height="60" fill="#c98a4b"/><text x="385" y="175" font-size="70" text-anchor="middle">🐷</text><text x="465" y="120" font-size="50" text-anchor="middle">🐤</text></g>
+          <circle cx="420" cy="140" r="92" fill="none" stroke="#7b5cff" stroke-width="14"/><circle cx="420" cy="140" r="99" fill="none" stroke="#fff" stroke-width="4"/>
+          <path d="M488 210 L560 282" stroke="#7b5cff" stroke-width="26" stroke-linecap="round"/>
+        </svg></a>
+        <p class="gdesc">Zoom in close to big pictures.<br>Find the hidden things! 🐷 🚀 🦄</p>
+        <a class="zoomplay" href="zoom/">▶ Play!</a>
+      </div>
     </div>
   </div>
 
@@ -1230,6 +1267,16 @@
     state: function () { return { level: level, idx: idx, hearts: hearts, elapsed: elapsed(), clockRunning: !!tTimer, kind: Q[idx] && Q[idx].kind || "" }; }
   };
 })();
+</script>
+<script>
+  /* Scroll-down hint: only on the home screen, hides once you scroll */
+  (function () {
+    var hint = document.getElementById("scrollHint"), title = document.getElementById("title"), more = document.getElementById("moreGames");
+    function upd() { hint.classList.toggle("show", title.classList.contains("on") && window.scrollY < 60); }
+    window.addEventListener("scroll", upd, { passive: true });
+    setInterval(upd, 300); upd();
+    hint.addEventListener("click", function () { more.scrollIntoView({ behavior: "smooth", block: "start" }); });
+  })();
 </script>
 </body>
 </html>
