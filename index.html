@@ -159,6 +159,21 @@
   #hearts.hit { cursor: pointer; }
   .btnrow { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
+  /* ===== Harder quiz: typed answers, word targets, countdowns ===== */
+  .qtext small { font-size: .62em; font-weight: 600; color: #8a7bb0; }
+  .word { display: inline-block; padding: 6px 10px; margin: -6px -6px; border-radius: 12px; cursor: pointer; position: relative; z-index: 2; }
+  .typewrap { display: flex; gap: 12px; align-items: stretch; width: 100%; min-width: 0; }
+  .answers.one > * { min-width: 0; }
+  #hearts.hit { padding: 6px 4px; margin: -6px -4px; }
+  .typein { flex: 1 1 0; min-width: 0; width: 100%; font-family: inherit; font-size: clamp(28px, 6vw, 40px); font-weight: bold; padding: 12px 16px; border-radius: 22px; border: 5px solid #7b5cff; text-align: center; color: #3a2a5d; min-height: 86px; background: #fff; user-select: text; -webkit-user-select: text; outline: none; }
+  .typein:focus { border-color: #ff4fa3; }
+  .typego { flex: none; padding: 14px 22px; }
+  .hearbtn { min-height: 70px !important; }
+  .arena.hop { height: 330px; }
+  .arena.hop .ans { width: 104px; min-height: 84px; height: 84px; font-size: 22px; padding: 6px; line-height: 1.1; }
+  .arena.hop .hopper { font-size: 44px; }
+  .countdown { font-size: 32px; font-weight: bold; color: #ff4fa3; margin-top: 6px; }
+  #timer.tapme { display: inline-block; padding: 10px 12px; margin: -10px -4px; cursor: pointer; position: relative; z-index: 5; }
   /* ===== Home screen redesign ===== */
   .blob { position: fixed; border-radius: 50%; z-index: -1; pointer-events: none; }
   .blob.b1 { width: 340px; height: 340px; left: -120px; top: -140px; background: #ffb3dc; opacity: .7; }
@@ -271,7 +286,7 @@
       <button class="homebtn" id="homeBtn" aria-label="Home" title="Home">🏠</button>
       <div class="hearts" id="hearts"></div>
       <div class="progress">
-        <div class="label"><span id="progLabel">Question 1 of 16</span> &nbsp; <span id="timer">⏱ 00:00</span></div>
+        <div class="label"><span id="progLabel">Question 1 of 20</span> &nbsp; <span id="timer">⏱ 00:00</span></div>
         <div class="bar"><div id="progBar" style="width:0%"></div></div>
       </div>
     </div>
@@ -705,247 +720,368 @@
     };
   }
 
+  // Typed answer (spelling, numbers). spec: {ans: [..] | function, place, say, msg}
+  function normAns(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+  function typed(spec) {
+    return function (api) {
+      var box = api.box;
+      box.className = "answers one";
+      var wrap = document.createElement("div");
+      wrap.className = "typewrap";
+      var inp = document.createElement("input");
+      inp.className = "typein"; inp.type = "text"; inp.maxLength = 24;
+      inp.setAttribute("autocomplete", "off"); inp.setAttribute("autocapitalize", "off");
+      inp.setAttribute("autocorrect", "off"); inp.setAttribute("spellcheck", "false");
+      inp.setAttribute("aria-label", "Type your answer");
+      inp.placeholder = spec.place || "Type here ✏️";
+      var go = document.createElement("button");
+      go.className = "ans c3 typego"; go.textContent = "Check ✔"; go.setAttribute("data-typed", "1");
+      wrap.appendChild(inp); wrap.appendChild(go);
+      box.appendChild(wrap);
+      if (spec.say && window.speechSynthesis) {
+        var hear = document.createElement("button");
+        hear.className = "ans c1 hearbtn"; hear.textContent = "🔊 Hear it";
+        hear.addEventListener("click", function () {
+          if (muted) return;
+          try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(spec.say); u.rate = 0.85; speechSynthesis.speak(u); } catch (e) {}
+        });
+        box.appendChild(hear);
+      }
+      function check() {
+        var v = normAns(inp.value);
+        if (!v) { sfx.boing(); inp.focus(); return; }
+        var list = typeof spec.ans === "function" ? spec.ans() : spec.ans;
+        for (var i = 0; i < list.length; i++) if (normAns(list[i]) === v) { inp.blur(); api.right(); return; }
+        inp.blur(); api.wrong(spec.msg || "Not quite! Check your spelling! ✏️");
+      }
+      go.addEventListener("click", check);
+      inp.addEventListener("keydown", function (e) { if (e.key === "Enter") check(); });
+      setTimeout(function () { try { inp.focus({ preventScroll: true }); } catch (e) {} }, 60);
+    };
+  }
+  // A target that hops around the arena. Decoys stay still in their own spots.
+  // spec: {label, hop (ms), decoys: [{t, msg}]}
+  function hopper(spec) {
+    return function (api) {
+      var box = api.box, timer = null;
+      box.classList.add("hop");
+      // 3 x 3 grid: decoys sit still in the middle row, the target hops between the top and bottom rows
+      var cells = [[0, 0], [0.5, 0], [1, 0], [0, 1], [0.5, 1], [1, 1], [0, 0.5], [1, 0.5], [0.5, 0.5]];
+      var decoyCells = [6, 7, 8].slice(0, (spec.decoys || []).length);
+      var free = []; for (var i = 0; i < 6; i++) if (decoyCells.indexOf(i) < 0) free.push(i);
+      function place(el, c) {
+        var W = box.clientWidth - el.offsetWidth - 10, H = box.clientHeight - el.offsetHeight - 10;
+        el.style.left = Math.max(5, Math.round(W * c[0])) + "px";
+        el.style.top = Math.max(5, Math.round(H * c[1])) + "px";
+      }
+      (spec.decoys || []).forEach(function (d, k) {
+        var b = document.createElement("button");
+        b.className = "ans c0"; b.innerHTML = d.t; b.setAttribute("data-ok", "0");
+        b.addEventListener("click", function () { api.wrong(d.msg); });
+        box.appendChild(b); place(b, cells[decoyCells[k]]);
+      });
+      var t = document.createElement("button");
+      t.className = "ans c3 hopper"; t.innerHTML = spec.label; t.setAttribute("data-hop", "1");
+      t.style.zIndex = "3";
+      box.appendChild(t);
+      var at = 0; place(t, cells[free[0]]);
+      function hop() {
+        var n = free[Math.floor(Math.random() * free.length)];
+        if (n === at) n = free[(free.indexOf(n) + 1) % free.length];
+        at = n; place(t, cells[n]);
+      }
+      timer = setInterval(hop, spec.hop || 900);
+      t.addEventListener("pointerdown", function (e) { e.preventDefault(); api.right(); });
+      t.addEventListener("click", function () { api.right(); });
+      api.onCleanup(function () { clearInterval(timer); });
+    };
+  }
+  // Some other part of the screen is the answer (e.g. the timer).
+  function tapElement(id) {
+    return function (api) {
+      var el = $(id);
+      el.classList.add("hit", "tapme");
+      function onClick(e) { e.stopPropagation(); api.right(); }
+      el.addEventListener("click", onClick);
+      api.onCleanup(function () { el.classList.remove("hit", "tapme"); el.removeEventListener("click", onClick); });
+    };
+  }
+  // Run two setups together
+  function both(a, b) { return function (api) { a(api); b(api); }; }
+
   // ================= Levels & questions =================
-  // Question: q (HTML), hint, answers [{t, ok, msg, style, cls}] or function(qIndex), layout, extra, setup, kind (for tests)
+  // Question: q (HTML), hint, answers [{t, ok, msg, style, cls}] or function(qIndex), layout, extra, setup, kind (for tests), time (seconds)
   var LEVELS = [
-    { name: "Super Easy", stars: 1, hearts: 5, emoji: "🐣", desc: "A warm-up. Easy peasy!", qs: [
-      { q: "Who is this quiz for?", answers: [
-        { t: "A dog 🐶", msg: "Woof! Dogs can't read! 🐶" }, { t: "Kaileigh! 👧", ok: true },
-        { t: "A robot 🤖", msg: "Beep boop! Wrong! 🤖" }, { t: "A potato 🥔", msg: "Potatoes don't play quizzes! 🥔" }] },
-      { q: "What colour is the sky on a sunny day?", answers: [
-        { t: "Green", msg: "Green? That's grass! 🌱" }, { t: "Spotty", msg: "The sky is not a dog! 🐾" },
-        { t: "Blue", ok: true }, { t: "Pizza", msg: "Pizza is not a colour! 🍕" }] },
-      { q: "What does a cow say?", answers: [
-        { t: "Woof", msg: "That's a dog! 🐶" }, { t: "Quack", msg: "That's a duck! 🦆" },
-        { t: "Hello!", msg: "Cows can't talk! Silly! 🐮" }, { t: "Moo", ok: true }] },
-      { q: "How many legs does a cat have?", answers: [
-        { t: "4", ok: true }, { t: "2", msg: "That's a chicken! 🐔" },
-        { t: "100", msg: "That's a creepy-crawly! 🐛" }, { t: "0", msg: "A cat with no legs? It would roll! 😹" }] },
-      { q: "Which word rhymes with CAT?", answers: [
-        { t: "Dog", msg: "Dog and cat don't rhyme! 🐕" }, { t: "Hat", ok: true },
-        { t: "Sun", msg: "Sun rhymes with fun! ☀️" }, { t: "Cup", msg: "Cup rhymes with pup! ☕" }] },
-      { q: "Which word is spelled right?", answers: [
-        { t: "Dgo", msg: "The letters got mixed up! 🌀" }, { t: "Ddog", msg: "Too many Ds! 🐶🐶" },
-        { t: "Dog", ok: true }, { t: "Odg", msg: "Odg? That's odd! 😄" }] },
-      { q: "How many eyes do you have?", answers: [
-        { t: "3", msg: "Three? Are you a monster? 👹" }, { t: "2", ok: true },
-        { t: "10", msg: "Ten eyes? That's a spider! 🕷️" }, { t: "0", msg: "Then how are you reading this? 👀" }] },
-      { q: "What do bees make?", answers: [
-        { t: "Jam", msg: "Jam comes from fruit! 🍓" }, { t: "Socks", msg: "Bees can't knit! 🧦" },
-        { t: "Honey 🍯", ok: true }, { t: "Pizza", msg: "Mmm, but no! 🍕" }] },
-      { q: "Which word is spelled right?", answers: [
-        { t: "Snu", msg: "Snu? Oops! 🙃" }, { t: "Sun ☀️", ok: true },
-        { t: "Sunn", msg: "One N is enough! ☀️" }, { t: "Sn", msg: "A letter ran away! 🏃" }] },
-      { q: "Which animal says quack?", answers: [
-        { t: "A duck 🦆", ok: true }, { t: "A lion 🦁", msg: "Lions ROAR! 🦁" },
-        { t: "A snake 🐍", msg: "Snakes go hiss! 🐍" }, { t: "A fish 🐟", msg: "Fish go blub blub! 🐟" }] },
-      { q: "Which one is a fruit?", answers: [
-        { t: "A sock 🧦", msg: "Don't eat socks! Yuck! 🧦" }, { t: "A rock 🪨", msg: "Crunch! Ouch! 🪨" },
-        { t: "A car 🚗", msg: "Beep beep! Not a fruit! 🚗" }, { t: "An apple 🍎", ok: true }] },
-      { q: "What letter does APPLE start with?", answers: [
-        { t: "B", msg: "B is for banana! 🍌" }, { t: "A", ok: true },
-        { t: "Z", msg: "Z is for zebra! 🦓" }, { t: "🍎", msg: "That's an apple, not a letter! 😄" }] },
-      { q: "Which word is spelled right?", answers: [
-        { t: "Hta", msg: "Mixed up! 🎩" }, { t: "Haat", msg: "Too many As! 🎩" },
-        { t: "Tah", msg: "That's backwards! 🎩" }, { t: "Hat 🎩", ok: true }] },
-      { q: "What colour is a banana?", answers: [
-        { t: "Blue", msg: "A blue banana? Weird! 💙" }, { t: "Yellow 🍌", ok: true },
-        { t: "Purple", msg: "That's a grape colour! 🍇" }, { t: "Stripy", msg: "That's a zebra! 🦓" }] },
-      { q: "How many fingers are on one hand?", answers: [
-        { t: "2", msg: "Count again! 🖐️" }, { t: "20", msg: "That's fingers AND toes! 🦶" },
-        { t: "5", ok: true }, { t: "100", msg: "That's a LOT of fingers! 😂" }] },
-      { q: "Which is bigger: an elephant or a mouse?", answers: [
-        { t: "The mouse 🐭", msg: "A mouse is tiny! Squeak! 🐭" }, { t: "The elephant 🐘", ok: true },
-        { t: "An ant 🐜", msg: "Ants are teeny tiny! 🐜" }, { t: "A pea 🟢", msg: "Peas are tiny too! 🟢" }] }
-    ] },
-
-    { name: "Easy", stars: 2, hearts: 5, emoji: "🐥", desc: "Silly jokes and easy spelling.", qs: [
-      { q: "Spell CAT backwards.", answers: [
-        { t: "CTA", msg: "Close! Start at the end: T... 🐱" }, { t: "ACT", msg: "A real word, but not backwards! 🎭" },
-        { t: "TAC", ok: true }, { t: "DOG", msg: "A dog is not a backwards cat! 🐕" }] },
-      { q: "What is yellow and goes zzz?", answers: [
-        { t: "A bee 🐝", msg: "Bees go BUZZ! Zzz is snoring! 😴" }, { t: "A banana 🍌", msg: "Bananas don't make noise! Unless... they are sleepy? 🤔" },
-        { t: "A sleepy banana 🍌😴", ok: true }, { t: "A taxi 🚕", msg: "Taxis go BEEP BEEP! 🚕" }] },
-      { q: "Which word is spelled right?", answers: [
-        { t: "Fsh", msg: "Fsh? Where is the I? 🐟" }, { t: "Fihs", msg: "Mixed up! 🐟" },
-        { t: "Fish 🐟", ok: true }, { t: "Fiish", msg: "Too many Is! 🐟" }] },
-      { q: "What is a cat's favourite colour?", answers: [
-        { t: "Red", msg: "Nope! Think of a cat sound... 🐱" }, { t: "Purr-ple! 💜", ok: true },
-        { t: "Green", msg: "Purr... purr... 🐱" }, { t: "Orange", msg: "Close! But cats go purr... 🐱" }] },
-      { q: "Who has more legs: a dog or a chair?", answers: [
-        { t: "The dog 🐕", msg: "Count them! A chair has 4 legs too! 🪑" }, { t: "The chair 🪑", msg: "Count them! A dog has 4 legs too! 🐕" },
-        { t: "They are the same!", ok: true }, { t: "My granny 👵", msg: "Granny has 2 legs! 👵" }] },
-      { q: "Spell TOP backwards.", answers: [
-        { t: "OPT", msg: "Start at the end! P... 🔝" }, { t: "POT 🍯", ok: true },
-        { t: "TOP", msg: "That's forwards! 🔝" }, { t: "PTO", msg: "Close! P - O - T! 🔝" }] },
-      { q: "What has keys but can't open doors?", answers: [
-        { t: "A car 🚗", msg: "Car keys CAN open car doors! 🚗" }, { t: "A house 🏠", msg: "House keys open doors! 🏠" },
-        { t: "A piano 🎹", ok: true }, { t: "A door 🚪", msg: "Ha ha! A door IS a door! 🚪" }] },
-      { q: "Tap the HAPPY face.", answers: [
-        { t: "😢", msg: "That face is sad! 😢" }, { t: "😠", msg: "That face is cross! 😠" },
-        { t: "😴", msg: "That face is sleepy! 😴" }, { t: "😀", ok: true }] },
-      { q: "What gets wetter the more it dries?", answers: [
-        { t: "A towel", ok: true }, { t: "The sun ☀️", msg: "The sun is hot and dry! ☀️" },
-        { t: "A fish 🐟", msg: "Fish are always wet! 🐟" }, { t: "A rock 🪨", msg: "Rocks don't dry things! 🪨" }] },
-      { q: "Which word starts with B?", answers: [
-        { t: "Apple", msg: "Apple starts with A! 🍎" }, { t: "Egg", msg: "Egg starts with E! 🥚" },
-        { t: "Banana", ok: true }, { t: "Orange", msg: "Orange starts with O! 🍊" }] },
-      { q: "What has a face and two hands, but no arms?", answers: [
-        { t: "A clock 🕐", ok: true }, { t: "A doll 🪆", msg: "Dolls have arms! 🪆" },
-        { t: "A teddy 🧸", msg: "Teddies have arms! 🧸" }, { t: "A ghost 👻", msg: "Boo! Not a ghost! 👻" }] },
-      { q: "What do you call a sleeping dinosaur?", answers: [
-        { t: "A T-Rex", msg: "Nope! Think about snoring... 😴" }, { t: "Bob", msg: "Ha! Maybe! But no. 🦖" },
-        { t: "A dino-SNORE! 🦕💤", ok: true }, { t: "Grumpy", msg: "He's not grumpy, he's sleepy! 😴" }] },
-      { q: "Which word is spelled right?", answers: [
-        { t: "Frend", msg: "There's a sneaky I missing! 👭" }, { t: "Freind", msg: "Swap the I and the E! 👭" },
-        { t: "Friend", ok: true }, { t: "Frenid", msg: "Mixed up! 👭" }] },
-      { q: "What is 2 + 2?", answers: [
-        { t: "22", msg: "That's two 2s stuck together! 😄" }, { t: "4", ok: true },
-        { t: "A fish 🐟", msg: "Fish can't count! 🐟" }, { t: "5", msg: "So close! 🤏" }] },
-      { q: "What kind of tree fits in your hand?", answers: [
-        { t: "An apple tree", msg: "Too big! Look at your hand... ✋" }, { t: "A Christmas tree", msg: "Way too big! 🎄" },
-        { t: "An oak tree", msg: "Oaks are HUGE! 🌳" }, { t: "A palm tree 🌴✋", ok: true }] },
-      { q: "Where do fish keep their money?", answers: [
-        { t: "In a piggy bank", msg: "Fish don't have pigs! Think about a river... 🐷" }, { t: "In a river BANK! 🏦", ok: true },
-        { t: "In a shoe", msg: "Fish don't wear shoes! 👟" }, { t: "Under a rock", msg: "Good guess! But no. 🪨" }] }
-    ] },
-
-    { name: "Medium", stars: 3, hearts: 4, emoji: "🐸", desc: "Trick questions! Read carefully.", qs: [
+    { name: "Super Easy", stars: 1, hearts: 5, emoji: "🐣", desc: "A warm-up. But not TOO easy!", qs: [
       { q: "What do cows drink?", answers: [
         { t: "Milk 🥛", msg: "Tricked you! Cows MAKE milk. They drink water! 🐮" }, { t: "Juice 🧃", msg: "Cows can't hold a juice box! 🧃" },
         { t: "Lemonade 🍋", msg: "Too sour for a cow! 🍋" }, { t: "Water 💧", ok: true }] },
-      { q: "Tap the BIGGEST number.", hint: "Look closely! 🔍", answers: [
-        { t: "1000", style: "font-size:16px", msg: "1000 is so TINY here! Look at the size! 🔍" }, { t: "9", style: "font-size:22px", msg: "That 9 is teeny! 🐜" },
-        { t: "2", style: "font-size:84px", ok: true }, { t: "50", style: "font-size:20px", msg: "That 50 is itty-bitty! 🐞" }] },
+      { q: "Spell CAT backwards.", answers: [
+        { t: "CTA", msg: "Start at the END: T... 🐱" }, { t: "ACT", msg: "A real word, but not backwards! 🎭" },
+        { t: "TAC", ok: true }, { t: "TCA", msg: "Close! T - A - C! 🐱" }] },
+      { q: "Type the word: 🐟<br><small>It swims in the sea!</small>", kind: "typed", sol: "fish", setup: typed({ ans: ["fish"], say: "fish", msg: "Not quite! It starts with F and ends with SH. 🐟" }) },
+      { q: "How many letters are in the word FIVE?", answers: [
+        { t: "5", msg: "Sneaky! Count them: F - I - V - E. 🖐️" }, { t: "4", ok: true },
+        { t: "3", msg: "Count again! F - I - V - E. 🖐️" }, { t: "1", msg: "Just one? Count again! ☝️" }] },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Frend", msg: "There's a sneaky I missing! 👭" }, { t: "Freind", msg: "I before E... in friend it's I then E! F-R-I-E-N-D 👭" },
+        { t: "Friend", ok: true }, { t: "Freand", msg: "No A in this word! 👭" }] },
+      { q: "What has keys but can't open doors?", answers: [
+        { t: "A car 🚗", msg: "Car keys CAN open car doors! 🚗" }, { t: "A house 🏠", msg: "House keys open doors! 🏠" },
+        { t: "A piano 🎹", ok: true }, { t: "A door 🚪", msg: "Ha ha! A door IS a door! 🚪" }] },
       { q: "Tap the word RED.", answers: [
         { t: "BLUE", cls: "plain", style: "color:#ff2a2a", msg: "That word says BLUE! It is just painted red! 🎨" },
         { t: "GREEN", cls: "plain", style: "color:#ffb800", msg: "That word says GREEN! 🎨" },
         { t: "RED", cls: "plain", style: "color:#2a7bff", ok: true },
         { t: "YELLOW", cls: "plain", style: "color:#21b35f", msg: "That word says YELLOW! 🎨" }] },
-      { q: "How many letters are in the word FIVE?", answers: [
-        { t: "5", msg: "Sneaky! Count them: F - I - V - E. 🖐️" }, { t: "4", ok: true },
-        { t: "10", msg: "Way too many! 😄" }, { t: "1", msg: "Just one? Count again! ☝️" }] },
+      { q: "Type the missing letter:<br>SH _ P 🚢", kind: "typed", sol: "i", setup: typed({ ans: ["i", "ship"], place: "One letter", msg: "Say it slowly: sh... i... p! 🚢" }) },
       { q: "You have 3 apples. You take away 2. How many apples do YOU have?", answers: [
         { t: "1", msg: "Tricked you! YOU took 2 apples. So YOU have 2! 🍎🍎" }, { t: "2", ok: true },
         { t: "3", msg: "Hmm, you took some! Who has them now? 🤔" }, { t: "0", msg: "Zero? Where did they go? 🍎" }] },
-      { q: "Spell CAT. Tap the letters in order!", answers: null, kind: "seq", setup: sequence(["T", "C", "A"], "CAT", "Oops! C - A - T! 🐱") },
-      { q: "What goes up but never comes down?", answers: [
-        { t: "A ball ⚽", msg: "Balls come down! Boing! ⚽" }, { t: "Your age 🎂", ok: true },
-        { t: "A bird 🐦", msg: "Birds land on trees! 🐦" }, { t: "A jumping frog 🐸", msg: "Frogs always come down! 🐸" }] },
+      { q: "What gets wetter the more it dries?", answers: [
+        { t: "A towel", ok: true }, { t: "The sun ☀️", msg: "The sun is hot and dry! ☀️" },
+        { t: "A fish 🐟", msg: "Fish are always wet! 🐟" }, { t: "A rock 🪨", msg: "Rocks don't dry things! 🪨" }] },
+      { q: "Spell FROG. Tap the letters in order!", kind: "seq", setup: sequence(["G", "R", "P", "O", "F"], "FROG", "Oops! F - R - O - G! 🐸") },
+      { q: "Which word rhymes with BEAR?", answers: [
+        { t: "Bead", msg: "Bead rhymes with seed! 🌱" }, { t: "Barn", msg: "Barn rhymes with yarn! 🧶" },
+        { t: "Bell", msg: "Bell rhymes with shell! 🐚" }, { t: "Chair 🪑", ok: true }] },
       { q: "What colour are these letters: <span style=\"color:#21b35f\">PINK</span>?", answers: [
         { t: "Pink", msg: "The word SAYS pink. But what colour is it? 🎨" }, { t: "Green", ok: true },
         { t: "Blue", msg: "Look again! 👀" }, { t: "Purple", msg: "Look again! 👀" }] },
-      { q: "Which is heavier: a box of feathers or a box of rocks? Both boxes weigh 1 kilo!", answers: [
-        { t: "Rocks 🪨", msg: "Both weigh 1 kilo! So they are the same! ⚖️" }, { t: "Feathers 🪶", msg: "Both weigh 1 kilo! So they are the same! ⚖️" },
-        { t: "They weigh the same!", ok: true }, { t: "A hippo 🦛", msg: "There is no hippo! 🦛" }] },
-      { q: "What has to be broken before you can use it?", answers: [
-        { t: "A toy 🧸", msg: "Don't break your toys! 😱" }, { t: "A window 🪟", msg: "Crash! No! 🪟" },
-        { t: "An egg 🥚", ok: true }, { t: "A pencil ✏️", msg: "A broken pencil is no good! ✏️" }] },
-      { q: "How many letters are in the word TEN?", answers: [
-        { t: "10", msg: "Sneaky! Count: T - E - N. 🔟" }, { t: "3", ok: true },
-        { t: "2", msg: "Count again! 🔟" }, { t: "1", msg: "Count again! 🔟" }] },
-      { q: "What has one eye but can't see?", answers: [
-        { t: "A pirate 🏴‍☠️", msg: "Pirates can see with one eye! Arr! 🏴‍☠️" }, { t: "A needle 🪡", ok: true },
-        { t: "A cyclops 👁️", msg: "Cyclops can see! 👁️" }, { t: "A potato 🥔", msg: "Potatoes have lots of eyes! 🥔" }] },
-      { q: "Which word is spelled right?", answers: [
-        { t: "Becuase", msg: "Big Elephants Can Always Understand Small Elephants! 🐘" }, { t: "Becoz", msg: "That's text-speak! 📱" },
-        { t: "Beecause", msg: "Too many Es! 🐝" }, { t: "Because", ok: true }] },
-      { q: "What has lots of teeth but can't bite?", answers: [
-        { t: "A shark 🦈", msg: "Sharks CAN bite! Chomp! 🦈" }, { t: "A comb", ok: true },
-        { t: "A crocodile 🐊", msg: "Snap snap! They bite! 🐊" }, { t: "A baby 👶", msg: "Babies have no teeth yet! 👶" }] },
-      { q: "Wake up the puppy! 🐶💤", hint: "Tap tap tap!", kind: "count", setup: counter(6, "🐶💤", "🐶 WOOF! I'm awake!") },
-      { q: "What do you call a bear with no teeth?", answers: [
-        { t: "A teddy", msg: "Nope! Think about gums... 😁" }, { t: "A gummy bear! 🧸", ok: true },
-        { t: "A grizzly", msg: "Grizzlies have big teeth! 🐻" }, { t: "Bob", msg: "Ha ha! No! 🐻" }] }
+      { q: "Who has more legs: a dog or a chair?", answers: [
+        { t: "The dog 🐕", msg: "Count them! A chair has 4 legs too! 🪑" }, { t: "The chair 🪑", msg: "Count them! A dog has 4 legs too! 🐕" },
+        { t: "They are the same!", ok: true }, { t: "My granny 👵", msg: "Granny has 2 legs! 👵" }] },
+      { q: "What is 7 + 5? Type it!", kind: "typed", sol: "12", setup: typed({ ans: ["12", "twelve"], place: "Number", msg: "Count on from 7: 8, 9, 10, 11, ... 🔢" }) },
+      { q: "Which one is NOT an animal?", answers: [
+        { t: "Cat 🐱", msg: "A cat is an animal! Meow! 🐱" }, { t: "Owl 🦉", msg: "An owl is an animal! Hoot! 🦉" },
+        { t: "Cloud ☁️", ok: true }, { t: "Frog 🐸", msg: "A frog is an animal! Ribbit! 🐸" }] },
+      { q: "What has a face and two hands, but no arms?", answers: [
+        { t: "A clock 🕐", ok: true }, { t: "A doll", msg: "Dolls have arms! 🧸" },
+        { t: "A teddy 🧸", msg: "Teddies have arms! 🧸" }, { t: "A ghost 👻", msg: "Boo! Not a ghost! 👻" }] },
+      { q: "Which word has a SILENT K?", hint: "Say each one out loud! 👄", answers: [
+        { t: "Kite", msg: "You can hear the K in kite! 🪁" }, { t: "Kick", msg: "You can hear the K in kick! ⚽" },
+        { t: "Milk", msg: "You can hear the K in milk! 🥛" }, { t: "Knee", ok: true }] },
+      { q: "Wake up the puppy! 🐶💤", hint: "Tap tap tap!", kind: "count", setup: counter(8, "🐶💤", "🐶 WOOF! I'm awake!") },
+      { q: "Last one! What letter does the word END end with?", answers: [
+        { t: "E", msg: "E is at the START of end! 😄" }, { t: "N", msg: "N is in the middle! 😄" },
+        { t: "D", ok: true }, { t: "Z", msg: "Z is the end of the alphabet, not the word! 😄" }] }
     ] },
 
-    { name: "Tricky", stars: 4, hearts: 4, emoji: "🦊", desc: "Sneaky tricks. Look everywhere!", qs: [
-      { q: "Tap the cheese. <span class=\"qemoji hit\" data-ok=\"1\">🧀</span>", answers: [
-        { t: "🍕", msg: "That's pizza! It HAS cheese, but it's not cheese! 🍕" }, { t: "🍎", msg: "That's an apple! 🍎" },
-        { t: "🍌", msg: "That's a banana! 🍌" }, { t: "🥕", msg: "That's a carrot! 🥕" }] },
-      { q: "Tap the right answer.", hint: "Which one is right? 🤔", layout: "row", answers: [
-        { t: "This one?", msg: "That one is on the LEFT! 👈" }, { t: "This one?", msg: "Think about LEFT and RIGHT! 🤔" },
-        { t: "This one?", ok: true }] },
+    { name: "Easy", stars: 2, hearts: 4, emoji: "🐥", desc: "Riddles and tricky spelling.", qs: [
+      { q: "Tap the BIGGEST number.", hint: "Look closely! 🔍", answers: [
+        { t: "1000", style: "font-size:16px", msg: "1000 is so TINY here! Look at the size! 🔍" }, { t: "9", style: "font-size:22px", msg: "That 9 is teeny! 🐜" },
+        { t: "2", style: "font-size:84px", ok: true }, { t: "50", style: "font-size:20px", msg: "That 50 is itty-bitty! 🐞" }] },
       { q: "Which word is spelled WRONG?", answers: [
         { t: "Cat", msg: "C-A-T. That is right! 🐱" }, { t: "Dog", msg: "D-O-G. That is right! 🐶" },
         { t: "Wrong", ok: true }, { t: "Fish", msg: "F-I-S-H. That is right! 🐟" }] },
+      { q: "The 🦉 hoots at ____.<br><small>(when it is dark)</small>", hint: "It rhymes with LIGHT.", kind: "typed", sol: "night",
+        setup: typed({ ans: ["night"], say: "night", msg: "It rhymes with light... and has a silent G H! 🌙" }) },
       { q: "Tap the letter that is NOT a b.", answers: [
         { t: "b", msg: "That's a b! Look at which way it faces! 👀" }, { t: "b", msg: "That's a b! 👀" },
         { t: "d", ok: true }, { t: "b", msg: "That's a b! 👀" }] },
+      { q: "What is the last letter of \"the alphabet\"?", hint: "Read it carefully!", answers: [
+        { t: "Z", msg: "Look at the words \"the alphabet\". What letter is at the end? 🔤" }, { t: "A", msg: "A is first, not last! 🅰️" },
+        { t: "T", ok: true }, { t: "Y", msg: "Why Y? 😄" }] },
+      { q: "What goes up but never comes down?", answers: [
+        { t: "A ball ⚽", msg: "Balls come down! Boing! ⚽" }, { t: "Your age 🎂", ok: true },
+        { t: "A bird 🐦", msg: "Birds land on trees! 🐦" }, { t: "A rocket 🚀", msg: "Rockets come back down too! 🚀" }] },
+      { q: "Spell TEN backwards. Type it!", kind: "typed", sol: "net", setup: typed({ ans: ["net"], msg: "Start at the end of T - E - N! 🔟" }) },
+      { q: "Pick the right word:<br>\"____ dog is fluffy.\"", answers: [
+        { t: "There", msg: "THERE is a place: over there! 👉" }, { t: "They're", msg: "THEY'RE means they are! 👫" },
+        { t: "Their", ok: true }, { t: "Thier", msg: "That one is spelled wrong! 😄" }] },
+      { q: "Which is heavier: 1 kilo of feathers or 1 kilo of rocks?", answers: [
+        { t: "Rocks 🪨", msg: "Both weigh 1 kilo! So they are the same! ⚖️" }, { t: "Feathers 🪶", msg: "Both weigh 1 kilo! So they are the same! ⚖️" },
+        { t: "They weigh the same!", ok: true }, { t: "A hippo 🦛", msg: "There is no hippo! 🦛" }] },
+      { q: "Tap the cheese. <span class=\"qemoji hit\" data-ok=\"1\">🧀</span>", answers: [
+        { t: "🍕", msg: "That's pizza! It HAS cheese, but it's not cheese! 🍕" }, { t: "🍎", msg: "That's an apple! 🍎" },
+        { t: "🍔", msg: "That's a burger! 🍔" }, { t: "🥕", msg: "That's a carrot! 🥕" }] },
+      { q: "Wait for GREEN, then tap!", kind: "green", setup: greenLight(3000, false) },
+      { q: "How many letters are in the word TWENTY?", answers: [
+        { t: "20", msg: "Sneaky! Count: T - W - E - N - T - Y. 🔢" }, { t: "5", msg: "Count again! 🔢" },
+        { t: "6", ok: true }, { t: "7", msg: "Count again! 🔢" }] },
+      { q: "Tap the right answer.", hint: "Which one is right? 🤔", layout: "row", answers: [
+        { t: "This one?", msg: "That one is on the LEFT! 👈" }, { t: "This one?", msg: "Think about LEFT and RIGHT! 🤔" },
+        { t: "This one?", ok: true }] },
+      { q: "What has one eye but can't see?", answers: [
+        { t: "A pirate", msg: "Pirates can see with one eye! Arr! 🏴‍☠️" }, { t: "A needle 🪡", ok: true },
+        { t: "A cyclops", msg: "A cyclops can see! 👁️" }, { t: "A potato 🥔", msg: "Potatoes have LOTS of eyes! 🥔" }] },
+      { q: "Type the word: 🐰<br><small>A fluffy pet with long ears.</small>", hint: "It has a double letter!", kind: "typed", sol: "rabbit",
+        setup: typed({ ans: ["rabbit"], say: "rabbit", msg: "Close! Rabbit has two Bs in the middle! 🐰" }) },
+      { q: "A farmer has 5 sheep. All but 2 run away. How many are left?", answers: [
+        { t: "3", msg: "\"All but 2\" means all of them EXCEPT 2! 🐑🐑" }, { t: "2", ok: true },
+        { t: "5", msg: "Some ran away! 🐑" }, { t: "0", msg: "Not all of them ran! 🐑" }] },
+      { q: "Which word has a SILENT W?", hint: "Say each one out loud! 👄", answers: [
+        { t: "Wet", msg: "You can hear the W in wet! 💧" }, { t: "Write ✏️", ok: true },
+        { t: "Window", msg: "You can hear the W in window! 🪟" }, { t: "Wish", msg: "You can hear the W in wish! 🌠" }] },
+      { q: "What can you catch but not throw?", answers: [
+        { t: "A ball ⚽", msg: "You can throw a ball! ⚽" }, { t: "A cold 🤧", ok: true },
+        { t: "A fish 🐟", msg: "You can throw a fish back! 🐟" }, { t: "A frisbee 🥏", msg: "Frisbees are for throwing! 🥏" }] },
+      { q: "Quick! What is 3 + 3?", time: 7, kind: "timed", answers: [
+        { t: "33", msg: "That's two 3s stuck together! 😄" }, { t: "9", msg: "That's 3 + 3 + 3! 😄" },
+        { t: "6", ok: true }, { t: "5", msg: "So close! 🤏" }] },
+      { q: "What number question is this?", hint: "Look everywhere! 👀", answers: function (i) {
+        var n = i + 1;
+        return [{ t: String(n + 1), msg: "Look at the top! 👆" }, { t: "100", msg: "Not THAT many! 😄" },
+          { t: String(n), ok: true }, { t: String(n - 2), msg: "Look at the top! 👆" }]; } }
+    ] },
+
+    { name: "Medium", stars: 3, hearts: 3, emoji: "🐸", desc: "Trick questions! Read every word.", qs: [
+      { q: "Tap the <span class=\"word hit\" data-ok=\"1\">answer</span>.", hint: "Read it again... 🤔", answers: [
+        { t: "This one!", msg: "Nope! Read the question again! 👀" }, { t: "Me!", msg: "Not me! Read the question again! 👀" },
+        { t: "The answer", msg: "That button just SAYS answer! Look at the question! 👀" }, { t: "No, me!", msg: "Nope! Read the question again! 👀" }] },
+      { q: "Type the number 8 as a word.", kind: "typed", sol: "eight", setup: typed({ ans: ["eight"], say: "eight", msg: "Eight has a sneaky G H in it! 8️⃣" }) },
+      { q: "Which word is spelled right?", answers: [
+        { t: "Becuase", msg: "Big Elephants Can Always Understand Small Elephants! 🐘" }, { t: "Becoz", msg: "That's text-speak! 📱" },
+        { t: "Beecause", msg: "Too many Es! 🐝" }, { t: "Because", ok: true }] },
       { q: "Find the ladybug!", hint: "She is very small... 🔍",
         extra: "<span class=\"ladybug hit\" data-ok=\"1\" aria-label=\"ladybug\">🐞</span>", answers: [
         { t: "There is no ladybug", msg: "Oh yes there is! Look around! 🔍" }, { t: "In my nose 👃", msg: "Eww! No! 🤧" },
         { t: "She flew away", msg: "No, she is still here! 🐞" }, { t: "Under the bed", msg: "There's no bed here! 🛏️" }] },
-      { q: "What is the last letter of \"the alphabet\"?", hint: "Read it carefully!", answers: [
-        { t: "Z", msg: "Look at the words \"the alphabet\". What letter is at the end? 🔤" }, { t: "A", msg: "A is first, not last! 🅰️" },
-        { t: "T", ok: true }, { t: "Y", msg: "Why Y? 😄" }] },
-      { q: "Spell DOG. Tap the letters in order!", kind: "seq", setup: sequence(["G", "B", "O", "D"], "DOG", "Oops! D - O - G! 🐶") },
-      { q: "Wait for GREEN, then tap!", kind: "green", setup: greenLight(3000, false) },
-      { q: "Which word has the MOST letters?", answers: [
-        { t: "Cat", msg: "Cat has only 3! 🐱" }, { t: "Elephant", msg: "Elephant has 8! But a MAILBOX is full of letters! 📬" },
-        { t: "Mailbox 📬", ok: true }, { t: "Dinosaur", msg: "Dinosaur has 8! But a MAILBOX is full of letters! 📬" }] },
       { q: "Tap a RED heart.", hint: "Look everywhere! 👀", kind: "hearts", setup: heartsHit, answers: [
         { t: "💙", msg: "That heart is blue! 💙" }, { t: "💚", msg: "That heart is green! 💚" },
         { t: "💛", msg: "That heart is yellow! 💛" }, { t: "💜", msg: "That heart is purple! 💜" }] },
-      { q: "What can you catch but not throw?", answers: [
-        { t: "A ball ⚽", msg: "You can throw a ball! ⚽" }, { t: "A cold 🤧", ok: true },
-        { t: "A fish 🐟", msg: "You can throw a fish back! 🐟" }, { t: "A frisbee 🥏", msg: "Frisbees are for throwing! 🥏" }] },
+      { q: "What has lots of teeth but can't bite?", answers: [
+        { t: "A shark 🦈", msg: "Sharks CAN bite! Chomp! 🦈" }, { t: "A comb", ok: true },
+        { t: "A crocodile 🐊", msg: "Snap snap! They bite! 🐊" }, { t: "A baby 👶", msg: "Babies have no teeth yet! 👶" }] },
+      { q: "\"Yesterday I ____ a book.\"<br><small>It sounds like a colour!</small>", kind: "typed", sol: "read",
+        setup: typed({ ans: ["read"], msg: "It SOUNDS like red, but it's spelled like \"I can read\"! 📖" }) },
       { q: "Which number word has 3 letters?", answers: [
         { t: "ONE", msg: "Yes... but look at the others too! 👀" }, { t: "SIX", msg: "Yes... but look at the others too! 👀" },
         { t: "TEN", msg: "Yes... but look at the others too! 👀" }, { t: "All of them!", ok: true }] },
+      { q: "Tap the YES button!", hint: "Easy peasy... right? 😏", layout: "arena", kind: "dodge",
+        setup: dodger({ label: "YES", doneLabel: "OK OK! YES 😅", need: 5, decoy: "NO", decoyMsg: "You tapped NO! I asked for YES! 😄" }) },
+      { q: "Which word is spelled WRONG?", answers: [
+        { t: "Knight", msg: "K-N-I-G-H-T is right! Silent K! ⚔️" }, { t: "Thumb", msg: "T-H-U-M-B is right! Silent B! 👍" },
+        { t: "Lissen", ok: true }, { t: "Laugh", msg: "L-A-U-G-H is right! 😂" }] },
+      { q: "You are in a race. You pass the person in 2nd place. What place are you in now?", answers: [
+        { t: "1st 🥇", msg: "You passed 2nd, not 1st! So you are 2nd! 🥈" }, { t: "2nd 🥈", ok: true },
+        { t: "3rd 🥉", msg: "You went FASTER, not slower! 🏃" }, { t: "Last", msg: "You passed someone! 🏃" }] },
       { q: "What runs but never walks?", answers: [
         { t: "A dog 🐕", msg: "Dogs walk too! 🐕" }, { t: "A snail 🐌", msg: "Snails never run! 🐌" },
         { t: "A river 🏞️", ok: true }, { t: "A chair 🪑", msg: "Chairs don't move at all! 🪑" }] },
+      { q: "Tap any button EXCEPT the blue one!", answers: [
+        { t: "Not me!", ok: true }, { t: "Tap me! 👆", msg: "That was the BLUE one! 💙" },
+        { t: "Nope!", ok: true }, { t: "Pick me!", ok: true }] },
+      { q: "Spell KNIFE. Tap the letters in order!", hint: "It has a silent letter! 🔪", kind: "seq", setup: sequence(["N", "I", "K", "M", "F", "E"], "KNIFE", "Oops! KNIFE starts with a silent K! 🔪") },
       { q: "What did the 0 say to the 8?", answers: [
         { t: "Hello!", msg: "Nope! Look at the 8's tummy... 8️⃣" }, { t: "Nice belt! 😎", ok: true },
         { t: "Go away!", msg: "That's not nice! 😮" }, { t: "Moo", msg: "Numbers don't moo! 🐮" }] },
+      { q: "Quick! Which is MORE?", time: 6, kind: "timed", answers: [
+        { t: "7", msg: "4 + 4 is 8. That's more than 7! ➕" }, { t: "4 + 4", ok: true },
+        { t: "2 + 3", msg: "2 + 3 is only 5! ➕" }, { t: "6", msg: "4 + 4 is 8. That's more! ➕" }] },
+      { q: "3 cats. Each cat has 4 legs. How many legs altogether? Type it!", kind: "typed", sol: "12", setup: typed({ ans: ["12", "twelve"], place: "Number", msg: "Count: 4... 8... and one more cat! 🐱🐱🐱" }) },
       { q: "What can you hold without touching it?", answers: [
         { t: "A cup ☕", msg: "You have to touch a cup! ☕" }, { t: "A cat 🐱", msg: "Cats like to be touched! Purr! 🐱" },
         { t: "Your breath 😮‍💨", ok: true }, { t: "A snowball ❄️", msg: "Brrr! You have to touch it! ❄️" }] },
-      { q: "Tap the YES button!", hint: "Easy peasy... right? 😏", layout: "arena", kind: "dodge",
-        setup: dodger({ label: "YES", doneLabel: "OK OK! YES 😅", need: 4, decoy: "NO", decoyMsg: "You tapped NO! I asked for YES! 😄" }) }
+      { q: "What was the answer to question 2?", hint: "Can you remember? 🧠", kind: "typed", sol: "eight",
+        setup: typed({ ans: ["eight", "8"], msg: "Question 2 asked you to type a number as a word! 🧠" }) },
+      { q: "Last one! How many letters are in the words LAST ONE?", answers: [
+        { t: "8", msg: "Spaces are not letters! L-A-S-T O-N-E. 🔤" }, { t: "2", msg: "That's how many WORDS! 🔤" },
+        { t: "7", ok: true }, { t: "1", msg: "Count again! 🔤" }] }
     ] },
 
-    { name: "Impossible", stars: 5, hearts: 3, emoji: "🦄", desc: "The sneakiest ones. Good luck!", qs: [
+    { name: "Tricky", stars: 4, hearts: 3, emoji: "🦊", desc: "Sneaky tricks and typing. Look everywhere!", qs: [
       { q: "Tap the dot<span class=\"bigdot hit\" data-ok=\"1\" aria-label=\"dot\">.</span>", answers: [
         { t: "⭐", msg: "That's a star! ⭐" }, { t: "❤️", msg: "That's a heart! ❤️" },
         { t: "⬛", msg: "That's a square! ⬛" }, { t: "🔺", msg: "That's a triangle! 🔺" }] },
-      { q: "What number question is this?", hint: "Look everywhere! 👀", answers: function (i) {
-        var n = i + 1;
-        return [{ t: String(n + 1), msg: "Look at the top! 👆" }, { t: "100", msg: "Not THAT many! 😄" },
-          { t: String(n), ok: true }, { t: String(n + 3), msg: "Look at the top! 👆" }]; } },
       { q: "Find the mouse!", hint: "Squeak squeak... where is she hiding?", kind: "hidden", setup: hiddenCorner("🐭", "mouse"), answers: [
         { t: "In the cheese", msg: "No cheese here! Look all over the screen! 👀" }, { t: "There is no mouse", msg: "Oh yes there is! Look everywhere! 👀" },
         { t: "Under my hat 🎩", msg: "No hats here! 🎩" }, { t: "She went home", msg: "She is still here! 🐭" }] },
-      { q: "Spell SUN backwards. Tap the letters!", kind: "seq", setup: sequence(["S", "M", "U", "N", "O"], "NUS", "Oops! Backwards: N - U - S! ☀️") },
-      { q: "Catch the frog! 🐸", hint: "He is VERY jumpy!", layout: "arena", kind: "dodge",
-        setup: dodger({ label: "🐸", doneLabel: "🐸💤 Tired!", need: 7, decoy: "Give up 🏳️", decoyMsg: "Never give up! Frogs get tired! 🐸" }) },
-      { q: "Where is the question mark<span class=\"bigdot hit\" data-ok=\"1\" aria-label=\"question mark\" style=\"font-size:1.1em\">?</span>", answers: [
-        { t: "Under the bed", msg: "No beds here! Look at the question! 👀" }, { t: "In space 🚀", msg: "Not in space! Look closer! 👀" },
-        { t: "There isn't one", msg: "Oh yes there is! 👀" }, { t: "In my pocket", msg: "Check the question! 👀" }] },
-      { q: "Tap the button 10 times! Go go go!", kind: "count", setup: counter(10, "👆", "🎉 Phew! Done!") },
+      { q: "Type the word for what you do at a funny joke. 😂", hint: "It has a sneaky GH!", kind: "typed", sol: "laugh",
+        setup: typed({ ans: ["laugh"], say: "laugh", msg: "It sounds like \"laff\" but it's spelled with A U G H! 😂" }) },
       { q: "Which word is spelled right?", answers: [
-        { t: "Elefant", msg: "Elephant uses PH for the F sound! 🐘" }, { t: "Elephent", msg: "So close! Check the end! 🐘" },
-        { t: "Elephant 🐘", ok: true }, { t: "Ellyphant", msg: "Ha! Ellyphant! 🐘" }] },
-      { q: "Wait... wait... then tap on GREEN!", kind: "green", setup: greenLight(4500, true) },
-      { q: "What word rhymes with ORANGE?", answers: [
-        { t: "Door hinge", msg: "Nice try! But it's not quite a rhyme! 🚪" }, { t: "Sponge", msg: "Close, but no! 🧽" },
-        { t: "Nothing does!", ok: true }, { t: "Banana", msg: "Banana rhymes with... nothing either! 🍌" }] },
-      { q: "Which animal is hiding in the word sCATter?", answers: [
-        { t: "A dog 🐶", msg: "Look at the big letters! 👀" }, { t: "A bat 🦇", msg: "Look at the big letters! 👀" },
-        { t: "A cat 🐱", ok: true }, { t: "A rat 🐀", msg: "Look at the big letters! 👀" }] },
+        { t: "Stashun", msg: "The SHUN sound is spelled T-I-O-N! 🚉" }, { t: "Stayshon", msg: "The SHUN sound is spelled T-I-O-N! 🚉" },
+        { t: "Station 🚉", ok: true }, { t: "Staytion", msg: "No Y! S-T-A-T-I-O-N. 🚉" }] },
+      { q: "Catch the bee!", hint: "She won't sit still!", layout: "arena", kind: "hop",
+        setup: hopper({ label: "🐝", hop: 900, decoys: [{ t: "🌸", msg: "That's a flower! Catch the BEE! 🐝" }, { t: "🦋", msg: "That's a butterfly! 🦋" }] }) },
+      { q: "Spell SUN backwards. Tap the letters!", kind: "seq", setup: sequence(["S", "M", "U", "N", "O"], "NUS", "Oops! Backwards: N - U - S! ☀️") },
+      { q: "Tap the word that is coloured RED.", answers: [
+        { t: "RED", cls: "plain", style: "color:#2a7bff", msg: "That word SAYS red, but it is blue! 💙" },
+        { t: "BLUE", cls: "plain", style: "color:#ff2a2a", ok: true },
+        { t: "GREEN", cls: "plain", style: "color:#ffb800", msg: "That one is yellow! 💛" },
+        { t: "PINK", cls: "plain", style: "color:#21b35f", msg: "That one is green! 💚" }] },
+      { q: "How many months have 28 days?", answers: [
+        { t: "1", msg: "February has 28... but EVERY month has at least 28 days! 📅" }, { t: "2", msg: "Every month has at least 28 days! 📅" },
+        { t: "All 12!", ok: true }, { t: "None", msg: "Every month has at least 28 days! 📅" }] },
       { q: "What has a neck but no head?", answers: [
         { t: "A giraffe 🦒", msg: "Giraffes have heads! 🦒" }, { t: "A bottle 🍾", ok: true },
         { t: "A snake 🐍", msg: "Snakes have heads! 🐍" }, { t: "A swan 🦢", msg: "Swans have heads! 🦢" }] },
-      { q: "How many letters are in the word TWENTY?", answers: [
-        { t: "20", msg: "Sneaky! Count: T - W - E - N - T - Y. 🔢" }, { t: "5", msg: "Count again! 🔢" },
-        { t: "6", ok: true }, { t: "12", msg: "Count again! 🔢" }] },
-      { q: "Tap the word that says CLICK.", hint: "Hmm... 🤔", answers: [
-        { t: "CLOCK", msg: "That says CLOCK! 🕐" }, { t: "CLUCK", msg: "That says CLUCK! 🐔" },
-        { t: "CLICK", ok: true }, { t: "CLACK", msg: "That says CLACK! 👏" }] },
-      { q: "Do NOT touch anything! 🤫", kind: "wait", setup: waitTimer(5000), answers: [
+      { q: "Type the number 40 as a word.", hint: "Careful... 🤔", kind: "typed", sol: "forty",
+        setup: typed({ ans: ["forty"], msg: "Tricky! Four has a U, but forty does NOT! F-O-R-T-Y 😮" }) },
+      { q: "Where is the question mark<span class=\"bigdot hit\" data-ok=\"1\" aria-label=\"question mark\" style=\"font-size:1.1em\">?</span>", answers: [
+        { t: "Under the bed", msg: "No beds here! Look at the question! 👀" }, { t: "In space 🚀", msg: "Not in space! Look closer! 👀" },
+        { t: "There isn't one", msg: "Oh yes there is! 👀" }, { t: "In my pocket", msg: "Check the question! 👀" }] },
+      { q: "What word rhymes with ORANGE?", answers: [
+        { t: "Door hinge", msg: "Nice try! But it's not quite a rhyme! 🚪" }, { t: "Sponge", msg: "Close, but no! 🧽" },
+        { t: "Nothing does!", ok: true }, { t: "Porridge", msg: "Close, but no! 🥣" }] },
+      { q: "Wait... wait... then tap on GREEN!", kind: "green", setup: greenLight(4500, true) },
+      { q: "DON'T press the button! 🤫", hint: "Not even a tiny bit...", kind: "wait", setup: waitTimer(4000), answers: [
+        { t: "🔴 PRESS ME!", msg: "I said DON'T press it! 😄" }] },
+      { q: "Pick the right word:<br>\"____ going to the park.\"", answers: [
+        { t: "Their", msg: "THEIR means it belongs to them! 🎒" }, { t: "There", msg: "THERE is a place! 👉" },
+        { t: "They're", ok: true }, { t: "Theyre", msg: "Don't forget the little ' mark! ✏️" }] },
+      { q: "Quick! Tap the odd one out!", time: 5, kind: "timed", layout: "row", answers: [
+        { t: "2", msg: "2 is even! 2, 4, 8 are all even. 🔢" }, { t: "4", msg: "4 is even! 🔢" },
+        { t: "7", ok: true }, { t: "8", msg: "8 is even! 🔢" }] },
+      { q: "What is half of 2, plus 2?", answers: [
+        { t: "2", msg: "Half of 2 is 1. Then 1 + 2 = 3! ➗" }, { t: "3", ok: true },
+        { t: "1", msg: "Half of 2 is 1. Then add 2! ➗" }, { t: "4", msg: "Half of 2 is 1. Then 1 + 2 = 3! ➗" }] },
+      { q: "Which animal is hiding in the word CATERPILLAR?", answers: [
+        { t: "A dog 🐶", msg: "Look at the first letters! 👀" }, { t: "An owl 🦉", msg: "Look at the first letters! 👀" },
+        { t: "A cat 🐱", ok: true }, { t: "A bee 🐝", msg: "Look at the first letters! 👀" }] },
+      { q: "What did you have to catch in question 5?", hint: "Can you remember? 🧠", answers: [
+        { t: "A frog", msg: "Not a frog! Think back to question 5! 🧠" }, { t: "A butterfly", msg: "The butterfly was a trick! 🧠" },
+        { t: "A mouse", msg: "The mouse was hiding, not flying! 🧠" }, { t: "A bee", ok: true }] },
+      { q: "Tap the YES button!", hint: "You know this one... 😏", layout: "arena", kind: "dodge",
+        setup: dodger({ label: "YES", doneLabel: "FINE! YES 😤", need: 7, decoy: "NO", decoyMsg: "You tapped NO! I asked for YES! 😄" }) }
+    ] },
+
+    { name: "Impossible", stars: 5, hearts: 3, emoji: "🦄", desc: "Really, truly impossible. Good luck!", qs: [
+      { q: "What is the <span class=\"word hit\" data-ok=\"1\">answer</span>?", hint: "Hmm... 🤔", answers: [
+        { t: "42", msg: "Nope! Read the question really carefully! 👀" }, { t: "Yes", msg: "Nope! Read the question really carefully! 👀" },
+        { t: "Kaileigh", msg: "Nice! But no! Read the question! 👀" }, { t: "What?", msg: "Nope! Read the question really carefully! 👀" }] },
+      { q: "Catch the frog!", hint: "He is SUPER jumpy!", layout: "arena", kind: "hop",
+        setup: hopper({ label: "🐸", hop: 650, decoys: [{ t: "Give up 🏳️", msg: "Never give up! 🐸" }] }) },
+      { q: "\"We went ______ the tunnel.\"<br><small>It sounds like THREW.</small>", hint: "This one is really hard!", kind: "typed", sol: "through",
+        setup: typed({ ans: ["through"], say: "We went through the tunnel.", msg: "Super tricky! It's T-H-R-O-U-G-H. 🚇" }) },
+      { q: "Which word is spelled WRONG?", answers: [
+        { t: "Island", msg: "Island is right! It has a silent S! 🏝️" }, { t: "Wednesday", msg: "Wednesday is right! Wed-NES-day! 📅" },
+        { t: "Febuary", ok: true }, { t: "Beautiful", msg: "Beautiful is right! 🌸" }] },
+      { q: "Do NOT touch anything! 🤫", kind: "wait", setup: waitTimer(6000), answers: [
         { t: "Tap me!", msg: "I said DON'T touch anything! 😄" }, { t: "Press me!", msg: "Hee hee! You touched it! 🙊" },
         { t: "Click here!", msg: "Hands on your head! 🙌" }, { t: "Touch me!", msg: "Shhh! Don't touch! 🤫" }] },
+      { q: "Whatever you do, do NOT tap the right answer!", answers: [
+        { t: "The right answer", msg: "I said DON'T! 😂" }, { t: "Me?", msg: "Hmm... think backwards! 🤔" },
+        { t: "The wrong answer", ok: true }, { t: "Nothing", msg: "That's not right OR wrong! 🤔" }] },
+      { q: "Mary's mum has 4 children: April, May, June and...?", answers: [
+        { t: "July", msg: "Read it again! Whose mum is it? 👀" }, { t: "Mary", ok: true },
+        { t: "August", msg: "Read it again! Whose mum is it? 👀" }, { t: "March", msg: "Read it again! Whose mum is it? 👀" }] },
+      { q: "Quick! Tap the turtle!", time: 4, kind: "timed", answers: [
+        { t: "🐇", msg: "That's a rabbit! 🐇" }, { t: "🐊", msg: "That's a crocodile! 🐊" },
+        { t: "🦎", msg: "That's a lizard! 🦎" }, { t: "🐢", ok: true }] },
+      { q: "Find the snail!", hint: "She is very slow... and very small.", kind: "hidden", setup: hiddenCorner("🐌", "snail"), answers: [
+        { t: "In my shoe", msg: "No shoes here! Look all over the screen! 👀" }, { t: "There is no snail", msg: "Oh yes there is! 👀" },
+        { t: "In the garden 🌷", msg: "No garden here! Look everywhere! 👀" }, { t: "She went home", msg: "She's too slow to go home! 🐌" }] },
+      { q: "What was the answer to question 7? Type it!", hint: "Can you remember? 🧠", kind: "typed", sol: "mary",
+        setup: typed({ ans: ["mary"], msg: "Think back to question 7... whose mum was it? 🧠" }) },
+      { q: "Spell NIGHT backwards! Tap the letters.", hint: "Start at the end!", kind: "seq", setup: sequence(["N", "I", "G", "H", "T", "E"], "THGIN", "Oops! Backwards: T - H - G - I - N! 🌙") },
+      { q: "Wait for it... wait for it... GREEN!", kind: "green", setup: greenLight(5500, true) },
+      { q: "Tap the timer!", hint: "Where is it? 👀", kind: "timer", setup: tapElement("timer"), answers: [
+        { t: "⏰", msg: "That's an alarm clock! Look for the real timer! 👀" }, { t: "⌛", msg: "That's an egg timer! Look for the real timer! 👀" },
+        { t: "🕐", msg: "That's a clock! Look for the real timer! 👀" }, { t: "⏲️", msg: "Nope! Look for the REAL timer! 👀" }] },
+      { q: "What do you put in a toaster?", answers: [
+        { t: "Toast 🍞", msg: "Toast comes OUT! You put BREAD in! 🍞" }, { t: "Bread", ok: true },
+        { t: "Butter 🧈", msg: "Messy! No! 🧈" }, { t: "A fork 🍴", msg: "NEVER do that! ⚡" }] },
+      { q: "Type the opposite of NO... backwards!", kind: "typed", sol: "sey", setup: typed({ ans: ["sey"], msg: "The opposite of NO is YES. Now flip it! 🔄" }) },
+      { q: "Tap the unicorn. Not the horses!", hint: "She's FAST!", layout: "arena", kind: "hop",
+        setup: hopper({ label: "🦄", hop: 700, decoys: [{ t: "🐴", msg: "That's a horse! 🐴" }, { t: "🐴", msg: "That's a horse too! 🐴" }, { t: "🐎", msg: "Still a horse! 🐎" }] }) },
+      { q: "What comes next?<br>O, T, T, F, F, S, S, E, ...", hint: "One, Two, Three... 🤔", answers: [
+        { t: "E", msg: "Count: One, Two, Three, Four, Five, Six, Seven, Eight, NINE! 🔢" }, { t: "T", msg: "Count: One, Two, Three... what comes after Eight? 🔢" },
+        { t: "N", ok: true }, { t: "G", msg: "Count: One, Two, Three... what comes after Eight? 🔢" }] },
+      { q: "Tap it 20 times in 10 seconds! GO!", kind: "count", time: 10, setup: counter(20, "👆", "🎉 Phew! Done!") },
+      { q: "How many times did you tap in question 18?", hint: "Can you remember? 🧠", answers: [
+        { t: "10", msg: "10 was the number of SECONDS! 🧠" }, { t: "18", msg: "18 was the question number! 🧠" },
+        { t: "20", ok: true }, { t: "100", msg: "Not THAT many! 😄" }] },
       { q: "Last one! Who is super smart?", answers: [
         { t: "Kaileigh! 🌟", ok: true }, { t: "Kaileigh! 💖", ok: true },
         { t: "Kaileigh! 🦄", ok: true }, { t: "Kaileigh! 🎉", ok: true }] }
@@ -1037,6 +1173,18 @@
       })(hits[j]);
     }
     if (q.setup) q.setup({ box: box, card: card, right: right, wrong: wrong, onCleanup: function (f) { cleanups.push(f); } });
+    if (q.time) {
+      var t0 = Date.now(), cd = document.createElement("div");
+      cd.className = "countdown";
+      $("qhint").appendChild(cd);
+      var tick = function () {
+        var rem = Math.max(0, q.time * 1000 - (Date.now() - t0));
+        cd.textContent = "⏰ " + Math.ceil(rem / 1000);
+        if (rem <= 0) { clearInterval(iv); wrong("Too slow! ⏰ Be quicker next time!"); }
+      };
+      var iv = setInterval(tick, 100); tick();
+      cleanups.push(function () { clearInterval(iv); });
+    }
   }
 
   function right() {
