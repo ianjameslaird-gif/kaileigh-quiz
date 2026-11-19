@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Word Search · Kai's Kool Kwiz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔤%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Fredoka", "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", Arial, sans-serif;
+    background: radial-gradient(rgba(123,92,255,.13) 1.5px, transparent 1.6px) 0 0/26px 26px, linear-gradient(160deg, #ffd9ef 0%, #dcdcff 40%, #c9f0ff 70%, #dcffd0 100%);
+    background-attachment: fixed;
+    color: #3a2a5d; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  .screen { display: none; min-height: 100vh; min-height: 100svh; flex-direction: column; align-items: center; padding: 12px 14px 28px; }
+  .screen.on { display: flex; }
+  .blob { position: fixed; border-radius: 50%; z-index: -1; pointer-events: none; }
+  .blob.b1 { width: 340px; height: 340px; left: -120px; top: -140px; background: #ffb3dc; opacity: .7; }
+  .blob.b2 { width: 300px; height: 300px; left: 40%; bottom: -170px; background: #bfeefa; opacity: .8; }
+  .blob.b3 { width: 220px; height: 220px; right: -90px; top: 45%; background: #e6d4ff; opacity: .6; }
+  .roundbtn { font-size: 26px; width: 52px; height: 52px; border-radius: 50%; border: 4px solid #fff; background: #ffe066; box-shadow: 0 4px 0 #d4a900; flex: none; padding: 0; line-height: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; color: inherit; }
+  .roundbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #d4a900; }
+  .roundbtn.home { background: #3fb5ff; box-shadow: 0 4px 0 #1f86c7; }
+  .roundbtn.back { background: #fff; box-shadow: 0 4px 0 #d4c8ff; font-size: 24px; }
+  .pill { display: inline-block; text-decoration: none; font-weight: 700; font-size: 20px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 18px; padding: 8px 14px; box-shadow: 0 5px 0 #d4c8ff; }
+  .pill:active { transform: translateY(4px); box-shadow: 0 1px 0 #d4c8ff; }
+  .topline { width: 100%; max-width: 760px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .big-title { font-weight: 700; font-size: clamp(50px, 12vw, 96px); line-height: .98; margin: 16px 0 8px; text-align: center; color: #ff4fa3; text-shadow: 3px 3px 0 #fff, 6px 6px 0 #9b7bff; }
+  .tagline { font-size: clamp(20px, 4vw, 26px); font-weight: 600; color: #2d2350; margin: 6px 0 16px; text-align: center; line-height: 1.3; max-width: 640px; }
+  .emoji-row { font-size: 50px; letter-spacing: 6px; }
+  .wiggle { display: inline-block; animation: wig 1.2s ease-in-out infinite; }
+  .wiggle:nth-child(2) { animation-delay: .3s; } .wiggle:nth-child(3) { animation-delay: .6s; }
+  @keyframes wig { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+  #cats, #diffs { display: grid; grid-template-columns: 1fr; gap: 14px; width: 100%; max-width: 560px; }
+  @media (min-width: 640px) { #cats { grid-template-columns: 1fr 1fr; } }
+  .cat, .dif { border: 5px solid #fff; border-radius: 24px; padding: 14px 16px; color: #fff; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 14px; box-shadow: 0 7px 0 rgba(0,0,0,.2); transition: transform .1s; width: 100%; }
+  .cat:nth-child(odd), .dif:nth-child(odd) { transform: rotate(1.1deg); }
+  .cat:nth-child(even), .dif:nth-child(even) { transform: rotate(-1.1deg); }
+  .cat:active, .dif:active { transform: translateY(5px); }
+  .cat .ic, .dif .ic { font-size: 52px; line-height: 1; }
+  .cat .nm, .dif .nm { font-size: clamp(24px, 5vw, 30px); font-weight: 700; line-height: 1.1; }
+  .cat .ds, .dif .ds { font-size: 17px; font-weight: 600; opacity: .95; margin-top: 2px; }
+  .cat .st, .dif .st { font-size: 16px; font-weight: 600; margin-top: 4px; background: rgba(255,255,255,.25); border-radius: 12px; padding: 2px 8px; display: inline-block; }
+  .howline { font-size: 18px; font-weight: 600; color: #7b5cff; text-align: center; margin-top: 18px; line-height: 1.4; max-width: 520px; }
+
+  /* ===== Play ===== */
+  #play { padding: 0; overflow: hidden; height: 100vh; height: 100svh; min-height: 0; }
+  #play.screen.on { display: flex; }
+  .topbar { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 10px; padding-top: max(8px, env(safe-area-inset-top)); background: rgba(255,255,255,.8); border-bottom: 4px solid #fff; width: 100%; }
+  #playTitle { font-weight: 700; font-size: clamp(16px, 3.8vw, 24px); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #playTitle .short { display: none; }
+  @media (max-width: 480px) {
+    #playTitle .full { display: none; }
+    #playTitle .short { display: inline; }
+  }
+  .tpill { font-weight: 700; font-size: clamp(16px, 3.5vw, 22px); background: #fff; border-radius: 16px; padding: 6px 10px; box-shadow: 0 3px 0 #d4c8ff; white-space: nowrap; }
+  #hintBtn { font-weight: 700; font-size: clamp(16px, 3.5vw, 22px); color: #fff; background: #ffb800; border: 4px solid #fff; border-radius: 18px; padding: 6px 12px; box-shadow: 0 4px 0 #c98f00; white-space: nowrap; height: 52px; }
+  #hintBtn:disabled { background: #c9c3d9; box-shadow: 0 4px 0 #9a93ad; cursor: default; }
+  #hintBtn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #c98f00; }
+  #words { flex: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; padding: 8px 8px 4px; width: 100%; max-height: 28vh; overflow-y: auto; }
+  .wchip { font-weight: 700; font-size: clamp(14px, 3.3vw, 18px); background: #fff; border: 3px solid #d4c8ff; border-radius: 14px; padding: 3px 9px; box-shadow: 0 3px 0 #d4c8ff; line-height: 1.3; }
+  .wchip.got { background: #c9f7dc; border-color: #2fd27a; color: #167a45; text-decoration: line-through; box-shadow: 0 3px 0 #17984f; }
+  .wchip.bump { animation: bump .45s; }
+  @keyframes bump { 0%,100% { transform: scale(1); } 40% { transform: scale(1.18); } }
+  .tip { font-size: 14px; font-weight: 600; color: #7b5cff; text-align: center; margin: 0 0 2px; width: 100%; }
+  #gridWrap { flex: 1; min-height: 0; display: flex; align-items: flex-start; justify-content: center; width: 100%; padding: 6px 8px 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); touch-action: none; }
+  #grid {
+    display: grid; background: #fff; border: 5px solid #fff; border-radius: 20px;
+    box-shadow: 0 8px 0 #d4c8ff, 0 12px 24px rgba(123,92,255,.18);
+    padding: 5px; touch-action: none; user-select: none; gap: 1px;
+  }
+  .cell {
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #2d2350; border-radius: 10px;
+    position: relative; cursor: pointer; line-height: 1; aspect-ratio: 1;
+    z-index: 1;
+  }
+  .cell .bg { position: absolute; inset: 6%; border-radius: 999px; z-index: -1; opacity: .95; }
+  .cell.sel { background: #ffe066; transform: scale(1.07); z-index: 2; }
+  .cell.anchor { box-shadow: inset 0 0 0 3px #7b5cff; background: #efe8ff; }
+  .cell.flash { animation: hintflash .4s ease-in-out 4; z-index: 3; }
+  @keyframes hintflash {
+    50% { background: #ffe066; box-shadow: 0 0 0 5px #ff4fa3, 0 0 16px #ff4fa3; transform: scale(1.18); }
+  }
+  body.dragging, body.dragging * { cursor: grabbing !important; }
+  @media (max-width: 420px) {
+    .roundbtn, .topbar .roundbtn { width: 46px; height: 46px; font-size: 22px; }
+    #hintBtn { height: 46px; padding: 4px 8px; }
+    .topbar { gap: 6px; padding: 6px 8px; padding-top: max(6px, env(safe-area-inset-top)); }
+  }
+
+  /* ===== Overlays ===== */
+  .overlay { position: fixed; inset: 0; background: rgba(58,42,93,.55); display: none; align-items: center; justify-content: center; z-index: 70; padding: 16px; }
+  .overlay.on { display: flex; }
+  .box { background: #fff; border: 6px solid #ffe066; border-radius: 30px; padding: 22px 20px; text-align: center; max-width: 520px; width: 100%; max-height: 96vh; overflow-y: auto; animation: pop .35s ease-out; }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .box h1 { font-size: clamp(34px, 8vw, 52px); margin: 6px 0 10px; color: #ff4fa3; text-shadow: 3px 3px 0 #ffe066; line-height: 1.05; }
+  .box p { font-size: clamp(21px, 4.5vw, 26px); margin: 10px 0; font-weight: 600; }
+  .btn { font-weight: 700; font-size: clamp(22px, 4.5vw, 30px); border: 5px solid #fff; border-radius: 24px; padding: 14px 24px; cursor: pointer; color: #fff; background: #7b5cff; box-shadow: 0 7px 0 #4b33b8; margin: 8px 4px; }
+  .btn.go { background: #2fd27a; box-shadow: 0 7px 0 #17984f; }
+  .btn.blue { background: #3fb5ff; box-shadow: 0 7px 0 #1f86c7; }
+  .btn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+  .bigtime { font-size: clamp(40px, 10vw, 60px); font-weight: 700; color: #7b5cff; margin: 4px 0; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 80; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<!-- HOME -->
+<div id="home" class="screen on">
+  <div class="topline">
+    <a class="pill" href="../">🏠 Kai's Kool Kwiz</a>
+    <button class="roundbtn" id="muteBtn" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div class="emoji-row" style="margin-top:8px"><span class="wiggle">🔤</span> <span class="wiggle">🦁</span> <span class="wiggle">🎈</span></div>
+  <div class="big-title">Word<br>Search</div>
+  <p class="tagline">Find the hidden words! Drag along the letters, or tap the first and last letter.</p>
+  <div id="cats"></div>
+</div>
+
+<!-- LEVEL -->
+<div id="level" class="screen">
+  <div class="topline">
+    <button class="roundbtn back" id="backHome" aria-label="Back">⬅</button>
+    <button class="roundbtn" id="muteBtn2" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div class="emoji-row" style="margin-top:8px" id="levelEmoji"></div>
+  <div class="big-title" id="levelTitle">Animals</div>
+  <p class="tagline">Pick a level!</p>
+  <div id="diffs"></div>
+  <p class="howline">💡 Stuck? You get 3 hints to flash a first letter.</p>
+</div>
+
+<!-- PLAY -->
+<div id="play" class="screen">
+  <div class="topbar">
+    <button class="roundbtn home" id="homeBtn" aria-label="Home" title="Home">🏠</button>
+    <div id="playTitle">Animals</div>
+    <div class="tpill" id="timer">⏱ 00:00</div>
+    <button id="hintBtn">💡 3</button>
+    <button class="roundbtn" id="muteBtn3" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div id="words"></div>
+  <div class="tip" id="playTip">Drag the letters · or tap first and last</div>
+  <div id="gridWrap"><div id="grid" role="grid" aria-label="Word search grid"></div></div>
+</div>
+
+<!-- WIN -->
+<div class="overlay" id="winBox">
+  <div class="box">
+    <div style="font-size:60px">🏆</div>
+    <h1>You did it, Kaileigh!</h1>
+    <p id="winSub">You found every word!</p>
+    <div class="bigtime" id="winTime">⏱ 00:00</div>
+    <p id="winBest"></p>
+    <button class="btn go" id="winAgain">🔁 Play again</button><br>
+    <button class="btn blue" id="winNew">🎒 New category</button><br>
+    <a class="pill" href="../" style="font-size:22px;padding:10px 18px;margin-top:8px">🏠 Home</a>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ================= Categories ================= */
+const CATS = {
+  animals: { name: "Animals", emoji: "🐾", color: "#2fd27a", shadow: "#17984f",
+    words: [["LION","🦁"],["TIGER","🐯"],["BEAR","🐻"],["WOLF","🐺"],["FROG","🐸"],["DUCK","🦆"],["GOAT","🐐"],["HORSE","🐴"],["SHEEP","🐑"],["MOUSE","🐭"],["SNAKE","🐍"],["BIRD","🐦"],["FISH","🐟"],["CRAB","🦀"],["SEAL","🦭"],["WHALE","🐋"],["SHARK","🦈"],["ZEBRA","🦓"],["CAMEL","🐫"],["PANDA","🐼"],["KOALA","🐨"],["SLOTH","🦥"],["MONKEY","🐒"],["RABBIT","🐰"],["TURTLE","🐢"],["LIZARD","🦎"],["EAGLE","🦅"],["OWL","🦉"],["FOX","🦊"],["CAT","🐱"],["DOG","🐶"],["PIG","🐷"],["HEN","🐔"],["COW","🐮"],["BAT","🦇"],["ANT","🐜"],["BEE","🐝"],["DEER","🦌"],["OTTER","🦦"],["LLAMA","🦙"],["HIPPO","🦛"],["RHINO","🦏"],["GIRAFFE","🦒"],["PENGUIN","🐧"],["DOLPHIN","🐬"],["PARROT","🦜"],["PONY","🐴"],["SWAN","🦢"],["SQUID","🦑"],["OCTOPUS","🐙"],["HAMSTER","🐹"],["CHICK","🐤"],["LAMB","🐑"],["ROBIN","🐦"],["CROW","🐦"],["HAWK","🦅"],["PUPPY","🐶"],["KITTEN","🐱"],["ELEPHANT","🐘"],["GORILLA","🦍"],["SNAIL","🐌"],["MOOSE","🦌"]] },
+  fruits: { name: "Fruits & Veg", emoji: "🍓", color: "#ff7a3d", shadow: "#c9541d",
+    words: [["APPLE","🍎"],["PEAR","🍐"],["GRAPE","🍇"],["PLUM","🟣"],["PEACH","🍑"],["MANGO","🥭"],["MELON","🍈"],["LEMON","🍋"],["LIME","🟢"],["BERRY","🫐"],["CHERRY","🍒"],["BANANA","🍌"],["ORANGE","🍊"],["KIWI","🥝"],["FIG","🟤"],["OLIVE","🫒"],["CARROT","🥕"],["PEA","🟢"],["BEAN","🌱"],["CORN","🌽"],["ONION","🧅"],["GARLIC","🧄"],["POTATO","🥔"],["TOMATO","🍅"],["CELERY","🥬"],["LETTUCE","🥬"],["CABBAGE","🥬"],["SPINACH","🥬"],["PEPPER","🫑"],["SQUASH","🎃"],["PUMPKIN","🎃"],["RADISH","🔴"],["BEET","🟣"],["TURNIP","⚪"],["LEEK","🥬"],["KALE","🥬"],["MINT","🌿"],["BASIL","🌿"],["SALAD","🥗"],["RAISIN","🍇"],["COCONUT","🥥"],["AVOCADO","🥑"],["PEANUT","🥜"],["ALMOND","🥜"],["CHILI","🌶️"],["YAM","🍠"],["DATE","🟤"],["BROCCOLI","🥦"],["CUCUMBER","🥒"],["PINEAPPLE","🍍"],["PAPAYA","🧡"],["APRICOT","🟠"],["SPROUT","🌱"],["SEED","🌱"],["HERB","🌿"],["JUICE","🧃"],["FRUIT","🍎"],["PARSNIP","🥕"],["WALNUT","🥜"],["PECAN","🥜"]] },
+  celebrations: { name: "Celebrations", emoji: "🎉", color: "#ff4fa3", shadow: "#c43070",
+    words: [["CAKE","🎂"],["BALLOON","🎈"],["CANDLE","🕯️"],["GIFT","🎁"],["HAT","🎩"],["LANTERN","🏮"],["FIREWORK","🎆"],["PRESENT","🎁"],["CONFETTI","🎊"],["PARTY","🎉"],["BANNER","🎏"],["RIBBON","🎀"],["BOW","🎀"],["CARD","💌"],["SONG","🎵"],["DANCE","💃"],["PARADE","🥳"],["CROWN","👑"],["TIARA","👑"],["WAND","🪄"],["STAR","⭐"],["FLAG","🚩"],["HORN","📯"],["POPPER","🎉"],["STREAMER","🎀"],["PINATA","🪅"],["CLOWN","🤡"],["MAGIC","✨"],["TRICK","🎩"],["TREAT","🍬"],["SWEET","🍭"],["CANDY","🍬"],["CUPCAKE","🧁"],["COOKIE","🍪"],["MUFFIN","🧁"],["MUSIC","🎶"],["DRUM","🥁"],["GUITAR","🎸"],["PIANO","🎹"],["SPARKLER","✨"],["WISH","🌟"],["CHEER","📣"],["CLAP","👏"],["SMILE","😊"],["LAUGH","😂"],["JOY","💛"],["FUN","🤩"],["GAME","🎲"],["PRIZE","🏆"],["MEDAL","🏅"],["TROPHY","🏆"],["FRIEND","🤗"],["FAMILY","👨‍👩‍👧"],["BIRTHDAY","🎂"],["HOLIDAY","🏖️"],["EASTER","🐰"],["COSTUME","👗"],["MASK","🎭"],["CAPE","🦸"],["WINGS","🧚"],["FAIRY","🧚"],["PRINCE","🤴"],["PRINCESS","👸"],["KING","🤴"],["QUEEN","👸"],["CASTLE","🏰"],["UNICORN","🦄"],["FEAST","🍽️"],["PICNIC","🧺"],["HUG","🤗"],["FIREWORKS","🎆"],["CHRISTMAS","🎄"],["SANTA","🎅"],["ELF","🧝"],["SLEIGH","🛷"],["WREATH","🎄"],["BELLS","🔔"],["HEART","❤️"],["LOVE","💕"]] },
+  mixed: { name: "Mixed Bag", emoji: "🌈", color: "#7b5cff", shadow: "#4b33b8",
+    words: [["TOY","🧸"],["DOLL","🎎"],["BALL","⚽"],["KITE","🪁"],["BLOCK","🧱"],["PUZZLE","🧩"],["TRAIN","🚂"],["CAR","🚗"],["BUS","🚌"],["BIKE","🚲"],["BOAT","⛵"],["SHIP","🚢"],["PLANE","✈️"],["TRUCK","🚚"],["SCOOTER","🛴"],["SKATE","⛸️"],["ROBOT","🤖"],["TEDDY","🧸"],["LEGO","🧱"],["YOYO","🪀"],["BOOK","📚"],["PEN","🖊️"],["PENCIL","✏️"],["CRAYON","🖍️"],["RULER","📏"],["PAPER","📄"],["GLUE","📎"],["SCHOOL","🏫"],["TEACHER","👩‍🏫"],["DESK","🪑"],["CHAIR","🪑"],["BAG","🎒"],["LUNCH","🍱"],["CLASS","🏫"],["MATH","🔢"],["STORY","📖"],["RAIN","🌧️"],["SUN","☀️"],["SNOW","❄️"],["WIND","💨"],["CLOUD","☁️"],["STORM","⛈️"],["RAINBOW","🌈"],["SUNNY","😎"],["FROST","❄️"],["ICE","🧊"],["HAIL","🌨️"],["SKY","🌌"],["MOON","🌙"],["EARTH","🌍"],["HAND","✋"],["FOOT","🦶"],["HEAD","👤"],["NOSE","👃"],["EYE","👁️"],["EAR","👂"],["MOUTH","👄"],["TOOTH","🦷"],["HAIR","💇"],["ARM","💪"],["LEG","🦵"],["KNEE","🦵"],["TOE","👣"],["FACE","😀"],["RED","❤️"],["BLUE","💙"],["PINK","💗"],["GREEN","💚"],["YELLOW","💛"],["PURPLE","💜"],["WHITE","🤍"],["BLACK","⬛"],["BROWN","🤎"],["GOLD","🥇"],["SILVER","🥈"],["HOUSE","🏠"],["HOME","🏡"],["DOOR","🚪"],["TABLE","🪵"],["BED","🛏️"],["LAMP","💡"],["CLOCK","⏰"],["PHONE","📱"],["CUP","☕"],["PLATE","🍽️"],["SPOON","🥄"],["FORK","🍴"],["BOWL","🥣"],["SOAP","🧼"],["TOWEL","🧺"],["BRUSH","🪥"],["COMB","💇"],["SHOE","👟"],["SOCK","🧦"],["COAT","🧥"],["SHIRT","👕"],["DRESS","👗"],["SKIRT","👗"],["PANTS","👖"],["JUMPER","🧶"],["SCARF","🧣"],["GLOVE","🧤"],["BOOT","👢"],["CAP","🧢"],["THUNDER","⚡"]] }
+};
+
+const DIRS8 = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]];
+const DIFFS = {
+  easy:   { name: "Easy",   emoji: "🌱", color: "#2fd27a", shadow: "#17984f", size: 8,  count: 6,  place: [[0,1],[1,0]],                 sel: [[0,1],[0,-1],[1,0],[-1,0]],                         maxLen: 7,  desc: "8×8 · 6 words · across and down" },
+  medium: { name: "Medium", emoji: "⭐", color: "#ffb800", shadow: "#c98f00", size: 10, count: 8,  place: [[0,1],[1,0],[1,1]],           sel: [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1]],           maxLen: 9,  desc: "10×10 · 8 words · and diagonal too" },
+  hard:   { name: "Hard",   emoji: "🔥", color: "#ff7a3d", shadow: "#c9541d", size: 12, count: 10, place: DIRS8,                        sel: DIRS8,                                                   maxLen: 12, desc: "12×12 · 10 words · every way, even backwards!" }
+};
+
+const COLORS = ["#ff6b9d","#ffb020","#2fd27a","#3fb5ff","#b04dff","#ff7a3d","#ffe066","#2bb3ff","#ff4fa3","#7b5cff"];
+const BEST_KEY = "kkk_ws_best";
+const MUTE_KEY = "kkk_ws_muted";
+
+/* ================= Helpers ================= */
+const $ = id => document.getElementById(id);
+function rng(seed) {
+  let a = (seed >>> 0) || 1;
+  return function () {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, rand) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function fmt(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+function loadBest() {
+  try { const s = JSON.parse(localStorage.getItem(BEST_KEY)); if (s && typeof s === "object") return s; } catch (e) {}
+  return {};
+}
+function saveBestMap(m) { try { localStorage.setItem(BEST_KEY, JSON.stringify(m)); } catch (e) {} }
+function bestKey(cat, diff) { return cat + "|" + diff; }
+function getBest(cat, diff) { const v = loadBest()[bestKey(cat, diff)]; return typeof v === "number" ? v : null; }
+function setBest(cat, diff, ms) {
+  const m = loadBest();
+  const k = bestKey(cat, diff);
+  const prev = m[k];
+  const rec = prev == null || ms < prev;
+  if (rec) { m[k] = ms; saveBestMap(m); }
+  return rec;
+}
+
+/* ================= Puzzle generator ================= */
+function pickWords(pool, count, rand) {
+  const shuffled = shuffle(pool, rand);
+  const out = [];
+  for (let i = 0; i < shuffled.length; i++) {
+    const s = shuffled[i][0];
+    let ok = true;
+    for (let j = 0; j < out.length; j++) {
+      const t = out[j][0];
+      if (t.indexOf(s) !== -1 || s.indexOf(t) !== -1) { ok = false; break; }
+    }
+    if (!ok) continue;
+    out.push(shuffled[i]);
+    if (out.length === count) return out;
+  }
+  return null;
+}
+function canPlace(grid, word, r, c, dr, dc) {
+  const n = grid.length, letters = word;
+  const cells = [];
+  for (let i = 0; i < letters.length; i++) {
+    const rr = r + dr * i, cc = c + dc * i;
+    if (rr < 0 || cc < 0 || rr >= n || cc >= n) return null;
+    const ch = grid[rr][cc];
+    if (ch && ch !== letters[i]) return null;
+    cells.push([rr, cc]);
+  }
+  return cells;
+}
+function placeWord(grid, word, dirs, rand) {
+  const n = grid.length, starts = [];
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) starts.push([r, c]);
+  const tryDirs = shuffle(dirs, rand);
+  const tryStarts = shuffle(starts, rand);
+  for (let d = 0; d < tryDirs.length; d++) {
+    const dr = tryDirs[d][0], dc = tryDirs[d][1];
+    for (let s = 0; s < tryStarts.length; s++) {
+      const cells = canPlace(grid, word, tryStarts[s][0], tryStarts[s][1], dr, dc);
+      if (!cells) continue;
+      for (let i = 0; i < word.length; i++) grid[cells[i][0]][cells[i][1]] = word[i];
+      return { cells: cells, dir: [dr, dc] };
+    }
+  }
+  return null;
+}
+function generatePuzzle(catKey, diffKey, seed) {
+  const cat = CATS[catKey], diff = DIFFS[diffKey];
+  if (!cat || !diff) throw new Error("Unknown category or difficulty");
+  const pool = cat.words.filter(function (w) {
+    return w[0].length >= 3 && w[0].length <= diff.maxLen && /^[A-Z]+$/.test(w[0]);
+  });
+  if (pool.length < diff.count) throw new Error("Not enough words in " + catKey + " for " + diffKey);
+  const baseSeed = (seed >>> 0) || 1;
+  for (let attempt = 0; attempt < 120; attempt++) {
+    const rand = rng(baseSeed + attempt * 9973);
+    const chosen = pickWords(pool, diff.count, rand);
+    if (!chosen) continue;
+    chosen.sort(function (a, b) { return b[0].length - a[0].length; });
+    const n = diff.size;
+    const grid = [];
+    for (let r = 0; r < n; r++) { const row = []; for (let c = 0; c < n; c++) row.push(""); grid.push(row); }
+    const placed = [];
+    let ok = true;
+    for (let i = 0; i < chosen.length; i++) {
+      const p = placeWord(grid, chosen[i][0], diff.place, rand);
+      if (!p) { ok = false; break; }
+      placed.push({ word: chosen[i][0], emoji: chosen[i][1], cells: p.cells, dir: p.dir, color: COLORS[i % COLORS.length], found: false });
+    }
+    if (!ok) continue;
+    const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!grid[r][c]) grid[r][c] = ABC[Math.floor(rand() * 26)];
+    return { grid: grid, words: placed, size: n, seed: baseSeed, attempt: attempt, catKey: catKey, diffKey: diffKey };
+  }
+  throw new Error("Could not place a puzzle for " + catKey + " " + diffKey + " seed " + baseSeed);
+}
+
+/* ================= Sound ================= */
+let AC = null, muted = false;
+try { muted = localStorage.getItem(MUTE_KEY) === "1"; } catch (e) {}
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); return AC; }
+function tone(f, t0, dur, type, vol, f2) {
+  const a = ac(); if (!a || muted) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(f, a.currentTime + t0);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, a.currentTime + t0 + dur);
+  g.gain.setValueAtTime(0.0001, a.currentTime + t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.2, a.currentTime + t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + t0 + dur);
+  o.connect(g); g.connect(a.destination); o.start(a.currentTime + t0); o.stop(a.currentTime + t0 + dur + 0.05);
+}
+const SFX = {
+  found() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.07, 0.22, "triangle", 0.22)); tone(1568, 0.3, 0.3, "sine", 0.1); },
+  miss() { tone(220, 0, 0.12, "sine", 0.08, 180); },
+  hint() { tone(880, 0, 0.15, "sine", 0.15, 1320); tone(1320, 0.15, 0.2, "sine", 0.12, 990); },
+  click() { tone(660, 0, 0.06, "square", 0.05); },
+  win() { [523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.13, 0.25, "triangle", 0.22)); tone(1047, 0.8, 0.6, "sine", 0.15); }
+};
+function say(text) {
+  if (muted || !window.speechSynthesis) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1.06; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
+}
+function setMuted(m) {
+  muted = m;
+  try { localStorage.setItem(MUTE_KEY, m ? "1" : "0"); } catch (e) {}
+  ["muteBtn","muteBtn2","muteBtn3"].forEach(function (id) { const b = $(id); if (b) b.textContent = m ? "🔇" : "🔊"; });
+  if (m && window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
+}
+
+/* ================= State ================= */
+let st = null, screen = "home", pickCat = null, anchor = null, drag = null, timerId = null;
+
+function show(id) {
+  ["home","level","play"].forEach(function (s) { $(s).classList.toggle("on", s === id); });
+  screen = id;
+  if (id !== "play") { $("winBox").classList.remove("on"); document.body.classList.remove("dragging"); }
+}
+
+function renderHome() {
+  const box = $("cats"); box.innerHTML = "";
+  Object.keys(CATS).forEach(function (key) {
+    const c = CATS[key];
+    const b = document.createElement("button");
+    b.className = "cat"; b.style.background = c.color; b.style.boxShadow = "0 7px 0 " + c.shadow;
+    const times = ["easy","medium","hard"].map(function (d) {
+      const t = getBest(key, d);
+      return t == null ? null : DIFFS[d].emoji + " " + fmt(t);
+    }).filter(Boolean);
+    b.innerHTML = '<div class="ic">' + c.emoji + '</div><div><div class="nm">' + c.name + '</div><div class="ds">Find hidden words!</div>' +
+      (times.length ? '<div class="st">Best ' + times.join(" · ") + "</div>" : "") + "</div>";
+    b.addEventListener("click", function () { SFX.click(); ac(); pickCat = key; renderLevel(); show("level"); });
+    box.appendChild(b);
+  });
+}
+function renderLevel() {
+  const c = CATS[pickCat];
+  $("levelTitle").textContent = c.name;
+  $("levelEmoji").innerHTML = '<span class="wiggle">' + c.emoji + "</span>";
+  const box = $("diffs"); box.innerHTML = "";
+  Object.keys(DIFFS).forEach(function (key) {
+    const d = DIFFS[key];
+    const b = document.createElement("button");
+    b.className = "dif"; b.style.background = d.color; b.style.boxShadow = "0 7px 0 " + d.shadow;
+    const best = getBest(pickCat, key);
+    b.innerHTML = '<div class="ic">' + d.emoji + '</div><div><div class="nm">' + d.name + '</div><div class="ds">' + d.desc + "</div>" +
+      (best != null ? '<div class="st">Best ' + fmt(best) + "</div>" : "") + "</div>";
+    b.addEventListener("click", function () { SFX.click(); ac(); startGame(pickCat, key); });
+    box.appendChild(b);
+  });
+}
+
+function startGame(catKey, diffKey, seed) {
+  const used = seed == null ? (Math.floor(Math.random() * 1e9) + 1) : seed;
+  const puz = generatePuzzle(catKey, diffKey, used);
+  st = {
+    catKey: catKey, diffKey: diffKey, seed: puz.seed, attempt: puz.attempt,
+    grid: puz.grid, words: puz.words, size: puz.size,
+    hints: 3, t0: Date.now(), elapsed: 0, playing: true
+  };
+  anchor = null; drag = null;
+  $("winBox").classList.remove("on");
+  confetti.run = (confetti.run || 0) + 1;
+  renderPlay();
+  show("play");
+  sizeGrid();
+}
+
+function renderPlay() {
+  const c = CATS[st.catKey], d = DIFFS[st.diffKey];
+  $("playTitle").innerHTML = '<span class="full">' + c.emoji + " " + c.name + " · " + d.name + '</span><span class="short">' + c.emoji + " " + d.name + "</span>";
+  $("hintBtn").textContent = "💡 " + st.hints;
+  $("hintBtn").disabled = st.hints <= 0 || !st.playing || st.words.every(function (w) { return w.found; });
+  $("timer").textContent = "⏱ " + fmt(st.playing ? Date.now() - st.t0 : st.elapsed);
+  renderWords();
+  renderGrid();
+}
+function renderWords() {
+  const box = $("words"); box.innerHTML = "";
+  st.words.forEach(function (w) {
+    const el = document.createElement("span");
+    el.className = "wchip" + (w.found ? " got" : "");
+    el.dataset.word = w.word;
+    el.textContent = w.emoji + " " + w.word;
+    if (w.found) el.style.borderColor = w.color;
+    box.appendChild(el);
+  });
+}
+function renderGrid() {
+  const g = $("grid");
+  g.style.gridTemplateColumns = "repeat(" + st.size + ", 1fr)";
+  g.innerHTML = "";
+  for (let r = 0; r < st.size; r++) {
+    for (let c = 0; c < st.size; c++) {
+      const el = document.createElement("div");
+      el.className = "cell";
+      el.dataset.r = r; el.dataset.c = c;
+      el.setAttribute("role", "gridcell");
+      const foundIn = st.words.filter(function (w) { return w.found && w.cells.some(function (p) { return p[0] === r && p[1] === c; }); });
+      if (foundIn.length === 1) {
+        const bg = document.createElement("span"); bg.className = "bg"; bg.style.background = foundIn[0].color; el.appendChild(bg);
+        el.classList.add("found");
+      } else if (foundIn.length > 1) {
+        const bg = document.createElement("span"); bg.className = "bg";
+        bg.style.background = "linear-gradient(135deg, " + foundIn[0].color + " 50%, " + foundIn[1].color + " 50%)";
+        el.appendChild(bg);
+        el.classList.add("found");
+      }
+      const t = document.createElement("span"); t.textContent = st.grid[r][c]; el.appendChild(t);
+      g.appendChild(el);
+    }
+  }
+  paintSel();
+}
+function cellEl(r, c) { return $("grid").querySelector('[data-r="' + r + '"][data-c="' + c + '"]'); }
+function sizeGrid() {
+  if (!st || screen !== "play") return;
+  const wrap = $("gridWrap");
+  const s = Math.max(120, Math.floor(Math.min(wrap.clientWidth, wrap.clientHeight)) - 2);
+  $("grid").style.width = s + "px";
+  $("grid").style.height = s + "px";
+  const cell = Math.floor((s - 12) / st.size);
+  $("grid").style.fontSize = Math.max(12, Math.min(36, Math.floor(cell * 0.55))) + "px";
+  $("grid").style.borderRadius = (st.size >= 12 ? 14 : 20) + "px";
+}
+
+function paintSel(path) {
+  const cells = $("grid").querySelectorAll(".cell");
+  for (let i = 0; i < cells.length; i++) cells[i].classList.remove("sel", "anchor");
+  if (anchor && !drag) {
+    const el = cellEl(anchor[0], anchor[1]);
+    if (el) el.classList.add("anchor");
+  }
+  if (path) {
+    for (let i = 0; i < path.length; i++) {
+      const el = cellEl(path[i][0], path[i][1]);
+      if (el) el.classList.add("sel");
+    }
+  }
+}
+
+function snapDir(dr, dc) {
+  const ad = Math.abs(dr), ac = Math.abs(dc);
+  if (ad === 0 && ac === 0) return [0, 0];
+  const sr = dr === 0 ? 0 : (dr > 0 ? 1 : -1);
+  const sc = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
+  if (ad === 0) return [0, sc];
+  if (ac === 0) return [sr, 0];
+  if (Math.min(ad, ac) / Math.max(ad, ac) > 0.45) return [sr, sc];
+  return ad > ac ? [sr, 0] : [0, sc];
+}
+function dirAllowed(dir) {
+  const list = DIFFS[st.diffKey].sel;
+  for (let i = 0; i < list.length; i++) if (list[i][0] === dir[0] && list[i][1] === dir[1]) return true;
+  return false;
+}
+function buildPath(r1, c1, r2, c2) {
+  const dr = r2 - r1, dc = c2 - c1;
+  if (dr === 0 && dc === 0) return [[r1, c1]];
+  const dir = snapDir(dr, dc);
+  if (!dirAllowed(dir) || (dir[0] === 0 && dir[1] === 0)) return [[r1, c1]];
+  let n = 0;
+  if (dir[0] !== 0) n = Math.abs(r2 - r1);
+  if (dir[1] !== 0) n = Math.max(n, Math.abs(c2 - c1));
+  while (n > 0) {
+    const rr = r1 + n * dir[0], cc = c1 + n * dir[1];
+    if (rr >= 0 && rr < st.size && cc >= 0 && cc < st.size) break;
+    n--;
+  }
+  const path = [];
+  for (let i = 0; i <= n; i++) path.push([r1 + i * dir[0], c1 + i * dir[1]]);
+  return path;
+}
+
+function trySelect(path) {
+  if (!st || !st.playing || !path || path.length < 2) { paintSel(); return false; }
+  const letters = path.map(function (p) { return st.grid[p[0]][p[1]]; }).join("");
+  const rev = letters.split("").reverse().join("");
+  const w = st.words.find(function (x) { return !x.found && (x.word === letters || x.word === rev); });
+  if (!w) { SFX.miss(); paintSel(); return false; }
+  w.found = true;
+  SFX.found();
+  say("You found " + w.word.toLowerCase() + "!");
+  renderGrid();
+  renderWords();
+  const chip = $("words").querySelector('[data-word="' + w.word + '"]');
+  if (chip) { chip.classList.add("bump"); setTimeout(function () { chip.classList.remove("bump"); }, 500); }
+  $("hintBtn").disabled = st.hints <= 0 || st.words.every(function (x) { return x.found; });
+  if (st.words.every(function (x) { return x.found; })) setTimeout(win, 350);
+  return true;
+}
+
+function win() {
+  if (!st || !st.playing) return;
+  st.playing = false;
+  st.elapsed = Date.now() - st.t0;
+  $("timer").textContent = "⏱ " + fmt(st.elapsed);
+  const rec = setBest(st.catKey, st.diffKey, st.elapsed);
+  const best = getBest(st.catKey, st.diffKey);
+  $("winSub").textContent = "You found every word in " + CATS[st.catKey].name + " · " + DIFFS[st.diffKey].name + "!";
+  $("winTime").textContent = "⏱ " + fmt(st.elapsed);
+  $("winBest").textContent = rec ? "🌟 New record! 🌟" : ("Best " + fmt(best));
+  $("winBox").classList.add("on");
+  SFX.win();
+  say("You did it, Kaileigh!");
+  confetti();
+}
+
+function useHint() {
+  if (!st || !st.playing || st.hints <= 0) return false;
+  const left = st.words.filter(function (w) { return !w.found; });
+  if (!left.length) return false;
+  st.hints--;
+  $("hintBtn").textContent = "💡 " + st.hints;
+  $("hintBtn").disabled = st.hints <= 0;
+  const w = left[Math.floor(Math.random() * left.length)];
+  const first = w.cells[0];
+  const el = cellEl(first[0], first[1]);
+  if (el) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); setTimeout(function () { el.classList.remove("flash"); }, 1800); }
+  SFX.hint();
+  return true;
+}
+
+/* ================= Pointer / touch ================= */
+function eventXY(e) {
+  if (e.touches && e.touches[0]) return [e.touches[0].clientX, e.touches[0].clientY];
+  if (e.changedTouches && e.changedTouches[0]) return [e.changedTouches[0].clientX, e.changedTouches[0].clientY];
+  return [e.clientX, e.clientY];
+}
+function cellFromXY(x, y) {
+  const el = document.elementFromPoint(x, y);
+  const cell = el && el.closest ? el.closest(".cell") : null;
+  if (!cell || !$("grid").contains(cell)) return null;
+  return [+cell.dataset.r, +cell.dataset.c];
+}
+function onDown(e) {
+  if (!st || !st.playing) return;
+  if (e.button != null && e.button !== 0) return;
+  if (e.pointerType === "mouse" && e.buttons !== 1 && e.type.indexOf("pointer") === 0) return;
+  const xy = eventXY(e);
+  const cell = cellFromXY(xy[0], xy[1]);
+  if (!cell) return;
+  if (e.cancelable) e.preventDefault();
+  if (e.pointerId != null && e.currentTarget.setPointerCapture) {
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+  drag = { start: cell, path: [cell], moved: false, pointerId: e.pointerId };
+  document.body.classList.add("dragging");
+  paintSel(drag.path);
+}
+function onMove(e) {
+  if (!drag) return;
+  if (e.cancelable) e.preventDefault();
+  const xy = eventXY(e);
+  const cell = cellFromXY(xy[0], xy[1]);
+  if (!cell) return;
+  if (cell[0] !== drag.start[0] || cell[1] !== drag.start[1]) drag.moved = true;
+  drag.path = buildPath(drag.start[0], drag.start[1], cell[0], cell[1]);
+  paintSel(drag.path);
+}
+function onUp(e) {
+  if (!drag) return;
+  if (e && e.cancelable) e.preventDefault();
+  const path = drag.path;
+  const moved = drag.moved;
+  const start = drag.start;
+  drag = null;
+  document.body.classList.remove("dragging");
+  if (moved) {
+    anchor = null;
+    trySelect(path);
+    paintSel();
+  } else {
+    if (anchor) {
+      const same = anchor[0] === start[0] && anchor[1] === start[1];
+      const a = anchor;
+      anchor = null;
+      if (same) { paintSel(); return; }
+      trySelect(buildPath(a[0], a[1], start[0], start[1]));
+      paintSel();
+    } else {
+      anchor = start;
+      paintSel();
+    }
+  }
+}
+
+function bindGrid() {
+  const wrap = $("gridWrap");
+  if (window.PointerEvent) {
+    wrap.addEventListener("pointerdown", onDown);
+    wrap.addEventListener("pointermove", onMove);
+    wrap.addEventListener("pointerup", onUp);
+    wrap.addEventListener("pointercancel", onUp);
+  } else {
+    wrap.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    wrap.addEventListener("touchstart", onDown, { passive: false });
+    wrap.addEventListener("touchmove", onMove, { passive: false });
+    wrap.addEventListener("touchend", onUp, { passive: false });
+    wrap.addEventListener("touchcancel", onUp, { passive: false });
+  }
+  wrap.addEventListener("touchmove", function (e) { if (drag && e.cancelable) e.preventDefault(); }, { passive: false });
+  wrap.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+}
+
+/* ================= Confetti ================= */
+function confetti() {
+  const cv = $("confetti"), x = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ["#ff4fa3","#ffe066","#7b5cff","#2fd27a","#3fb5ff","#ff7a3d","#fff"];
+  const P = [];
+  for (let i = 0; i < 90; i++) P.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*0.3, vx: Math.random()*6-3, vy: 3+Math.random()*4, a: Math.random()*6, r: 6+Math.random()*7, c: cols[i%cols.length] });
+  const run = ++confetti.run; let n = 0;
+  (function f() {
+    if (run !== confetti.run) { x.clearRect(0, 0, cv.width, cv.height); return; }
+    x.clearRect(0, 0, cv.width, cv.height);
+    for (const q of P) { q.x += q.vx; q.y += q.vy; q.a += .1; x.fillStyle = q.c; x.save(); x.translate(q.x, q.y); x.rotate(q.a); x.fillRect(-q.r, -q.r / 2, q.r * 2, q.r); x.restore(); }
+    if (++n < 200) requestAnimationFrame(f); else x.clearRect(0, 0, cv.width, cv.height);
+  })();
+}
+confetti.run = 0;
+
+/* ================= Wire up ================= */
+function goHome() {
+  st = null; pickCat = null; anchor = null; drag = null;
+  confetti.run = (confetti.run || 0) + 1;
+  $("winBox").classList.remove("on");
+  document.body.classList.remove("dragging");
+  renderHome();
+  show("home");
+}
+$("backHome").addEventListener("click", function () { SFX.click(); goHome(); });
+$("homeBtn").addEventListener("click", function () { SFX.click(); goHome(); });
+$("hintBtn").addEventListener("click", function () { useHint(); });
+$("winAgain").addEventListener("click", function () { SFX.click(); if (st) startGame(st.catKey, st.diffKey); });
+$("winNew").addEventListener("click", function () { SFX.click(); goHome(); });
+["muteBtn","muteBtn2","muteBtn3"].forEach(function (id) {
+  $(id).addEventListener("click", function () { ac(); setMuted(!muted); SFX.click(); });
+});
+window.addEventListener("resize", sizeGrid);
+timerId = setInterval(function () {
+  if (st && st.playing) $("timer").textContent = "⏱ " + fmt(Date.now() - st.t0);
+}, 200);
+
+setMuted(muted);
+bindGrid();
+renderHome();
+
+window.__ws = {
+  CATS: CATS, DIFFS: DIFFS, COLORS: COLORS,
+  generatePuzzle: generatePuzzle,
+  startGame: startGame,
+  get state() { return st; },
+  get screen() { return screen; },
+  get anchor() { return anchor; },
+  selectLine: function (r1, c1, r2, c2) { return trySelect(buildPath(r1, c1, r2, c2)); },
+  selectPath: trySelect,
+  useHint: useHint,
+  goHome: goHome,
+  fmt: fmt, getBest: getBest, buildPath: buildPath
+};
+</script>
+</body>
+</html>
