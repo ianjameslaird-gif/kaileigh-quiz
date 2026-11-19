@@ -330,7 +330,7 @@ const SFX = {
 };
 function say(text) {
   if (muted || !window.speechSynthesis) return;
-  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1.06; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(String(text).replace(/Kaileigh/gi, "Kai Lee")); u.rate = 1.06; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
 }
 function setMuted(m) {
   muted = m;
@@ -533,7 +533,7 @@ function win() {
   $("winBest").textContent = rec ? "🌟 New record! 🌟" : ("Best " + fmt(best));
   $("winBox").classList.add("on");
   SFX.win();
-  say("You did it, Kaileigh!");
+  say("You did it, Kai Lee!");
   confetti();
 }
 

@@ -797,7 +797,7 @@
         hear.className = "ans c1 hearbtn"; hear.textContent = "🔊 Hear it";
         hear.addEventListener("click", function () {
           if (muted) return;
-          try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(spec.say); u.rate = 0.85; speechSynthesis.speak(u); } catch (e) {}
+          try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(String(spec.say).replace(/Kaileigh/gi, "Kai Lee")); u.rate = 0.85; speechSynthesis.speak(u); } catch (e) {}
         });
         box.appendChild(hear);
       }

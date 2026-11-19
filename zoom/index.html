@@ -198,7 +198,7 @@ const SFX = {
 };
 function say(text) {
   if (muted || !window.speechSynthesis) return;
-  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.9; u.pitch = 1.2; speechSynthesis.speak(u); } catch (e) {}
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(String(text).replace(/Kaileigh/gi, "Kai Lee")); u.rate = 0.9; u.pitch = 1.2; speechSynthesis.speak(u); } catch (e) {}
 }
 
 /* ================= Save ================= */
@@ -707,7 +707,7 @@ function win() {
   $("winSub").textContent = `You found all ${S.objs.length} things!`;
   $("winBest").textContent = first ? "🌟 Your first time!" : better ? "🎉 New best time!" : `Best time: ${fmt(st.best)}`;
   $("winNext").style.display = SI < SCENES.length - 1 ? "" : "none";
-  $("winBox").classList.add("on"); SFX.win(); say("You did it, Kaileigh!"); confetti();
+  $("winBox").classList.add("on"); SFX.win(); say("You did it, Kai Lee!"); confetti();
 }
 $("winNext").onclick = () => { SFX.click(); $("winBox").classList.remove("on"); startScene(SI + 1); };
 $("winHome").onclick = () => { SFX.click(); $("winBox").classList.remove("on"); goHome(); };

@@ -350,7 +350,7 @@ const SFX = {
 };
 function say(text) {
   if (!window.speechSynthesis) return;
-  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text.replace(/…/g, "...")); u.rate = 0.9; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text.replace(/…/g, "...").replace(/Kaileigh/gi, "Kai Lee")); u.rate = 0.9; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
 }
 function setMute(m) {
   muted = m; try { localStorage.setItem("kkk_animal_muted", m ? "1" : "0"); } catch (e) {}
