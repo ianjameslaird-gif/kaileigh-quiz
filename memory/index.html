@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Memory Match · Kai's Kool Kwiz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🚪%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Fredoka", "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", Arial, sans-serif;
+    background: radial-gradient(rgba(123,92,255,.13) 1.5px, transparent 1.6px) 0 0/26px 26px, linear-gradient(160deg, #ffd9ef 0%, #dcdcff 40%, #c9f0ff 70%, #dcffd0 100%);
+    background-attachment: fixed;
+    color: #3a2a5d; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  .screen { display: none; min-height: 100vh; min-height: 100svh; flex-direction: column; align-items: center; padding: 12px 14px 28px; }
+  .screen.on { display: flex; }
+  .blob { position: fixed; border-radius: 50%; z-index: -1; pointer-events: none; }
+  .blob.b1 { width: 340px; height: 340px; left: -120px; top: -140px; background: #ffb3dc; opacity: .7; }
+  .blob.b2 { width: 300px; height: 300px; left: 40%; bottom: -170px; background: #bfeefa; opacity: .8; }
+  .blob.b3 { width: 220px; height: 220px; right: -90px; top: 45%; background: #e6d4ff; opacity: .6; }
+  .roundbtn { font-size: 26px; width: 52px; height: 52px; border-radius: 50%; border: 4px solid #fff; background: #ffe066; box-shadow: 0 4px 0 #d4a900; flex: none; padding: 0; line-height: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; color: inherit; }
+  .roundbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #d4a900; }
+  .roundbtn.home { background: #3fb5ff; box-shadow: 0 4px 0 #1f86c7; }
+  .roundbtn.back { background: #fff; box-shadow: 0 4px 0 #d4c8ff; font-size: 24px; }
+  .pill { display: inline-block; text-decoration: none; font-weight: 700; font-size: 20px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 18px; padding: 8px 14px; box-shadow: 0 5px 0 #d4c8ff; }
+  .pill:active { transform: translateY(4px); box-shadow: 0 1px 0 #d4c8ff; }
+  .topline { width: 100%; max-width: 760px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .big-title { font-weight: 700; font-size: clamp(50px, 12vw, 96px); line-height: .98; margin: 16px 0 8px; text-align: center; color: #12b5a0; text-shadow: 3px 3px 0 #fff, 6px 6px 0 #7b5cff; }
+  .tagline { font-size: clamp(20px, 4vw, 26px); font-weight: 600; color: #2d2350; margin: 6px 0 16px; text-align: center; line-height: 1.3; max-width: 640px; }
+  .emoji-row { font-size: 50px; letter-spacing: 6px; }
+  .wiggle { display: inline-block; animation: wig 1.2s ease-in-out infinite; }
+  .wiggle:nth-child(2) { animation-delay: .3s; } .wiggle:nth-child(3) { animation-delay: .6s; }
+  @keyframes wig { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+  #cats, #diffs { display: grid; grid-template-columns: 1fr; gap: 14px; width: 100%; max-width: 560px; }
+  @media (min-width: 640px) { #cats { grid-template-columns: 1fr 1fr; } }
+  .cat, .dif { border: 5px solid #fff; border-radius: 24px; padding: 14px 16px; color: #fff; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 14px; box-shadow: 0 7px 0 rgba(0,0,0,.2); transition: transform .1s; width: 100%; }
+  .cat:nth-child(odd), .dif:nth-child(odd) { transform: rotate(1.1deg); }
+  .cat:nth-child(even), .dif:nth-child(even) { transform: rotate(-1.1deg); }
+  .cat:active, .dif:active { transform: translateY(5px); }
+  .cat .ic, .dif .ic { font-size: 52px; line-height: 1; }
+  .cat .nm, .dif .nm { font-size: clamp(24px, 5vw, 30px); font-weight: 700; line-height: 1.1; }
+  .cat .ds, .dif .ds { font-size: 17px; font-weight: 600; opacity: .95; margin-top: 2px; }
+  .cat .st, .dif .st { font-size: 16px; font-weight: 600; margin-top: 4px; background: rgba(255,255,255,.25); border-radius: 12px; padding: 2px 8px; display: inline-block; }
+  .howline { font-size: 18px; font-weight: 600; color: #7b5cff; text-align: center; margin-top: 18px; line-height: 1.4; max-width: 520px; }
+  .stylepick { margin: 8px 0 4px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .stylepick .lab { font-weight: 700; font-size: 18px; color: #2d2350; }
+  .seg { display: inline-flex; background: #fff; border: 4px solid #fff; border-radius: 18px; box-shadow: 0 5px 0 #d4c8ff; overflow: hidden; }
+  .seg button { border: 0; background: transparent; font-weight: 700; font-size: 18px; padding: 8px 14px; color: #7b5cff; }
+  .seg button.on { background: #12b5a0; color: #fff; }
+  .seg button:active { transform: none; }
+
+  /* ===== Play ===== */
+  #play { padding: 0; overflow: hidden; height: 100vh; height: 100svh; min-height: 0; }
+  #play.screen.on { display: flex; }
+  .topbar { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 10px; padding-top: max(8px, env(safe-area-inset-top)); background: rgba(255,255,255,.8); border-bottom: 4px solid #fff; width: 100%; }
+  #playTitle { font-weight: 700; font-size: clamp(15px, 3.6vw, 22px); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #playTitle .short { display: none; }
+  @media (max-width: 480px) {
+    #playTitle .full { display: none; }
+    #playTitle .short { display: inline; }
+  }
+  @media (max-width: 430px) {
+    #playTitle { display: none; }
+  }
+  .tpill { font-weight: 700; font-size: clamp(14px, 3.3vw, 20px); background: #fff; border-radius: 16px; padding: 6px 10px; box-shadow: 0 3px 0 #d4c8ff; white-space: nowrap; }
+  #styleBtn { font-weight: 700; font-size: clamp(16px, 3.5vw, 22px); width: 52px; height: 52px; border: 4px solid #fff; border-radius: 18px; background: #fff; box-shadow: 0 4px 0 #d4c8ff; padding: 0; flex: none; line-height: 1; }
+  #styleBtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #d4c8ff; }
+  #gridWrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px 8px 12px; padding-bottom: max(12px, env(safe-area-inset-bottom)); position: relative; }
+  #grid {
+    display: grid;
+    padding: 6px;
+    touch-action: manipulation;
+    user-select: none;
+    overflow: visible;
+  }
+  body.style-doors #grid {
+    background: linear-gradient(180deg, #d8c2a4, #c4a882);
+    border: 6px solid #fff;
+    border-radius: 22px;
+    box-shadow: 0 8px 0 #b8956c, 0 12px 24px rgba(123,92,255,.18);
+    padding: 12px 10px 12px 16px;
+  }
+  body.style-cards #grid {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 4px;
+  }
+
+  .tile { position: relative; width: var(--tile, 80px); height: var(--tile, 80px); perspective: 900px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .frame { position: absolute; inset: 0; border-radius: 12px; transform-style: preserve-3d; }
+  .pic {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: calc(var(--tile, 80px) * .52); line-height: 1; border-radius: 10px;
+    background: linear-gradient(180deg, #fff8e8, #ffe9c4);
+    box-shadow: inset 0 0 0 3px rgba(255,255,255,.7);
+    z-index: 1;
+  }
+  .pic .spark { position: absolute; top: 2%; right: 4%; font-size: calc(var(--tile, 80px) * .32); opacity: 0; pointer-events: none; }
+  .tile.matched .pic { background: linear-gradient(180deg, #e8fff2, #c9f7dc); box-shadow: inset 0 0 0 3px #2fd27a, 0 0 12px rgba(47,210,122,.55); }
+  .tile.matched .pic .spark { animation: sparkle .7s ease; }
+  @keyframes sparkle {
+    0% { opacity: 0; transform: scale(.4) rotate(0) translateY(0); }
+    35% { opacity: 1; transform: scale(1.25) rotate(15deg) translateY(-10%); }
+    100% { opacity: 0; transform: scale(1.6) rotate(-12deg) translateY(-25%); }
+  }
+  .tile.matched.pop .pic { animation: matchpop .4s ease; }
+  @keyframes matchpop { 0% { transform: scale(.86); } 55% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+  /* Doors */
+  body.style-doors .door {
+    position: absolute; inset: 0; transform-origin: left center; transform-style: preserve-3d;
+    transition: transform .48s cubic-bezier(.2,.75,.2,1); z-index: 2; border-radius: 10px;
+  }
+  body.style-doors .tile.open .door,
+  body.style-doors .tile.matched .door { transform: rotateY(-108deg); }
+  body.style-doors .tile.open,
+  body.style-doors .tile.matched { z-index: 3; }
+  body.style-doors .door-face {
+    position: absolute; inset: 0; border-radius: 10px; overflow: hidden;
+    border: 3px solid rgba(255,255,255,.75);
+    box-shadow: inset 0 0 0 3px rgba(0,0,0,.08), 2px 2px 0 rgba(0,0,0,.12);
+    background: var(--door, #ff7a3d);
+  }
+  body.style-doors .door-face::before {
+    content: ""; position: absolute; left: 14%; right: 28%; top: 12%; height: 32%;
+    border-radius: 6px; border: 2px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12);
+  }
+  body.style-doors .door-face::after {
+    content: ""; position: absolute; left: 14%; right: 28%; top: 52%; height: 32%;
+    border-radius: 6px; border: 2px solid rgba(255,255,255,.35); background: rgba(255,255,255,.08);
+  }
+  body.style-doors .knob {
+    position: absolute; right: 9%; top: 50%; width: 18%; height: 18%; min-width: 8px; min-height: 8px;
+    transform: translateY(-50%); border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, #fff6c2, #f0c44a 50%, #c99212);
+    box-shadow: 0 1px 2px rgba(0,0,0,.35); z-index: 1;
+  }
+  body.style-doors .frame {
+    background: linear-gradient(180deg, #b08968, #8d6a4a);
+    box-shadow: inset 0 0 0 3px rgba(80,50,20,.25);
+    padding: 0;
+  }
+
+  /* Cards */
+  body.style-cards .frame { transition: transform .5s cubic-bezier(.2,.75,.2,1); }
+  body.style-cards .tile.open .frame,
+  body.style-cards .tile.matched .frame { transform: rotateY(180deg); }
+  body.style-cards .door, body.style-cards .pic { backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 12px; }
+  body.style-cards .pic { transform: rotateY(180deg); border: 3px solid #fff; box-shadow: 0 4px 0 rgba(0,0,0,.12); }
+  body.style-cards .door { position: absolute; inset: 0; z-index: 2; }
+  body.style-cards .door-face {
+    position: absolute; inset: 0; border-radius: 12px; border: 4px solid #fff;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.45) 0 18%, transparent 19%),
+      repeating-linear-gradient(45deg, rgba(255,255,255,.18) 0 10px, transparent 10px 20px),
+      var(--door, #7b5cff);
+    box-shadow: 0 4px 0 rgba(0,0,0,.14);
+  }
+  body.style-cards .door-face::before, body.style-cards .door-face::after { content: none; }
+  body.style-cards .knob { display: none; }
+  body.style-cards .door-face .qmark {
+    display: flex; align-items: center; justify-content: center; height: 100%;
+    font-size: calc(var(--tile, 80px) * .46); color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.15); font-weight: 700;
+  }
+  body.style-doors .door-face .qmark { display: none; }
+
+  #peekBanner {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    background: #ffe066; color: #2d2350; font-weight: 700; font-size: clamp(18px, 4vw, 26px);
+    border: 4px solid #fff; border-radius: 18px; padding: 8px 16px; box-shadow: 0 5px 0 #d4a900;
+    z-index: 5; display: none; white-space: nowrap; pointer-events: none;
+  }
+  #peekBanner.on { display: block; animation: pop .3s ease-out; }
+  #peekBanner.go { background: #2fd27a; color: #fff; box-shadow: 0 5px 0 #17984f; }
+
+  @media (max-width: 420px) {
+    .roundbtn, .topbar .roundbtn, #styleBtn { width: 46px; height: 46px; font-size: 22px; }
+    .topbar { gap: 6px; padding: 6px 8px; padding-top: max(6px, env(safe-area-inset-top)); }
+    .tpill { padding: 5px 8px; }
+  }
+  @media (max-width: 360px) {
+    .roundbtn, .topbar .roundbtn, #styleBtn { width: 40px; height: 40px; font-size: 20px; }
+    .tpill { font-size: 13px; padding: 4px 6px; }
+    .topbar { gap: 4px; padding: 4px 6px; padding-top: max(4px, env(safe-area-inset-top)); }
+  }
+
+  /* ===== Overlays ===== */
+  .overlay { position: fixed; inset: 0; background: rgba(58,42,93,.72); display: none; align-items: center; justify-content: center; z-index: 90; padding: 16px; }
+  .overlay.on { display: flex; }
+  .box { background: #ffffff; border: 6px solid #ffe066; border-radius: 30px; padding: 22px 20px; text-align: center; max-width: 520px; width: 100%; max-height: 96vh; overflow-y: auto; animation: pop .35s ease-out; box-shadow: 0 18px 40px rgba(40,20,70,.35); position: relative; z-index: 1; }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .box h1 { font-size: clamp(34px, 8vw, 52px); margin: 6px 0 10px; color: #ff4fa3; text-shadow: 3px 3px 0 #ffe066; line-height: 1.05; }
+  .box p { font-size: clamp(21px, 4.5vw, 26px); margin: 10px 0; font-weight: 600; }
+  .btn { font-weight: 700; font-size: clamp(22px, 4.5vw, 30px); border: 5px solid #fff; border-radius: 24px; padding: 14px 24px; cursor: pointer; color: #fff; background: #7b5cff; box-shadow: 0 7px 0 #4b33b8; margin: 8px 4px; }
+  .btn.go { background: #2fd27a; box-shadow: 0 7px 0 #17984f; }
+  .btn.blue { background: #3fb5ff; box-shadow: 0 7px 0 #1f86c7; }
+  .btn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+  .bigtime { font-size: clamp(36px, 9vw, 56px); font-weight: 700; color: #7b5cff; margin: 4px 0; }
+  .stars { font-size: clamp(40px, 10vw, 64px); letter-spacing: 6px; line-height: 1.1; margin: 4px 0 8px; }
+  .stars .dim { opacity: .25; filter: grayscale(1); }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 95; width: 100%; height: 100%; }
+</style>
+</head>
+<body class="style-doors">
+<canvas id="confetti"></canvas>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<!-- HOME -->
+<div id="home" class="screen on">
+  <div class="topline">
+    <a class="pill" href="../">🏠 Kai's Kool Kwiz</a>
+    <button class="roundbtn" id="muteBtn" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div class="emoji-row" style="margin-top:8px"><span class="wiggle">🚪</span> <span class="wiggle">🦁</span> <span class="wiggle">🍎</span></div>
+  <div class="big-title">Memory<br>Match</div>
+  <p class="tagline">Open the doors and find the pairs! Remember where each picture hides.</p>
+  <div class="stylepick">
+    <span class="lab">Look:</span>
+    <div class="seg" role="group" aria-label="Door or card style">
+      <button type="button" id="homeDoors" class="on">🚪 Doors</button>
+      <button type="button" id="homeCards">🃏 Cards</button>
+    </div>
+  </div>
+  <div id="cats"></div>
+</div>
+
+<!-- LEVEL -->
+<div id="level" class="screen">
+  <div class="topline">
+    <button class="roundbtn back" id="backHome" aria-label="Back">⬅</button>
+    <button class="roundbtn" id="muteBtn2" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div class="emoji-row" style="margin-top:8px" id="levelEmoji"></div>
+  <div class="big-title" id="levelTitle">Animals</div>
+  <p class="tagline">Pick a level!</p>
+  <div id="diffs"></div>
+  <p class="howline">🚪 Open two doors. If the pictures match, they stay open. If not, they close — so remember where they were!</p>
+</div>
+
+<!-- PLAY -->
+<div id="play" class="screen">
+  <div class="topbar">
+    <button class="roundbtn home" id="homeBtn" aria-label="Home" title="Home">🏠</button>
+    <div id="playTitle">Animals</div>
+    <div class="tpill" id="timer">⏱ 00:00</div>
+    <div class="tpill" id="stats">0 · 0/6</div>
+    <button id="styleBtn" aria-label="Switch to cards" title="Doors or cards">🚪</button>
+    <button class="roundbtn" id="muteBtn3" aria-label="Sound on or off">🔊</button>
+  </div>
+  <div id="gridWrap">
+    <div id="peekBanner">👀 Peek time!</div>
+    <div id="grid" role="grid" aria-label="Memory grid"></div>
+  </div>
+</div>
+
+<!-- WIN -->
+<div class="overlay" id="winBox">
+  <div class="box">
+    <div style="font-size:60px">🏆</div>
+    <h1>You did it, Kaileigh!</h1>
+    <div class="stars" id="winStars" aria-label="Star rating">⭐⭐⭐</div>
+    <p id="winSub">You found every pair!</p>
+    <div class="bigtime" id="winTime">⏱ 00:00</div>
+    <p id="winMoves">0 moves</p>
+    <p id="winBest"></p>
+    <button class="btn go" id="winAgain">🔁 Play again</button><br>
+    <button class="btn blue" id="winLevel">🎯 Change level</button><br>
+    <a class="pill" href="../" style="font-size:22px;padding:10px 18px;margin-top:8px">🏠 Home</a>
+  </div>
+</div>
+
+<script>
+const $ = function (id) { return document.getElementById(id); };
+const MUTE_KEY = "kkk_mem_muted";
+const BEST_KEY = "kkk_mem_best";
+const STYLE_KEY = "kkk_mem_style";
+const PEEK_MS = 2000;
+const CLOSE_MS = 500;
+const MISMATCH_MS = 1000;
+
+const DOOR_COLORS = ["#ff7a3d","#7b5cff","#3fb5ff","#2fd27a","#ff4fa3","#ffb800","#ff6b6b","#12b5a0"];
+
+const THEMES = {
+  animals: {
+    name: "Animals", emoji: "🦁", color: "#ff7a3d", shadow: "#c9541d",
+    desc: "Lions, dogs, dolphins and more",
+    pics: ["🐶","🐱","🐭","🐹","🐰","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🐺","🐴","🦄","🐝","🐛","🐞","🦋","🐢","🐙","🐬","🐳","🐠"]
+  },
+  fruit: {
+    name: "Fruits & Veg", emoji: "🍎", color: "#2fd27a", shadow: "#17984f",
+    desc: "Apples, carrots, berries and more",
+    pics: ["🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🍒","🍑","🍍","🍈","🍅","🍆","🌽","🥕","🍄","🥑","🥝","🥥","🥦","🥒","🥔","🌶️","🥬","🧄","🧅","🥜"]
+  },
+  party: {
+    name: "Party", emoji: "🎈", color: "#ff4fa3", shadow: "#c41d6e",
+    desc: "Balloons, cake, gifts and fun",
+    pics: ["🎈","🎉","🎊","🎁","🎂","🍰","🎀","🎩","👑","🎵","🎸","🎺","🥁","🎠","🎡","🎢","🎆","🎇","🎯","🍦","🍭","🍬","🍪","🍩","🎄","🎃","🎅","⭐","🌟","🔔"]
+  },
+  mixed: {
+    name: "Mixed", emoji: "🌈", color: "#7b5cff", shadow: "#4b33b8",
+    desc: "A bit of everything!",
+    pics: ["🌈","☀️","🌙","☁️","❄️","🌸","🌼","🌷","🚗","🚌","🚀","✈️","🚂","🚲","⛵","⚽","🏀","🎾","⚾","🏠","🧸","📚","✏️","🎨","🎮","💎","⏰","💡","🐶","🍎","🎈","🦁"]
+  }
+};
+
+const LEVELS = {
+  easy:   { name: "Easy",   emoji: "🌱", color: "#2fd27a", shadow: "#17984f", cols: 4, rows: 3, pairs: 6,  peek: true,  desc: "4×3 · 6 pairs · a quick peek first" },
+  medium: { name: "Medium", emoji: "⭐", color: "#ffb800", shadow: "#c98f00", cols: 4, rows: 4, pairs: 8,  peek: false, desc: "4×4 · 8 pairs" },
+  hard:   { name: "Hard",   emoji: "🔥", color: "#ff7a3d", shadow: "#c9541d", cols: 6, rows: 5, pairs: 15, peek: false, desc: "6×5 · 15 pairs" }
+};
+
+function uniquePics(arr) {
+  const out = [], seen = {};
+  for (let i = 0; i < arr.length; i++) {
+    if (!seen[arr[i]]) { seen[arr[i]] = 1; out.push(arr[i]); }
+  }
+  return out;
+}
+Object.keys(THEMES).forEach(function (k) { THEMES[k].pics = uniquePics(THEMES[k].pics); });
+
+function shuffle(arr, rand) {
+  rand = rand || Math.random;
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+
+function deal(themeKey, pairs, rand) {
+  const pool = THEMES[themeKey].pics.slice();
+  if (pool.length < pairs) throw new Error("Theme " + themeKey + " has only " + pool.length + " pictures");
+  shuffle(pool, rand);
+  const chosen = pool.slice(0, pairs);
+  const tiles = [];
+  for (let i = 0; i < chosen.length; i++) {
+    tiles.push({ emo: chosen[i], id: i, open: false, matched: false });
+    tiles.push({ emo: chosen[i], id: i, open: false, matched: false });
+  }
+  shuffle(tiles, rand);
+  return tiles;
+}
+
+function fmt(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(s / 60);
+  return String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+
+function starRating(moves, pairs) {
+  if (moves <= pairs + 3) return 3;
+  if (moves <= Math.ceil(pairs * 2.2)) return 2;
+  return 1;
+}
+
+function bestKey(theme, level) { return theme + "_" + level; }
+function loadBestMap() {
+  try { const s = JSON.parse(localStorage.getItem(BEST_KEY)); if (s && typeof s === "object") return s; } catch (e) {}
+  return {};
+}
+function saveBestMap(m) { try { localStorage.setItem(BEST_KEY, JSON.stringify(m)); } catch (e) {} }
+function getBest(theme, level) { return loadBestMap()[bestKey(theme, level)] || null; }
+function recordBest(theme, level, time, moves) {
+  const map = loadBestMap();
+  const k = bestKey(theme, level);
+  const prev = map[k] || {};
+  const next = {
+    time: (prev.time == null || time < prev.time) ? time : prev.time,
+    moves: (prev.moves == null || moves < prev.moves) ? moves : prev.moves
+  };
+  map[k] = next;
+  saveBestMap(map);
+  return { best: next, timeRecord: prev.time == null || time < prev.time, movesRecord: prev.moves == null || moves < prev.moves };
+}
+
+function bestLine(theme, level) {
+  const b = getBest(theme, level);
+  if (!b) return "";
+  return "🏆 Best " + fmt(b.time) + " · " + b.moves + " moves";
+}
+
+/* ================= Sound ================= */
+let AC = null, muted = false, styleMode = "doors";
+try { muted = localStorage.getItem(MUTE_KEY) === "1"; } catch (e) {}
+try { const s = localStorage.getItem(STYLE_KEY); if (s === "cards" || s === "doors") styleMode = s; } catch (e) {}
+
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); return AC; }
+function tone(f, t0, dur, type, vol, f2) {
+  const a = ac(); if (!a || muted) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(f, a.currentTime + t0);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, a.currentTime + t0 + dur);
+  g.gain.setValueAtTime(0.0001, a.currentTime + t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.2, a.currentTime + t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + t0 + dur);
+  o.connect(g); g.connect(a.destination); o.start(a.currentTime + t0); o.stop(a.currentTime + t0 + dur + 0.05);
+}
+const SFX = {
+  open() { tone(420, 0, 0.09, "triangle", 0.08, 520); },
+  match() { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.07, 0.22, "triangle", 0.2); }); tone(1568, 0.28, 0.25, "sine", 0.08); },
+  miss() { tone(280, 0, 0.16, "sine", 0.07, 200); },
+  click() { tone(660, 0, 0.06, "square", 0.05); },
+  go() { tone(784, 0, 0.12, "triangle", 0.14, 1175); },
+  win() { [523, 659, 784, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.13, 0.25, "triangle", 0.22); }); tone(1047, 0.8, 0.6, "sine", 0.15); }
+};
+function say(text) {
+  if (muted || !window.speechSynthesis) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(String(text).replace(/Kaileigh/gi, "Kai Lee")); u.rate = 1.06; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
+}
+function setMuted(m) {
+  muted = m;
+  try { localStorage.setItem(MUTE_KEY, m ? "1" : "0"); } catch (e) {}
+  ["muteBtn","muteBtn2","muteBtn3"].forEach(function (id) { const b = $(id); if (b) b.textContent = m ? "🔇" : "🔊"; });
+  if (m && window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
+}
+
+function applyStyle(mode) {
+  styleMode = (mode === "cards") ? "cards" : "doors";
+  document.body.classList.toggle("style-doors", styleMode === "doors");
+  document.body.classList.toggle("style-cards", styleMode === "cards");
+  try { localStorage.setItem(STYLE_KEY, styleMode); } catch (e) {}
+  const doorsOn = styleMode === "doors";
+  $("homeDoors").classList.toggle("on", doorsOn);
+  $("homeCards").classList.toggle("on", !doorsOn);
+  const sb = $("styleBtn");
+  if (sb) {
+    sb.textContent = doorsOn ? "🚪" : "🃏";
+    sb.setAttribute("aria-label", doorsOn ? "Switch to cards" : "Switch to doors");
+    sb.title = doorsOn ? "Doors" : "Cards";
+  }
+  sizeGrid();
+}
+
+/* ================= State ================= */
+let st = null, screen = "home", pickTheme = null, gameGen = 0, timerId = null, peekTimer = null, mismatchTimer = null;
+
+function show(id) {
+  ["home","level","play"].forEach(function (s) { $(s).classList.toggle("on", s === id); });
+  screen = id;
+  if (id !== "play") $("winBox").classList.remove("on");
+}
+
+function renderHome() {
+  const box = $("cats"); box.innerHTML = "";
+  Object.keys(THEMES).forEach(function (key) {
+    const t = THEMES[key];
+    const btn = document.createElement("button");
+    btn.className = "cat";
+    btn.style.background = t.color;
+    btn.style.boxShadow = "0 7px 0 " + t.shadow;
+    btn.type = "button";
+    btn.setAttribute("data-theme", key);
+    const bests = ["easy","medium","hard"].map(function (lv) { return getBest(key, lv); }).filter(Boolean);
+    let stLine = "";
+    if (bests.length) {
+      const times = bests.map(function (b) { return b.time; });
+      stLine = '<div class="st">🏆 ' + bests.length + " best score" + (bests.length > 1 ? "s" : "") + "</div>";
+    }
+    btn.innerHTML = '<div class="ic">' + t.emoji + '</div><div><div class="nm">' + t.name + '</div><div class="ds">' + t.desc + "</div>" + stLine + "</div>";
+    btn.addEventListener("click", function () { SFX.click(); openLevels(key); });
+    box.appendChild(btn);
+  });
+}
+
+function openLevels(themeKey) {
+  pickTheme = themeKey;
+  const t = THEMES[themeKey];
+  $("levelEmoji").textContent = t.emoji;
+  $("levelTitle").textContent = t.name;
+  const box = $("diffs"); box.innerHTML = "";
+  Object.keys(LEVELS).forEach(function (key) {
+    const lv = LEVELS[key];
+    const btn = document.createElement("button");
+    btn.className = "dif";
+    btn.type = "button";
+    btn.style.background = lv.color;
+    btn.style.boxShadow = "0 7px 0 " + lv.shadow;
+    btn.setAttribute("data-level", key);
+    const bl = bestLine(themeKey, key);
+    btn.innerHTML = '<div class="ic">' + lv.emoji + '</div><div><div class="nm">' + lv.name + '</div><div class="ds">' + lv.desc + "</div>" + (bl ? '<div class="st">' + bl + "</div>" : "") + "</div>";
+    btn.addEventListener("click", function () { SFX.click(); startGame(themeKey, key); });
+    box.appendChild(btn);
+  });
+  show("level");
+}
+
+function tileHtml(tile, i) {
+  const color = DOOR_COLORS[i % DOOR_COLORS.length];
+  const label = (tile.open || tile.matched) ? ("Picture " + (i + 1) + ", " + tile.emo) : ("Door " + (i + 1) + ", closed");
+  const cls = "tile" + (tile.open ? " open" : "") + (tile.matched ? " matched" : "");
+  return '<button type="button" class="' + cls + '" data-i="' + i + '" aria-label="' + label + '" style="--door:' + color + '">' +
+    '<div class="frame">' +
+      '<div class="pic"><span class="emo">' + tile.emo + '</span><span class="spark" aria-hidden="true">✨</span></div>' +
+      '<div class="door"><div class="door-face"><span class="knob"></span><span class="qmark">?</span></div></div>' +
+    "</div></button>";
+}
+
+function paintGrid() {
+  if (!st) return;
+  const g = $("grid");
+  g.style.gridTemplateColumns = "repeat(" + st.cols + ", var(--tile))";
+  g.style.gridTemplateRows = "repeat(" + st.rows + ", var(--tile))";
+  let html = "";
+  for (let i = 0; i < st.tiles.length; i++) html += tileHtml(st.tiles[i], i);
+  g.innerHTML = html;
+  sizeGrid();
+}
+
+function refreshTile(i) {
+  if (!st) return;
+  const el = $("grid").querySelector('[data-i="' + i + '"]');
+  if (!el) return;
+  const tile = st.tiles[i];
+  el.classList.toggle("open", !!tile.open);
+  el.classList.toggle("matched", !!tile.matched);
+  const label = (tile.open || tile.matched) ? ("Picture " + (i + 1) + ", " + tile.emo) : ("Door " + (i + 1) + ", closed");
+  el.setAttribute("aria-label", label);
+}
+
+function sizeGrid() {
+  if (!st) return;
+  const wrap = $("gridWrap");
+  const cols = st.cols, rows = st.rows;
+  const ww = wrap.clientWidth;
+  const hh = wrap.clientHeight;
+  const gap = cols >= 6 ? 4 : (cols >= 4 ? 8 : 10);
+  const doors = document.body.classList.contains("style-doors");
+  // doors: 6px border x2 + padding 16+10 width, 12+12 height; cards: 4px padding x2
+  const chromeX = doors ? 38 : 16;
+  const chromeY = doors ? 36 : 16;
+  const size = Math.max(36, Math.floor(Math.min(
+    (ww - chromeX - gap * (cols - 1)) / cols,
+    (hh - chromeY - gap * (rows - 1)) / rows
+  )));
+  const grid = $("grid");
+  grid.style.setProperty("--tile", size + "px");
+  grid.style.gap = gap + "px";
+  grid.style.gridTemplateColumns = "repeat(" + cols + ", " + size + "px)";
+  grid.style.gridTemplateRows = "repeat(" + rows + ", " + size + "px)";
+}
+
+function updateHud() {
+  if (!st) return;
+  const t = THEMES[st.themeKey], lv = LEVELS[st.levelKey];
+  $("playTitle").innerHTML = '<span class="full">' + t.emoji + " " + t.name + " · " + lv.name + '</span><span class="short">' + t.emoji + " " + lv.name + "</span>";
+  $("stats").textContent = st.moves + " · " + st.found + "/" + st.pairs;
+  if (st.playing && st.t0) $("timer").textContent = "⏱ " + fmt(Date.now() - st.t0);
+  else if (!st.t0) $("timer").textContent = "⏱ 00:00";
+}
+
+function clearTimers() {
+  if (peekTimer) { clearTimeout(peekTimer); peekTimer = null; }
+  if (mismatchTimer) { clearTimeout(mismatchTimer); mismatchTimer = null; }
+}
+
+function startGame(themeKey, levelKey, opts) {
+  opts = opts || {};
+  const lv = LEVELS[levelKey], th = THEMES[themeKey];
+  if (!lv || !th) return;
+  gameGen += 1;
+  const gen = gameGen;
+  clearTimers();
+  $("winBox").classList.remove("on");
+  confetti.run = (confetti.run || 0) + 1;
+  const tiles = deal(themeKey, lv.pairs, opts.rand);
+  st = {
+    themeKey: themeKey, levelKey: levelKey, tiles: tiles,
+    cols: lv.cols, rows: lv.rows, pairs: lv.pairs,
+    picked: [], locked: false, moves: 0, found: 0,
+    t0: 0, playing: false, peeking: false, finished: false, gen: gen
+  };
+  show("play");
+  $("peekBanner").classList.remove("on", "go");
+  $("peekBanner").textContent = "👀 Peek time!";
+  paintGrid();
+  updateHud();
+  const doPeek = lv.peek && !opts.skipPeek;
+  if (doPeek) {
+    st.peeking = true;
+    st.locked = true;
+    for (let i = 0; i < st.tiles.length; i++) st.tiles[i].open = true;
+    paintGrid();
+    $("peekBanner").classList.add("on");
+    peekTimer = setTimeout(function () {
+      if (gameGen !== gen || !st) return;
+      $("peekBanner").classList.remove("on");
+      $("peekBanner").textContent = "GO!";
+      $("peekBanner").classList.add("on", "go");
+      for (let i = 0; i < st.tiles.length; i++) st.tiles[i].open = false;
+      paintGrid();
+      SFX.go();
+      peekTimer = setTimeout(function () {
+        if (gameGen !== gen || !st) return;
+        $("peekBanner").classList.remove("on", "go");
+        st.peeking = false;
+        st.locked = false;
+        st.playing = true;
+        st.t0 = Date.now();
+        updateHud();
+      }, CLOSE_MS);
+    }, PEEK_MS);
+  } else {
+    st.playing = true;
+    st.t0 = Date.now();
+    updateHud();
+  }
+}
+
+function pick(i) {
+  if (!st || !st.playing || st.locked || st.peeking || st.finished) return false;
+  const tile = st.tiles[i];
+  if (!tile || tile.open || tile.matched) return false;
+  tile.open = true;
+  refreshTile(i);
+  SFX.open();
+  st.picked.push(i);
+  if (st.picked.length < 2) return true;
+  st.moves += 1;
+  updateHud();
+  const a = st.tiles[st.picked[0]], b = st.tiles[st.picked[1]];
+  const ids = st.picked.slice();
+  st.picked = [];
+  if (a.id === b.id && ids[0] !== ids[1]) {
+    a.matched = true;
+    b.matched = true;
+    st.found += 1;
+    refreshTile(ids[0]);
+    refreshTile(ids[1]);
+    const el0 = $("grid").querySelector('[data-i="' + ids[0] + '"]');
+    const el1 = $("grid").querySelector('[data-i="' + ids[1] + '"]');
+    if (el0) { el0.classList.remove("pop"); void el0.offsetWidth; el0.classList.add("pop"); }
+    if (el1) { el1.classList.remove("pop"); void el1.offsetWidth; el1.classList.add("pop"); }
+    SFX.match();
+    updateHud();
+    if (st.found >= st.pairs) win();
+    return true;
+  }
+  st.locked = true;
+  SFX.miss();
+  const gen = st.gen;
+  mismatchTimer = setTimeout(function () {
+    if (!st || st.gen !== gen) return;
+    ids.forEach(function (j) {
+      if (st.tiles[j] && !st.tiles[j].matched) { st.tiles[j].open = false; refreshTile(j); }
+    });
+    st.locked = false;
+  }, MISMATCH_MS);
+  return true;
+}
+
+function win() {
+  if (!st || st.finished) return;
+  st.finished = true;
+  st.playing = false;
+  st.locked = true;
+  const time = Math.max(0, Date.now() - st.t0);
+  st.time = time;
+  const stars = starRating(st.moves, st.pairs);
+  st.stars = stars;
+  const rec = recordBest(st.themeKey, st.levelKey, time, st.moves);
+  const msgs = { 3: "Super memory!", 2: "Great job!", 1: "You found every pair!" };
+  $("winSub").textContent = msgs[stars] || msgs[1];
+  $("winTime").textContent = "⏱ " + fmt(time);
+  $("winMoves").textContent = st.moves + " move" + (st.moves === 1 ? "" : "s");
+  let starsHtml = "";
+  for (let i = 1; i <= 3; i++) starsHtml += i <= stars ? "⭐" : '<span class="dim">⭐</span>';
+  $("winStars").innerHTML = starsHtml;
+  $("winStars").setAttribute("aria-label", stars + " star" + (stars === 1 ? "" : "s"));
+  let bestTxt = "";
+  if (rec.timeRecord && rec.movesRecord) bestTxt = "🏆 New best time and moves!";
+  else if (rec.timeRecord) bestTxt = "🏆 New best time!";
+  else if (rec.movesRecord) bestTxt = "🏆 New best moves!";
+  else bestTxt = "Best: ⏱ " + fmt(rec.best.time) + " · " + rec.best.moves + " moves";
+  $("winBest").textContent = bestTxt;
+  $("winBox").classList.add("on");
+  SFX.win();
+  say("You did it, Kai Lee!");
+  confetti();
+}
+
+function goHome() {
+  gameGen += 1;
+  clearTimers();
+  st = null;
+  pickTheme = null;
+  confetti.run = (confetti.run || 0) + 1;
+  $("winBox").classList.remove("on");
+  $("peekBanner").classList.remove("on", "go");
+  renderHome();
+  show("home");
+}
+
+function goLevel() {
+  gameGen += 1;
+  clearTimers();
+  $("winBox").classList.remove("on");
+  $("peekBanner").classList.remove("on", "go");
+  const theme = (st && st.themeKey) || pickTheme;
+  st = null;
+  if (theme) openLevels(theme);
+  else goHome();
+}
+
+/* ================= Confetti ================= */
+function confetti() {
+  const cv = $("confetti"), x = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ["#ff4fa3","#ffe066","#7b5cff","#2fd27a","#3fb5ff","#ff7a3d","#fff","#12b5a0"];
+  const P = [];
+  for (let i = 0; i < 90; i++) P.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*0.3, vx: Math.random()*6-3, vy: 3+Math.random()*4, a: Math.random()*6, r: 6+Math.random()*7, c: cols[i%cols.length] });
+  const run = ++confetti.run; let n = 0;
+  (function f() {
+    if (run !== confetti.run) { x.clearRect(0, 0, cv.width, cv.height); return; }
+    x.clearRect(0, 0, cv.width, cv.height);
+    for (const q of P) { q.x += q.vx; q.y += q.vy; q.a += .1; x.fillStyle = q.c; x.save(); x.translate(q.x, q.y); x.rotate(q.a); x.fillRect(-q.r, -q.r / 2, q.r * 2, q.r); x.restore(); }
+    if (++n < 200) requestAnimationFrame(f); else x.clearRect(0, 0, cv.width, cv.height);
+  })();
+}
+confetti.run = 0;
+
+/* ================= Wire up ================= */
+$("grid").addEventListener("click", function (e) {
+  const btn = e.target.closest(".tile");
+  if (!btn) return;
+  pick(+btn.getAttribute("data-i"));
+});
+$("backHome").addEventListener("click", function () { SFX.click(); goHome(); });
+$("homeBtn").addEventListener("click", function () { SFX.click(); goHome(); });
+$("winAgain").addEventListener("click", function () { SFX.click(); if (st) startGame(st.themeKey, st.levelKey); else if (pickTheme) openLevels(pickTheme); });
+$("winLevel").addEventListener("click", function () { SFX.click(); goLevel(); });
+$("homeDoors").addEventListener("click", function () { SFX.click(); applyStyle("doors"); });
+$("homeCards").addEventListener("click", function () { SFX.click(); applyStyle("cards"); });
+$("styleBtn").addEventListener("click", function () { SFX.click(); applyStyle(styleMode === "doors" ? "cards" : "doors"); });
+["muteBtn","muteBtn2","muteBtn3"].forEach(function (id) {
+  $(id).addEventListener("click", function () { ac(); setMuted(!muted); SFX.click(); });
+});
+window.addEventListener("resize", sizeGrid);
+window.addEventListener("orientationchange", function () { setTimeout(sizeGrid, 80); });
+timerId = setInterval(function () {
+  if (st && st.playing && st.t0) $("timer").textContent = "⏱ " + fmt(Date.now() - st.t0);
+}, 200);
+
+setMuted(muted);
+applyStyle(styleMode);
+renderHome();
+
+window.__mem = {
+  THEMES: THEMES, LEVELS: LEVELS, DOOR_COLORS: DOOR_COLORS,
+  PEEK_MS: PEEK_MS, CLOSE_MS: CLOSE_MS, MISMATCH_MS: MISMATCH_MS,
+  deal: deal, shuffle: shuffle, starRating: starRating, fmt: fmt,
+  startGame: startGame, goHome: goHome, goLevel: goLevel, openLevels: openLevels,
+  pick: pick, sizeGrid: sizeGrid, applyStyle: applyStyle, setMuted: setMuted,
+  getBest: getBest, recordBest: recordBest,
+  get state() { return st; },
+  get screen() { return screen; },
+  get style() { return styleMode; },
+  get muted() { return muted; },
+  get pickTheme() { return pickTheme; }
+};
+</script>
+</body>
+</html>
