@@ -93,6 +93,16 @@
     #hintBtn { height: 46px; padding: 4px 8px; }
     .topbar { gap: 6px; padding: 6px 8px; padding-top: max(6px, env(safe-area-inset-top)); }
   }
+  @media (max-width: 360px) {
+    .roundbtn, .topbar .roundbtn { width: 40px; height: 40px; font-size: 20px; }
+    #hintBtn { height: 40px; padding: 2px 6px; font-size: 15px; }
+    .tpill { font-size: 14px; padding: 4px 7px; }
+    .wchip { font-size: 12px; padding: 2px 6px; border-width: 2px; box-shadow: 0 2px 0 #d4c8ff; }
+    .tip { display: none; }
+    .topbar { gap: 4px; padding: 4px 6px; padding-top: max(4px, env(safe-area-inset-top)); }
+    #grid { padding: 2px; border-width: 4px; }
+    #words { padding: 4px 4px 2px; gap: 4px 5px; }
+  }
 
   /* ===== Overlays ===== */
   .overlay { position: fixed; inset: 0; background: rgba(58,42,93,.55); display: none; align-items: center; justify-content: center; z-index: 70; padding: 16px; }
@@ -174,16 +184,16 @@ const CATS = {
   animals: { name: "Animals", emoji: "🐾", color: "#2fd27a", shadow: "#17984f",
     words: [["LION","🦁"],["TIGER","🐯"],["BEAR","🐻"],["WOLF","🐺"],["FROG","🐸"],["DUCK","🦆"],["GOAT","🐐"],["HORSE","🐴"],["SHEEP","🐑"],["MOUSE","🐭"],["SNAKE","🐍"],["BIRD","🐦"],["FISH","🐟"],["CRAB","🦀"],["SEAL","🦭"],["WHALE","🐋"],["SHARK","🦈"],["ZEBRA","🦓"],["CAMEL","🐫"],["PANDA","🐼"],["KOALA","🐨"],["SLOTH","🦥"],["MONKEY","🐒"],["RABBIT","🐰"],["TURTLE","🐢"],["LIZARD","🦎"],["EAGLE","🦅"],["OWL","🦉"],["FOX","🦊"],["CAT","🐱"],["DOG","🐶"],["PIG","🐷"],["HEN","🐔"],["COW","🐮"],["BAT","🦇"],["ANT","🐜"],["BEE","🐝"],["DEER","🦌"],["OTTER","🦦"],["LLAMA","🦙"],["HIPPO","🦛"],["RHINO","🦏"],["GIRAFFE","🦒"],["PENGUIN","🐧"],["DOLPHIN","🐬"],["PARROT","🦜"],["PONY","🐴"],["SWAN","🦢"],["SQUID","🦑"],["OCTOPUS","🐙"],["HAMSTER","🐹"],["CHICK","🐤"],["LAMB","🐑"],["ROBIN","🐦"],["CROW","🐦"],["HAWK","🦅"],["PUPPY","🐶"],["KITTEN","🐱"],["ELEPHANT","🐘"],["GORILLA","🦍"],["SNAIL","🐌"],["MOOSE","🦌"]] },
   fruits: { name: "Fruits & Veg", emoji: "🍓", color: "#ff7a3d", shadow: "#c9541d",
-    words: [["APPLE","🍎"],["PEAR","🍐"],["GRAPE","🍇"],["PLUM","🟣"],["PEACH","🍑"],["MANGO","🥭"],["MELON","🍈"],["LEMON","🍋"],["LIME","🟢"],["BERRY","🫐"],["CHERRY","🍒"],["BANANA","🍌"],["ORANGE","🍊"],["KIWI","🥝"],["FIG","🟤"],["OLIVE","🫒"],["CARROT","🥕"],["PEA","🟢"],["BEAN","🌱"],["CORN","🌽"],["ONION","🧅"],["GARLIC","🧄"],["POTATO","🥔"],["TOMATO","🍅"],["CELERY","🥬"],["LETTUCE","🥬"],["CABBAGE","🥬"],["SPINACH","🥬"],["PEPPER","🫑"],["SQUASH","🎃"],["PUMPKIN","🎃"],["RADISH","🔴"],["BEET","🟣"],["TURNIP","⚪"],["LEEK","🥬"],["KALE","🥬"],["MINT","🌿"],["BASIL","🌿"],["SALAD","🥗"],["RAISIN","🍇"],["COCONUT","🥥"],["AVOCADO","🥑"],["PEANUT","🥜"],["ALMOND","🥜"],["CHILI","🌶️"],["YAM","🍠"],["DATE","🟤"],["BROCCOLI","🥦"],["CUCUMBER","🥒"],["PINEAPPLE","🍍"],["PAPAYA","🧡"],["APRICOT","🟠"],["SPROUT","🌱"],["SEED","🌱"],["HERB","🌿"],["JUICE","🧃"],["FRUIT","🍎"],["PARSNIP","🥕"],["WALNUT","🥜"],["PECAN","🥜"]] },
+    words: [["APPLE","🍎"],["PEAR","🍐"],["GRAPE","🍇"],["PLUM","🟣"],["PEACH","🍑"],["MANGO","🥭"],["MELON","🍈"],["LEMON","🍋"],["LIME","🟢"],["BERRY","🫐"],["CHERRY","🍒"],["BANANA","🍌"],["ORANGE","🍊"],["KIWI","🥝"],["FIG","🟤"],["OLIVE","🫒"],["CARROT","🥕"],["PEA","🟢"],["BEAN","🌱"],["CORN","🌽"],["ONION","🧅"],["GARLIC","🧄"],["POTATO","🥔"],["TOMATO","🍅"],["CELERY","🥬"],["LETTUCE","🥬"],["CABBAGE","🥬"],["SPINACH","🥬"],["PEPPER","🫑"],["SQUASH","🎃"],["PUMPKIN","🎃"],["RADISH","🔴"],["BEET","🟣"],["TURNIP","⚪"],["LEEK","🥬"],["KALE","🥬"],["MINT","🌿"],["BASIL","🌿"],["SALAD","🥗"],["RAISIN","🍇"],["COCONUT","🥥"],["AVOCADO","🥑"],["CHILLI","🌶️"],["YAM","🍠"],["DATE","🟤"],["BROCCOLI","🥦"],["CUCUMBER","🥒"],["PINEAPPLE","🍍"],["PAPAYA","🧡"],["APRICOT","🟠"],["SPROUT","🌱"],["SEED","🌱"],["HERB","🌿"],["JUICE","🧃"],["FRUIT","🍎"],["PARSNIP","🥕"],["GUAVA","🍈"],["LYCHEE","🍒"],["DURIAN","🍈"]] },
   celebrations: { name: "Celebrations", emoji: "🎉", color: "#ff4fa3", shadow: "#c43070",
-    words: [["CAKE","🎂"],["BALLOON","🎈"],["CANDLE","🕯️"],["GIFT","🎁"],["HAT","🎩"],["LANTERN","🏮"],["FIREWORK","🎆"],["PRESENT","🎁"],["CONFETTI","🎊"],["PARTY","🎉"],["BANNER","🎏"],["RIBBON","🎀"],["BOW","🎀"],["CARD","💌"],["SONG","🎵"],["DANCE","💃"],["PARADE","🥳"],["CROWN","👑"],["TIARA","👑"],["WAND","🪄"],["STAR","⭐"],["FLAG","🚩"],["HORN","📯"],["POPPER","🎉"],["STREAMER","🎀"],["PINATA","🪅"],["CLOWN","🤡"],["MAGIC","✨"],["TRICK","🎩"],["TREAT","🍬"],["SWEET","🍭"],["CANDY","🍬"],["CUPCAKE","🧁"],["COOKIE","🍪"],["MUFFIN","🧁"],["MUSIC","🎶"],["DRUM","🥁"],["GUITAR","🎸"],["PIANO","🎹"],["SPARKLER","✨"],["WISH","🌟"],["CHEER","📣"],["CLAP","👏"],["SMILE","😊"],["LAUGH","😂"],["JOY","💛"],["FUN","🤩"],["GAME","🎲"],["PRIZE","🏆"],["MEDAL","🏅"],["TROPHY","🏆"],["FRIEND","🤗"],["FAMILY","👨‍👩‍👧"],["BIRTHDAY","🎂"],["HOLIDAY","🏖️"],["EASTER","🐰"],["COSTUME","👗"],["MASK","🎭"],["CAPE","🦸"],["WINGS","🧚"],["FAIRY","🧚"],["PRINCE","🤴"],["PRINCESS","👸"],["KING","🤴"],["QUEEN","👸"],["CASTLE","🏰"],["UNICORN","🦄"],["FEAST","🍽️"],["PICNIC","🧺"],["HUG","🤗"],["FIREWORKS","🎆"],["CHRISTMAS","🎄"],["SANTA","🎅"],["ELF","🧝"],["SLEIGH","🛷"],["WREATH","🎄"],["BELLS","🔔"],["HEART","❤️"],["LOVE","💕"]] },
+    words: [["CAKE","🎂"],["BALLOON","🎈"],["CANDLE","🕯️"],["GIFT","🎁"],["HAT","🎩"],["LANTERN","🏮"],["FIREWORK","🎆"],["PRESENT","🎁"],["CONFETTI","🎊"],["PARTY","🎉"],["BANNER","🎏"],["RIBBON","🎀"],["BOW","🎀"],["CARD","💌"],["SONG","🎵"],["DANCE","💃"],["PARADE","🥳"],["CROWN","👑"],["TIARA","👑"],["WAND","🪄"],["STAR","⭐"],["FLAG","🚩"],["HORN","📯"],["POPPER","🎉"],["STREAMER","🎀"],["PINATA","🪅"],["CLOWN","🤡"],["MAGIC","✨"],["TRICK","🎩"],["TREAT","🍬"],["SWEET","🍭"],["CANDY","🍬"],["CUPCAKE","🧁"],["COOKIE","🍪"],["MUFFIN","🧁"],["MUSIC","🎶"],["DRUM","🥁"],["GUITAR","🎸"],["PIANO","🎹"],["SPARKLER","✨"],["WISH","🌟"],["CHEER","📣"],["CLAP","👏"],["SMILE","😊"],["LAUGH","😂"],["JOY","💛"],["FUN","🤩"],["GAME","🎲"],["PRIZE","🏆"],["MEDAL","🏅"],["TROPHY","🏆"],["FRIEND","🤗"],["FAMILY","👪"],["BIRTHDAY","🎂"],["HOLIDAY","🏖️"],["EASTER","🐰"],["COSTUME","👗"],["MASK","🎭"],["CAPE","🦸"],["WINGS","🧚"],["FAIRY","🧚"],["PRINCE","🤴"],["PRINCESS","👸"],["KING","🤴"],["QUEEN","👸"],["CASTLE","🏰"],["UNICORN","🦄"],["FEAST","🍽️"],["PICNIC","🧺"],["HUG","🤗"],["FIREWORKS","🎆"],["CHRISTMAS","🎄"],["SANTA","🎅"],["ELF","🧝"],["SLEIGH","🛷"],["WREATH","🎄"],["BELLS","🔔"],["HEART","❤️"],["LOVE","💕"]] },
   mixed: { name: "Mixed Bag", emoji: "🌈", color: "#7b5cff", shadow: "#4b33b8",
-    words: [["TOY","🧸"],["DOLL","🎎"],["BALL","⚽"],["KITE","🪁"],["BLOCK","🧱"],["PUZZLE","🧩"],["TRAIN","🚂"],["CAR","🚗"],["BUS","🚌"],["BIKE","🚲"],["BOAT","⛵"],["SHIP","🚢"],["PLANE","✈️"],["TRUCK","🚚"],["SCOOTER","🛴"],["SKATE","⛸️"],["ROBOT","🤖"],["TEDDY","🧸"],["LEGO","🧱"],["YOYO","🪀"],["BOOK","📚"],["PEN","🖊️"],["PENCIL","✏️"],["CRAYON","🖍️"],["RULER","📏"],["PAPER","📄"],["GLUE","📎"],["SCHOOL","🏫"],["TEACHER","👩‍🏫"],["DESK","🪑"],["CHAIR","🪑"],["BAG","🎒"],["LUNCH","🍱"],["CLASS","🏫"],["MATH","🔢"],["STORY","📖"],["RAIN","🌧️"],["SUN","☀️"],["SNOW","❄️"],["WIND","💨"],["CLOUD","☁️"],["STORM","⛈️"],["RAINBOW","🌈"],["SUNNY","😎"],["FROST","❄️"],["ICE","🧊"],["HAIL","🌨️"],["SKY","🌌"],["MOON","🌙"],["EARTH","🌍"],["HAND","✋"],["FOOT","🦶"],["HEAD","👤"],["NOSE","👃"],["EYE","👁️"],["EAR","👂"],["MOUTH","👄"],["TOOTH","🦷"],["HAIR","💇"],["ARM","💪"],["LEG","🦵"],["KNEE","🦵"],["TOE","👣"],["FACE","😀"],["RED","❤️"],["BLUE","💙"],["PINK","💗"],["GREEN","💚"],["YELLOW","💛"],["PURPLE","💜"],["WHITE","🤍"],["BLACK","⬛"],["BROWN","🤎"],["GOLD","🥇"],["SILVER","🥈"],["HOUSE","🏠"],["HOME","🏡"],["DOOR","🚪"],["TABLE","🪵"],["BED","🛏️"],["LAMP","💡"],["CLOCK","⏰"],["PHONE","📱"],["CUP","☕"],["PLATE","🍽️"],["SPOON","🥄"],["FORK","🍴"],["BOWL","🥣"],["SOAP","🧼"],["TOWEL","🧺"],["BRUSH","🪥"],["COMB","💇"],["SHOE","👟"],["SOCK","🧦"],["COAT","🧥"],["SHIRT","👕"],["DRESS","👗"],["SKIRT","👗"],["PANTS","👖"],["JUMPER","🧶"],["SCARF","🧣"],["GLOVE","🧤"],["BOOT","👢"],["CAP","🧢"],["THUNDER","⚡"]] }
+    words: [["TOY","🧸"],["DOLL","🎎"],["BALL","⚽"],["KITE","🪁"],["BLOCK","🧱"],["PUZZLE","🧩"],["TRAIN","🚂"],["CAR","🚗"],["BUS","🚌"],["BIKE","🚲"],["BOAT","⛵"],["SHIP","🚢"],["PLANE","✈️"],["TRUCK","🚚"],["SCOOTER","🛴"],["SKATE","⛸️"],["ROBOT","🤖"],["TEDDY","🧸"],["LEGO","🧱"],["YOYO","🪀"],["BOOK","📚"],["PEN","🖊️"],["PENCIL","✏️"],["CRAYON","🖍️"],["RULER","📏"],["PAPER","📄"],["GLUE","🧴"],["SCHOOL","🏫"],["TEACHER","👩‍🏫"],["DESK","🪑"],["CHAIR","🪑"],["BAG","🎒"],["LUNCH","🍱"],["CLASS","🏫"],["MATHS","🔢"],["STORY","📖"],["RAIN","🌧️"],["SUN","☀️"],["SNOW","❄️"],["WIND","💨"],["CLOUD","☁️"],["STORM","⛈️"],["RAINBOW","🌈"],["SUNNY","😎"],["FROST","❄️"],["ICE","🧊"],["HAIL","🌨️"],["SKY","🌌"],["MOON","🌙"],["EARTH","🌍"],["HAND","✋"],["FOOT","🦶"],["HEAD","👤"],["NOSE","👃"],["EYE","👁️"],["EAR","👂"],["MOUTH","👄"],["TOOTH","🦷"],["HAIR","💇"],["ARM","💪"],["LEG","🦵"],["KNEE","🦵"],["TOE","👣"],["FACE","😀"],["RED","❤️"],["BLUE","💙"],["PINK","💗"],["GREEN","💚"],["YELLOW","💛"],["PURPLE","💜"],["WHITE","🤍"],["BLACK","⬛"],["BROWN","🤎"],["GOLD","🥇"],["SILVER","🥈"],["HOUSE","🏠"],["HOME","🏡"],["DOOR","🚪"],["TABLE","🪵"],["BED","🛏️"],["LAMP","💡"],["CLOCK","⏰"],["PHONE","📱"],["CUP","☕"],["PLATE","🍽️"],["SPOON","🥄"],["FORK","🍴"],["BOWL","🥣"],["SOAP","🧼"],["TOWEL","🧺"],["BRUSH","🪥"],["COMB","💇"],["SHOE","👟"],["SOCK","🧦"],["COAT","🧥"],["SHIRT","👕"],["DRESS","👗"],["SKIRT","👗"],["JEANS","👖"],["JUMPER","🧶"],["SCARF","🧣"],["GLOVE","🧤"],["BOOT","👢"],["CAP","🧢"],["THUNDER","⚡"],["PEANUT","🥜"],["ALMOND","🥜"],["WALNUT","🥜"],["PECAN","🥜"],["COLOUR","🎨"],["GREY","⬜"]] }
 };
 
 const DIRS8 = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]];
 const DIFFS = {
-  easy:   { name: "Easy",   emoji: "🌱", color: "#2fd27a", shadow: "#17984f", size: 8,  count: 6,  place: [[0,1],[1,0]],                 sel: [[0,1],[0,-1],[1,0],[-1,0]],                         maxLen: 7,  desc: "8×8 · 6 words · across and down" },
+  easy:   { name: "Easy",   emoji: "🌱", color: "#2fd27a", shadow: "#17984f", size: 8,  count: 6,  place: [[0,1],[1,0]],                 sel: [[0,1],[0,-1],[1,0],[-1,0]],                         maxLen: 8,  desc: "8×8 · 6 words · across and down" },
   medium: { name: "Medium", emoji: "⭐", color: "#ffb800", shadow: "#c98f00", size: 10, count: 8,  place: [[0,1],[1,0],[1,1]],           sel: [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1]],           maxLen: 9,  desc: "10×10 · 8 words · and diagonal too" },
   hard:   { name: "Hard",   emoji: "🔥", color: "#ff7a3d", shadow: "#c9541d", size: 12, count: 10, place: DIRS8,                        sel: DIRS8,                                                   maxLen: 12, desc: "12×12 · 10 words · every way, even backwards!" }
 };
@@ -232,6 +242,121 @@ function setBest(cat, diff, ms) {
 }
 
 /* ================= Puzzle generator ================= */
+const SCAN_DIRS = [[0,1],[1,0],[1,1],[1,-1]];
+const BLOCKED = ["SEX","SEXY","FUCK","FUK","SHIT","CUNT","COCK","DICK","PISS","TIT","TITS","BOOB","BOOBS","ASS","ARSE","ANAL","ANUS","PORN","NUDE","NAKED","PENIS","VAGINA","BITCH","SLUT","WHORE","FAG","FAGS","HOMO","NIGGER","NIGGA","RETARD","WANK","JIZZ","CUM","SEMEN","HELL","DAMN","POO","POOP","PEE","FART","TURD","CRAP","BUM","KILL","KILLED","MURDER","RAPE","RAPED","STAB","BLOOD","GUN","GUNS","BOMB","DIE","DIES","DIED","DEAD","WEED","METH","DRUG"];
+let BANK_SET = null, BLOCK_SET = null;
+function bankSet() {
+  if (!BANK_SET) {
+    BANK_SET = {};
+    Object.keys(CATS).forEach(function (k) { CATS[k].words.forEach(function (w) { BANK_SET[w[0]] = true; }); });
+  }
+  return BANK_SET;
+}
+function blockSet() {
+  if (!BLOCK_SET) { BLOCK_SET = {}; BLOCKED.forEach(function (w) { BLOCK_SET[w] = true; }); }
+  return BLOCK_SET;
+}
+function cellsKey(cells) { return cells.map(function (p) { return p[0] + "," + p[1]; }).sort().join("|"); }
+function coveredByPlaced(cells, placed) {
+  for (let i = 0; i < placed.length; i++) {
+    const w = placed[i];
+    let all = true;
+    for (let j = 0; j < cells.length; j++) {
+      const r = cells[j][0], c = cells[j][1];
+      let hit = false;
+      for (let k = 0; k < w.cells.length; k++) if (w.cells[k][0] === r && w.cells[k][1] === c) { hit = true; break; }
+      if (!hit) { all = false; break; }
+    }
+    if (all) return true;
+  }
+  return false;
+}
+function eachFilledSub(grid, fn) {
+  const n = grid.length;
+  for (let d = 0; d < SCAN_DIRS.length; d++) {
+    const dr = SCAN_DIRS[d][0], dc = SCAN_DIRS[d][1];
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        const pr = r - dr, pc = c - dc;
+        if (pr >= 0 && pc >= 0 && pr < n && pc < n) continue;
+        const cells = [], letters = [];
+        let rr = r, cc = c;
+        while (rr >= 0 && cc >= 0 && rr < n && cc < n) {
+          cells.push([rr, cc]); letters.push(grid[rr][cc] || "");
+          rr += dr; cc += dc;
+        }
+        for (let i = 0; i < letters.length; i++) {
+          if (!letters[i]) continue;
+          let s = letters[i];
+          for (let j = i + 1; j < letters.length; j++) {
+            if (!letters[j]) break;
+            s += letters[j];
+            if (s.length >= 3) fn(s, cells.slice(i, j + 1));
+          }
+        }
+      }
+    }
+  }
+}
+function scanIssues(grid, placed) {
+  const targets = {};
+  for (let i = 0; i < placed.length; i++) targets[placed[i].word] = true;
+  const bank = bankSet(), blocked = blockSet();
+  const targetHits = {};
+  const issues = [];
+  eachFilledSub(grid, function (s, cells) {
+    const rev = s.split("").reverse().join("");
+    const tw = targets[s] ? s : (targets[rev] ? rev : null);
+    if (tw) {
+      if (!targetHits[tw]) targetHits[tw] = {};
+      targetHits[tw][cellsKey(cells)] = true;
+      return;
+    }
+    if (coveredByPlaced(cells, placed)) return;
+    const bw = bank[s] ? s : (bank[rev] ? rev : null);
+    if (bw) issues.push("extra:" + bw);
+    const kw = blocked[s] ? s : (blocked[rev] ? rev : null);
+    if (kw) issues.push("block:" + kw);
+  });
+  for (const w in targetHits) {
+    let n = 0; for (const k in targetHits[w]) n++;
+    if (n > 1) issues.push("dup:" + w);
+  }
+  return issues;
+}
+function fillBlanks(grid, blanks, placed, rand) {
+  const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  function randomFill() {
+    for (let i = 0; i < blanks.length; i++) grid[blanks[i][0]][blanks[i][1]] = ABC[Math.floor(rand() * 26)];
+  }
+  function clear() {
+    for (let i = 0; i < blanks.length; i++) grid[blanks[i][0]][blanks[i][1]] = "";
+  }
+  for (let attempt = 0; attempt < 28; attempt++) {
+    randomFill();
+    if (scanIssues(grid, placed).length === 0) return true;
+  }
+  for (let attempt = 0; attempt < 10; attempt++) {
+    clear();
+    const order = shuffle(blanks, rand);
+    let ok = true;
+    for (let i = 0; i < order.length; i++) {
+      const r = order[i][0], c = order[i][1];
+      const letters = shuffle(ABC.split(""), rand);
+      let found = false;
+      for (let k = 0; k < letters.length; k++) {
+        grid[r][c] = letters[k];
+        if (scanIssues(grid, placed).length === 0) { found = true; break; }
+      }
+      if (!found) { ok = false; break; }
+    }
+    if (ok && scanIssues(grid, placed).length === 0) return true;
+  }
+  clear();
+  return false;
+}
+
+
 function pickWords(pool, count, rand) {
   const shuffled = shuffle(pool, rand);
   const out = [];
@@ -284,7 +409,7 @@ function generatePuzzle(catKey, diffKey, seed) {
   });
   if (pool.length < diff.count) throw new Error("Not enough words in " + catKey + " for " + diffKey);
   const baseSeed = (seed >>> 0) || 1;
-  for (let attempt = 0; attempt < 120; attempt++) {
+  for (let attempt = 0; attempt < 200; attempt++) {
     const rand = rng(baseSeed + attempt * 9973);
     const chosen = pickWords(pool, diff.count, rand);
     if (!chosen) continue;
@@ -300,8 +425,9 @@ function generatePuzzle(catKey, diffKey, seed) {
       placed.push({ word: chosen[i][0], emoji: chosen[i][1], cells: p.cells, dir: p.dir, color: COLORS[i % COLORS.length], found: false });
     }
     if (!ok) continue;
-    const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!grid[r][c]) grid[r][c] = ABC[Math.floor(rand() * 26)];
+    const blanks = [];
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!grid[r][c]) blanks.push([r, c]);
+    if (!fillBlanks(grid, blanks, placed, rand)) continue;
     return { grid: grid, words: placed, size: n, seed: baseSeed, attempt: attempt, catKey: catKey, diffKey: diffKey };
   }
   throw new Error("Could not place a puzzle for " + catKey + " " + diffKey + " seed " + baseSeed);
@@ -340,7 +466,7 @@ function setMuted(m) {
 }
 
 /* ================= State ================= */
-let st = null, screen = "home", pickCat = null, anchor = null, drag = null, timerId = null;
+let st = null, screen = "home", pickCat = null, anchor = null, drag = null, timerId = null, winTimer = null;
 
 function show(id) {
   ["home","level","play"].forEach(function (s) { $(s).classList.toggle("on", s === id); });
@@ -390,11 +516,13 @@ function startGame(catKey, diffKey, seed) {
     hints: 3, t0: Date.now(), elapsed: 0, playing: true
   };
   anchor = null; drag = null;
+  clearTimeout(winTimer); winTimer = null;
   $("winBox").classList.remove("on");
   confetti.run = (confetti.run || 0) + 1;
   renderPlay();
   show("play");
   sizeGrid();
+  requestAnimationFrame(sizeGrid);
 }
 
 function renderPlay() {
@@ -447,7 +575,12 @@ function cellEl(r, c) { return $("grid").querySelector('[data-r="' + r + '"][dat
 function sizeGrid() {
   if (!st || screen !== "play") return;
   const wrap = $("gridWrap");
-  const s = Math.max(120, Math.floor(Math.min(wrap.clientWidth, wrap.clientHeight)) - 2);
+  const cs = window.getComputedStyle(wrap);
+  const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+  const padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+  const availW = wrap.clientWidth - padX;
+  const availH = wrap.clientHeight - padY;
+  const s = Math.max(120, Math.floor(Math.min(availW, availH)) - 2);
   $("grid").style.width = s + "px";
   $("grid").style.height = s + "px";
   const cell = Math.floor((s - 12) / st.size);
@@ -502,13 +635,30 @@ function buildPath(r1, c1, r2, c2) {
   for (let i = 0; i <= n; i++) path.push([r1 + i * dir[0], c1 + i * dir[1]]);
   return path;
 }
+function exactPath(r1, c1, r2, c2) {
+  const dr = r2 - r1, dc = c2 - c1;
+  if (dr === 0 && dc === 0) return [[r1, c1]];
+  const ad = Math.abs(dr), ac = Math.abs(dc);
+  let dir;
+  if (dr === 0) dir = [0, dc > 0 ? 1 : -1];
+  else if (dc === 0) dir = [dr > 0 ? 1 : -1, 0];
+  else if (ad === ac) dir = [dr > 0 ? 1 : -1, dc > 0 ? 1 : -1];
+  else return null;
+  if (!dirAllowed(dir)) return null;
+  const n = Math.max(ad, ac);
+  const path = [];
+  for (let i = 0; i <= n; i++) path.push([r1 + i * dir[0], c1 + i * dir[1]]);
+  return path;
+}
 
 function trySelect(path) {
   if (!st || !st.playing || !path || path.length < 2) { paintSel(); return false; }
   const letters = path.map(function (p) { return st.grid[p[0]][p[1]]; }).join("");
   const rev = letters.split("").reverse().join("");
+  const already = st.words.find(function (x) { return x.found && (x.word === letters || x.word === rev); });
+  if (already) { paintSel(); return "already"; }
   const w = st.words.find(function (x) { return !x.found && (x.word === letters || x.word === rev); });
-  if (!w) { SFX.miss(); paintSel(); return false; }
+  if (!w) { SFX.miss(); paintSel(); return "miss"; }
   w.found = true;
   SFX.found();
   say("You found " + w.word.toLowerCase() + "!");
@@ -517,8 +667,8 @@ function trySelect(path) {
   const chip = $("words").querySelector('[data-word="' + w.word + '"]');
   if (chip) { chip.classList.add("bump"); setTimeout(function () { chip.classList.remove("bump"); }, 500); }
   $("hintBtn").disabled = st.hints <= 0 || st.words.every(function (x) { return x.found; });
-  if (st.words.every(function (x) { return x.found; })) setTimeout(win, 350);
-  return true;
+  if (st.words.every(function (x) { return x.found; })) { clearTimeout(winTimer); winTimer = setTimeout(win, 350); }
+  return "found";
 }
 
 function win() {
@@ -564,15 +714,29 @@ function cellFromXY(x, y) {
   if (!cell || !$("grid").contains(cell)) return null;
   return [+cell.dataset.r, +cell.dataset.c];
 }
+function cellFromXYNear(x, y) {
+  const direct = cellFromXY(x, y);
+  if (direct) return direct;
+  if (!st) return null;
+  const grid = $("grid");
+  const box = grid.getBoundingClientRect();
+  const pad = 80;
+  if (x < box.left - pad || x > box.right + pad || y < box.top - pad || y > box.bottom + pad) return null;
+  const n = st.size;
+  const cc = Math.max(0, Math.min(n - 1, Math.floor((x - box.left) / box.width * n)));
+  const rr = Math.max(0, Math.min(n - 1, Math.floor((y - box.top) / box.height * n)));
+  return [rr, cc];
+}
 function onDown(e) {
   if (!st || !st.playing) return;
   if (e.button != null && e.button !== 0) return;
   if (e.pointerType === "mouse" && e.buttons !== 1 && e.type.indexOf("pointer") === 0) return;
+  if (drag && e.pointerId != null && drag.pointerId != null && e.pointerId !== drag.pointerId) return;
   const xy = eventXY(e);
   const cell = cellFromXY(xy[0], xy[1]);
   if (!cell) return;
   if (e.cancelable) e.preventDefault();
-  if (e.pointerId != null && e.currentTarget.setPointerCapture) {
+  if (e.pointerId != null && e.currentTarget && e.currentTarget.setPointerCapture) {
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
   }
   drag = { start: cell, path: [cell], moved: false, pointerId: e.pointerId };
@@ -581,9 +745,10 @@ function onDown(e) {
 }
 function onMove(e) {
   if (!drag) return;
+  if (e.pointerId != null && drag.pointerId != null && e.pointerId !== drag.pointerId) return;
   if (e.cancelable) e.preventDefault();
   const xy = eventXY(e);
-  const cell = cellFromXY(xy[0], xy[1]);
+  const cell = cellFromXYNear(xy[0], xy[1]);
   if (!cell) return;
   if (cell[0] !== drag.start[0] || cell[1] !== drag.start[1]) drag.moved = true;
   drag.path = buildPath(drag.start[0], drag.start[1], cell[0], cell[1]);
@@ -591,7 +756,16 @@ function onMove(e) {
 }
 function onUp(e) {
   if (!drag) return;
+  if (e && e.pointerId != null && drag.pointerId != null && e.pointerId !== drag.pointerId) return;
   if (e && e.cancelable) e.preventDefault();
+  const xy = e ? eventXY(e) : null;
+  if (xy) {
+    const cell = cellFromXYNear(xy[0], xy[1]);
+    if (cell) {
+      if (cell[0] !== drag.start[0] || cell[1] !== drag.start[1]) drag.moved = true;
+      drag.path = buildPath(drag.start[0], drag.start[1], cell[0], cell[1]);
+    }
+  }
   const path = drag.path;
   const moved = drag.moved;
   const start = drag.start;
@@ -605,9 +779,11 @@ function onUp(e) {
     if (anchor) {
       const same = anchor[0] === start[0] && anchor[1] === start[1];
       const a = anchor;
+      if (same) { anchor = null; paintSel(); return; }
+      const exact = exactPath(a[0], a[1], start[0], start[1]);
+      if (!exact || exact.length < 2) { anchor = start; paintSel(); return; }
       anchor = null;
-      if (same) { paintSel(); return; }
-      trySelect(buildPath(a[0], a[1], start[0], start[1]));
+      trySelect(exact);
       paintSel();
     } else {
       anchor = start;
@@ -654,6 +830,7 @@ confetti.run = 0;
 
 /* ================= Wire up ================= */
 function goHome() {
+  clearTimeout(winTimer); winTimer = null;
   st = null; pickCat = null; anchor = null; drag = null;
   confetti.run = (confetti.run || 0) + 1;
   $("winBox").classList.remove("on");
@@ -670,6 +847,7 @@ $("winNew").addEventListener("click", function () { SFX.click(); goHome(); });
   $(id).addEventListener("click", function () { ac(); setMuted(!muted); SFX.click(); });
 });
 window.addEventListener("resize", sizeGrid);
+window.addEventListener("orientationchange", function () { setTimeout(sizeGrid, 80); });
 timerId = setInterval(function () {
   if (st && st.playing) $("timer").textContent = "⏱ " + fmt(Date.now() - st.t0);
 }, 200);
@@ -679,17 +857,21 @@ bindGrid();
 renderHome();
 
 window.__ws = {
-  CATS: CATS, DIFFS: DIFFS, COLORS: COLORS,
+  CATS: CATS, DIFFS: DIFFS, COLORS: COLORS, BLOCKED: BLOCKED,
   generatePuzzle: generatePuzzle,
   startGame: startGame,
   get state() { return st; },
   get screen() { return screen; },
   get anchor() { return anchor; },
+  get muted() { return muted; },
+  setMuted: setMuted,
   selectLine: function (r1, c1, r2, c2) { return trySelect(buildPath(r1, c1, r2, c2)); },
+  selectExact: function (r1, c1, r2, c2) { return trySelect(exactPath(r1, c1, r2, c2)); },
   selectPath: trySelect,
   useHint: useHint,
   goHome: goHome,
-  fmt: fmt, getBest: getBest, buildPath: buildPath
+  fmt: fmt, getBest: getBest, buildPath: buildPath, exactPath: exactPath,
+  scanIssues: scanIssues
 };
 </script>
 </body>
