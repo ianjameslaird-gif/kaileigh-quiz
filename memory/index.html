@@ -763,5 +763,24 @@ window.__mem = {
   get pickTheme() { return pickTheme; }
 };
 </script>
+
+<script>
+  /* Count a visit once per browser session; stay silent if it fails */
+  (function () {
+    var PAGE = "memory";
+    var SK = "kq_hit_" + PAGE;
+    try { if (sessionStorage.getItem(SK) === "1") return; } catch (e) {}
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    if (ctrl) setTimeout(function () { ctrl.abort(); }, 8000);
+    fetch("https://yjzipkgorsudkugouvba.supabase.co/rest/v1/rpc/bump_hit", {
+      method: "POST",
+      headers: { "apikey": "sb_publishable_bJdh1REiNeXFwjz_hGGohg_Iz2bSpWs", "Content-Type": "application/json" },
+      body: JSON.stringify({ p_page: PAGE }),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function (r) {
+      if (r.ok) { try { sessionStorage.setItem(SK, "1"); } catch (e) {} }
+    }).catch(function () {});
+  })();
+</script>
 </body>
 </html>
