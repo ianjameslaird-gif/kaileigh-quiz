@@ -69,10 +69,18 @@
   @keyframes bump { 0%,100% { transform: scale(1); } 40% { transform: scale(1.18); } }
   .tip { font-size: 14px; font-weight: 600; color: #7b5cff; text-align: center; margin: 0 0 2px; width: 100%; }
   #gridWrap { flex: 1; min-height: 0; display: flex; align-items: flex-start; justify-content: center; width: 100%; padding: 6px 8px 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); touch-action: none; }
-  #grid {
-    display: grid; background: #fff; border: 5px solid #fff; border-radius: 20px;
+  #gridFrame {
+    position: relative; flex: none;
+    --grid-pad: 5px;
+    background: #fff; border: 5px solid #fff; border-radius: 20px;
     box-shadow: 0 8px 0 #d4c8ff, 0 12px 24px rgba(123,92,255,.18);
-    padding: 5px; touch-action: none; user-select: none; gap: 1px;
+    padding: var(--grid-pad); touch-action: none; user-select: none;
+  }
+  #bands { position: absolute; inset: var(--grid-pad); pointer-events: none; z-index: 0; }
+  .band { position: absolute; border-radius: 999px; pointer-events: none; transform-origin: center center; opacity: .95; }
+  #grid {
+    display: grid; gap: 1px; position: relative; z-index: 1;
+    width: 100%; height: 100%; touch-action: none; user-select: none;
   }
   .cell {
     display: flex; align-items: center; justify-content: center;
@@ -80,7 +88,6 @@
     position: relative; cursor: pointer; line-height: 1; aspect-ratio: 1;
     z-index: 1;
   }
-  .cell .bg { position: absolute; inset: 6%; border-radius: 999px; z-index: -1; opacity: .95; }
   .cell.sel { background: #ffe066; transform: scale(1.07); z-index: 2; }
   .cell.anchor { box-shadow: inset 0 0 0 3px #7b5cff; background: #efe8ff; }
   .cell.flash { animation: hintflash .4s ease-in-out 4; z-index: 3; }
@@ -100,7 +107,7 @@
     .wchip { font-size: 12px; padding: 2px 6px; border-width: 2px; box-shadow: 0 2px 0 #d4c8ff; }
     .tip { display: none; }
     .topbar { gap: 4px; padding: 4px 6px; padding-top: max(4px, env(safe-area-inset-top)); }
-    #grid { padding: 2px; border-width: 4px; }
+    #gridFrame { --grid-pad: 2px; border-width: 4px; }
     #words { padding: 4px 4px 2px; gap: 4px 5px; }
   }
 
@@ -159,7 +166,7 @@
   </div>
   <div id="words"></div>
   <div class="tip" id="playTip">Drag the letters · or tap first and last</div>
-  <div id="gridWrap"><div id="grid" role="grid" aria-label="Word search grid"></div></div>
+  <div id="gridWrap"><div id="gridFrame"><div id="bands" aria-hidden="true"></div><div id="grid" role="grid" aria-label="Word search grid"></div></div></div>
 </div>
 
 <!-- WIN -->
@@ -356,6 +363,54 @@ function fillBlanks(grid, blanks, placed, rand) {
   return false;
 }
 
+function isLetter(ch) {
+  return typeof ch === "string" && /^[A-Z]$/.test(ch);
+}
+function assertGridLetters(grid) {
+  if (!grid || !grid.length) return "empty-grid";
+  for (let r = 0; r < grid.length; r++) {
+    if (!grid[r] || grid[r].length !== grid.length) return "bad-row:" + r;
+    for (let c = 0; c < grid[r].length; c++) {
+      if (!isLetter(grid[r][c])) return "bad-cell:" + r + "," + c + ":" + String(grid[r][c]);
+    }
+  }
+  return null;
+}
+function stressTest(nEach) {
+  nEach = nEach || 250;
+  const cats = Object.keys(CATS), diffs = Object.keys(DIFFS);
+  const issues = [];
+  let ok = 0;
+  const total = cats.length * diffs.length * nEach;
+  cats.forEach(function (ck) {
+    CATS[ck].words.forEach(function (w) {
+      if (!w || typeof w[0] !== "string" || !/^[A-Z]+$/.test(w[0])) issues.push("bank:" + ck + ":" + String(w && w[0]));
+    });
+    diffs.forEach(function (dk) {
+      for (let i = 0; i < nEach; i++) {
+        try {
+          const puz = generatePuzzle(ck, dk, i + 1);
+          const letterBug = assertGridLetters(puz.grid);
+          if (letterBug) issues.push(ck + "/" + dk + "/" + (i + 1) + " " + letterBug);
+          const scan = scanIssues(puz.grid, puz.words);
+          if (scan.length) issues.push(ck + "/" + dk + "/" + (i + 1) + " " + scan.join(","));
+          puz.words.forEach(function (w) {
+            if (!/^[A-Z]+$/.test(w.word)) issues.push(ck + "/" + dk + "/" + (i + 1) + " bad-word:" + w.word);
+            for (let k = 0; k < w.cells.length; k++) {
+              const ch = puz.grid[w.cells[k][0]][w.cells[k][1]];
+              const fwd = w.word[k], rev = w.word[w.word.length - 1 - k];
+              if (ch !== fwd && ch !== rev) issues.push(ck + "/" + dk + "/" + (i + 1) + " place-mismatch:" + w.word);
+            }
+          });
+          ok++;
+        } catch (e) {
+          issues.push(ck + "/" + dk + "/" + (i + 1) + " " + (e && e.message ? e.message : String(e)));
+        }
+      }
+    });
+  });
+  return { ok: ok, issues: issues, total: total };
+}
 
 function pickWords(pool, count, rand) {
   const shuffled = shuffle(pool, rand);
@@ -428,6 +483,7 @@ function generatePuzzle(catKey, diffKey, seed) {
     const blanks = [];
     for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!grid[r][c]) blanks.push([r, c]);
     if (!fillBlanks(grid, blanks, placed, rand)) continue;
+    if (assertGridLetters(grid)) continue;
     return { grid: grid, words: placed, size: n, seed: baseSeed, attempt: attempt, catKey: catKey, diffKey: diffKey };
   }
   throw new Error("Could not place a puzzle for " + catKey + " " + diffKey + " seed " + baseSeed);
@@ -513,7 +569,7 @@ function startGame(catKey, diffKey, seed) {
   st = {
     catKey: catKey, diffKey: diffKey, seed: puz.seed, attempt: puz.attempt,
     grid: puz.grid, words: puz.words, size: puz.size,
-    hints: 3, t0: Date.now(), elapsed: 0, playing: true
+    hints: 3, t0: Date.now(), elapsed: 0, playing: true, findSeq: 0
   };
   anchor = null; drag = null;
   clearTimeout(winTimer); winTimer = null;
@@ -555,37 +611,70 @@ function renderGrid() {
       el.className = "cell";
       el.dataset.r = r; el.dataset.c = c;
       el.setAttribute("role", "gridcell");
-      const foundIn = st.words.filter(function (w) { return w.found && w.cells.some(function (p) { return p[0] === r && p[1] === c; }); });
-      if (foundIn.length === 1) {
-        const bg = document.createElement("span"); bg.className = "bg"; bg.style.background = foundIn[0].color; el.appendChild(bg);
-        el.classList.add("found");
-      } else if (foundIn.length > 1) {
-        const bg = document.createElement("span"); bg.className = "bg";
-        bg.style.background = "linear-gradient(135deg, " + foundIn[0].color + " 50%, " + foundIn[1].color + " 50%)";
-        el.appendChild(bg);
+      if (st.words.some(function (w) { return w.found && w.cells.some(function (p) { return p[0] === r && p[1] === c; }); })) {
         el.classList.add("found");
       }
-      const t = document.createElement("span"); t.textContent = st.grid[r][c]; el.appendChild(t);
+      const t = document.createElement("span");
+      t.textContent = isLetter(st.grid[r][c]) ? st.grid[r][c] : "";
+      el.appendChild(t);
       g.appendChild(el);
     }
   }
+  renderBands();
   paintSel();
+}
+function renderBands() {
+  const box = $("bands");
+  const frame = $("gridFrame");
+  if (!box || !frame || !st) return;
+  box.innerHTML = "";
+  const inner = box.clientWidth || (frame.clientWidth - (parseFloat(getComputedStyle(frame).paddingTop) || 5) * 2);
+  if (inner <= 0) return;
+  const cell = inner / st.size;
+  const inset = Math.max(3, cell * 0.12);
+  const found = st.words.filter(function (w) { return w.found; }).sort(function (a, b) { return (a.foundAt || 0) - (b.foundAt || 0); });
+  for (let i = 0; i < found.length; i++) {
+    const w = found[i], cells = w.cells;
+    if (!cells || cells.length < 1) continue;
+    const r0 = cells[0][0], c0 = cells[0][1];
+    const r1 = cells[cells.length - 1][0], c1 = cells[cells.length - 1][1];
+    const x0 = c0 * cell + cell / 2, y0 = r0 * cell + cell / 2;
+    const x1 = c1 * cell + cell / 2, y1 = r1 * cell + cell / 2;
+    const len = Math.hypot(x1 - x0, y1 - y0) + cell - 2 * inset;
+    const thick = cell - 2 * inset;
+    const angle = Math.atan2(y1 - y0, x1 - x0) * 180 / Math.PI;
+    const midX = (x0 + x1) / 2, midY = (y0 + y1) / 2;
+    const el = document.createElement("div");
+    el.className = "band";
+    el.style.left = (midX - len / 2) + "px";
+    el.style.top = (midY - thick / 2) + "px";
+    el.style.width = len + "px";
+    el.style.height = thick + "px";
+    el.style.background = w.color;
+    el.style.transform = "rotate(" + angle + "deg)";
+    el.style.zIndex = String(i + 1);
+    box.appendChild(el);
+  }
 }
 function cellEl(r, c) { return $("grid").querySelector('[data-r="' + r + '"][data-c="' + c + '"]'); }
 function sizeGrid() {
   if (!st || screen !== "play") return;
   const wrap = $("gridWrap");
+  const frame = $("gridFrame");
+  if (!wrap || !frame) return;
   const cs = window.getComputedStyle(wrap);
   const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
   const padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
   const availW = wrap.clientWidth - padX;
   const availH = wrap.clientHeight - padY;
   const s = Math.max(120, Math.floor(Math.min(availW, availH)) - 2);
-  $("grid").style.width = s + "px";
-  $("grid").style.height = s + "px";
-  const cell = Math.floor((s - 12) / st.size);
+  frame.style.width = s + "px";
+  frame.style.height = s + "px";
+  const pad = parseFloat(getComputedStyle(frame).paddingTop) || 5;
+  const cell = Math.floor((s - pad * 2) / st.size);
   $("grid").style.fontSize = Math.max(12, Math.min(36, Math.floor(cell * 0.55))) + "px";
-  $("grid").style.borderRadius = (st.size >= 12 ? 14 : 20) + "px";
+  frame.style.borderRadius = (st.size >= 12 ? 14 : 20) + "px";
+  renderBands();
 }
 
 function paintSel(path) {
@@ -660,6 +749,8 @@ function trySelect(path) {
   const w = st.words.find(function (x) { return !x.found && (x.word === letters || x.word === rev); });
   if (!w) { SFX.miss(); paintSel(); return "miss"; }
   w.found = true;
+  st.findSeq = (st.findSeq || 0) + 1;
+  w.foundAt = st.findSeq;
   SFX.found();
   say("You found " + w.word.toLowerCase() + "!");
   renderGrid();
@@ -856,10 +947,48 @@ setMuted(muted);
 bindGrid();
 renderHome();
 
+function loadDemoOverlap() {
+  const grid = [
+    ["C","A","K","E","S","W","R","T"],
+    ["L","I","M","E","P","L","U","H"],
+    ["I","B","U","S","Q","V","F","D"],
+    ["O","A","N","T","J","B","D","X"],
+    ["N","T","G","O","Y","M","P","K"],
+    ["Q","W","E","R","Y","A","U","I"],
+    ["B","S","D","F","G","H","J","L"],
+    ["Z","X","V","C","B","N","M","P"]
+  ];
+  const letterBug = assertGridLetters(grid);
+  if (letterBug) throw new Error(letterBug);
+  st = {
+    catKey: "celebrations", diffKey: "easy", seed: 0, attempt: 0,
+    grid: grid, size: 8, hints: 3, t0: Date.now(), elapsed: 0, playing: true, findSeq: 2,
+    words: [
+      { word: "LION", emoji: "🦁", cells: [[0,0],[1,0],[2,0],[3,0],[4,0]], dir: [1,0], color: "#2fd27a", found: true, foundAt: 1 },
+      { word: "CAKE", emoji: "🎂", cells: [[0,0],[0,1],[0,2],[0,3]], dir: [0,1], color: "#ff6b9d", found: true, foundAt: 2 },
+      { word: "LIME", emoji: "🟢", cells: [[1,0],[1,1],[1,2],[1,3]], dir: [0,1], color: "#ffb020", found: false, foundAt: 0 },
+      { word: "BUS", emoji: "🚌", cells: [[2,1],[2,2],[2,3]], dir: [0,1], color: "#3fb5ff", found: false, foundAt: 0 },
+      { word: "ANT", emoji: "🐜", cells: [[3,1],[3,2],[3,3]], dir: [0,1], color: "#b04dff", found: false, foundAt: 0 }
+    ]
+  };
+  anchor = null; drag = null;
+  clearTimeout(winTimer); winTimer = null;
+  $("winBox").classList.remove("on");
+  confetti.run = (confetti.run || 0) + 1;
+  renderPlay();
+  show("play");
+  sizeGrid();
+  requestAnimationFrame(sizeGrid);
+}
+
 window.__ws = {
   CATS: CATS, DIFFS: DIFFS, COLORS: COLORS, BLOCKED: BLOCKED,
   generatePuzzle: generatePuzzle,
   startGame: startGame,
+  loadDemoOverlap: loadDemoOverlap,
+  assertGridLetters: assertGridLetters,
+  stressTest: stressTest,
+  isLetter: isLetter,
   get state() { return st; },
   get screen() { return screen; },
   get anchor() { return anchor; },
