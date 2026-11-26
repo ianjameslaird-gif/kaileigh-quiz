@@ -20,7 +20,6 @@
   button { font-family: inherit; cursor: pointer; }
   #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 95; width: 100%; height: 100%; }
 
-  /* ===== Desk ===== */
   #desk {
     position: fixed; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -42,36 +41,29 @@
   .roundbtn { font-size: 24px; width: 50px; height: 50px; border-radius: 50%; border: 4px solid #fff; background: #ffe066; box-shadow: 0 4px 0 #d4a900; flex: none; padding: 0; line-height: 1; }
   .roundbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #d4a900; }
 
-  /* ===== Book stage ===== */
   #bookStage {
-    position: relative;
-    z-index: 2;
-    perspective: 2200px;
-    perspective-origin: 50% 48%;
+    position: relative; z-index: 2;
+    perspective: 2200px; perspective-origin: 50% 48%;
     display: flex; align-items: center; justify-content: center;
-    width: 100%;
-    flex: 1 1 auto;
-    min-height: 0;
+    width: 100%; flex: 1 1 auto; min-height: 0;
   }
   #book {
     --cw: min(400px, 86vw);
     --ch: min(580px, 74vh);
     position: relative;
-    width: var(--cw);
-    height: var(--ch);
+    width: var(--cw); height: var(--ch);
     transform-style: preserve-3d;
     transition: width .9s cubic-bezier(.2,.7,.2,1), height .9s cubic-bezier(.2,.7,.2,1);
     flex: none;
   }
   #book.open {
-    --sw: min(1120px, 96vw);
-    --sh: min(720px, 86vh);
-    width: var(--sw);
-    height: var(--sh);
+    --sw: min(1240px, 97vw);
+    --sh: min(760px, 84vh);
+    width: var(--sw); height: var(--sh);
   }
   #book.single.open {
-    width: min(520px, 94vw);
-    height: min(calc(min(520px, 94vw) / 1.32 + 78px), 88vh);
+    width: min(97vw, 720px);
+    height: min(58vh, calc(min(97vw, 720px) * 0.62));
   }
   .book-shadow {
     position: absolute; left: 6%; right: 6%; bottom: -22px; height: 30px;
@@ -80,21 +72,17 @@
   .page-edge {
     position: absolute; top: 10px; bottom: 10px; width: 11px; z-index: 1; pointer-events: none;
     background: repeating-linear-gradient(90deg, #f3e2bf 0 2px, #e6d0a4 2px 3px, #f7ead0 3px 5px);
-    border-radius: 0 3px 3px 0;
-    box-shadow: 2px 0 0 #d4bc8a;
+    border-radius: 0 3px 3px 0; box-shadow: 2px 0 0 #d4bc8a;
   }
   .page-edge.right-edge { right: -9px; }
   #book.closed .page-edge.right-edge { right: -12px; width: 14px; }
-  #book.single.open .page-edge.right-edge { right: -8px; }
 
   .spread {
     position: absolute; inset: 0;
-    display: flex; transform-style: preserve-3d;
+    transform-style: preserve-3d;
     border-radius: 4px 10px 10px 4px;
     overflow: visible;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 2;
+    opacity: 0; pointer-events: none; z-index: 2;
   }
   #book.open .spread { opacity: 1; pointer-events: auto; }
 
@@ -103,34 +91,29 @@
       radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.45), transparent 55%),
       repeating-linear-gradient(0deg, rgba(120,70,20,.035) 0 2px, transparent 2px 5px),
       linear-gradient(180deg, #f7ead0, #f0dcb6);
-    color: #3a2414;
-    position: relative;
-    overflow: hidden;
+    color: #3a2414; position: relative; overflow: hidden;
   }
-  .page.left, .cover-inside {
-    width: 50%; height: 100%;
-    border-radius: 3px 0 0 3px;
+  .cover-inside {
+    width: 100%; height: 100%;
+    border-radius: 8px 0 0 8px;
     box-shadow: inset -18px 0 28px -18px rgba(80,40,10,.22);
     padding: 16px 18px 16px 22px;
+    overflow: auto;
   }
   .page.right {
-    width: 50%; height: 100%;
+    position: absolute; left: 50%; top: 0; right: 0; bottom: 0;
+    width: auto; height: auto;
     border-radius: 0 8px 8px 0;
     box-shadow: inset 18px 0 28px -18px rgba(80,40,10,.18);
     padding: 0;
-    position: relative;
-    overflow: hidden;
   }
-  #book.single.open .page.right { width: 100%; border-radius: 0 8px 8px 0; }
   .spine {
-    width: 16px; flex: none; height: 100%;
+    position: absolute; left: 50%; top: 0; bottom: 0; width: 16px;
+    transform: translateX(-50%); z-index: 6;
     background: linear-gradient(90deg, #5a121c, #8c1c2b 40%, #5a121c 70%, #3d0c14);
     box-shadow: inset 0 0 8px rgba(0,0,0,.45);
-    z-index: 4;
   }
-  #book.single.open .spine { width: 12px; }
 
-  /* Cover: sits on the right half, hinged at the spine */
   .cover {
     position: absolute; top: 0; bottom: 0; right: 0;
     width: 100%;
@@ -141,25 +124,20 @@
     transition: transform 1.05s cubic-bezier(.15,.62,.2,1), width .9s cubic-bezier(.2,.7,.2,1);
   }
   #book.open .cover { width: 50%; transform: rotateY(-180deg); pointer-events: none; }
-  #book.single.open .cover { width: 100%; transform: rotateY(-180deg); pointer-events: none; }
-  #book.opened .cover { z-index: 1; }
+  #book.opened .cover { z-index: 5; pointer-events: auto; }
+  #book.playing .cover { pointer-events: none; visibility: hidden; }
+  #book.playing .spine, #book.playing .page.right { visibility: hidden; }
   .cover-face {
     position: absolute; inset: 0;
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
     border-radius: inherit;
   }
   .cover-front {
-    background:
-      radial-gradient(ellipse at 50% 30%, #b42a3d, #7a1422 55%, #5a0e18);
+    background: radial-gradient(ellipse at 50% 30%, #b42a3d, #7a1422 55%, #5a0e18);
     border: 8px solid #c9a24a;
-    box-shadow:
-      inset 0 0 0 4px #7a1422,
-      inset 0 0 0 8px #e6c15a,
-      0 8px 18px rgba(0,0,0,.35);
+    box-shadow: inset 0 0 0 4px #7a1422, inset 0 0 0 8px #e6c15a, 0 8px 18px rgba(0,0,0,.35);
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-    padding: 16px 14px 18px;
-    color: #f8e7b0;
-    overflow: hidden;
+    padding: 16px 14px 18px; color: #f8e7b0; overflow: hidden;
   }
   .cover-front .brand { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #e6c15a; margin-top: 4px; }
   .cover-front h1 {
@@ -178,52 +156,82 @@
   .cover-front .goldline { width: 70%; height: 2px; background: linear-gradient(90deg, transparent, #e6c15a, transparent); margin: 6px 0; }
   .cover-inside {
     transform: rotateY(180deg);
-    width: 100%; height: 100%;
-    border-radius: 8px 0 0 8px;
-    box-shadow: inset -18px 0 28px -18px rgba(80,40,10,.22);
-    padding: 16px 18px 16px 22px;
     background:
       radial-gradient(ellipse at 80% 10%, rgba(255,255,255,.45), transparent 55%),
       repeating-linear-gradient(0deg, rgba(120,70,20,.035) 0 2px, transparent 2px 5px),
       linear-gradient(180deg, #f7ead0, #f0dcb6);
-    overflow: auto;
   }
-  #book.single .cover-inside { /* hidden as a page; single uses header on the right page */ }
 
-  /* Hidden leftover left page slot used in spread when cover has finished opening:
-     the visible left page is the cover inside. We also keep #pageL as that inside. */
+  /* Full-spread play surface */
+  #playLayout {
+    display: none;
+    position: absolute; inset: 0;
+    z-index: 8;
+    border-radius: 4px 8px 8px 4px;
+    overflow: hidden;
+    background: #1a120c;
+    transform-style: preserve-3d;
+  }
+  #book.playing #playLayout { display: block; }
+  #view { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; background: #1a120c; }
+  #view.drag { cursor: grabbing; }
+  #view svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .gutter {
+    position: absolute; left: 50%; top: 0; bottom: 0; width: 14px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, #3d0c14, #8c1c2b 35%, #5a121c 70%, #3d0c14);
+    box-shadow: 4px 0 10px rgba(0,0,0,.28), -4px 0 10px rgba(0,0,0,.28);
+    pointer-events: none; z-index: 7;
+  }
+  .playhead {
+    position: absolute; top: 8px; left: 10px; right: 10px;
+    display: flex; align-items: center; gap: 6px;
+    z-index: 8; pointer-events: none;
+  }
+  .playhead > * { pointer-events: auto; }
+  .playhead .ttl {
+    flex: 1; min-width: 0;
+    font-weight: 700; font-size: clamp(13px, 2.2vw, 18px); color: #3a2414;
+    background: rgba(255,248,232,.92); border: 3px solid #e6c15a; border-radius: 14px;
+    padding: 5px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    box-shadow: 0 2px 0 #c9a24a;
+  }
+  .tpill { font-weight: 700; font-size: clamp(13px, 2vw, 16px); background: rgba(255,248,232,.94); border-radius: 14px; padding: 5px 8px; box-shadow: 0 2px 0 #c9a24a; white-space: nowrap; border: 3px solid #e6c15a; }
+  .tpill.bonus { background: #ffe066; color: #7a4a00; }
+  .tpill.bonus.out { background: #eee; color: #888; }
+  #hintBtn, #contentsBtn {
+    font-weight: 700; font-size: clamp(14px, 2.2vw, 17px); color: #fff;
+    background: #ffb800; border: 3px solid #fff; border-radius: 16px;
+    padding: 5px 10px; box-shadow: 0 3px 0 #c98f00; height: 40px; white-space: nowrap;
+  }
+  #hintBtn:disabled { background: #c9c3d9; box-shadow: 0 3px 0 #9a93ad; }
+  #contentsBtn { background: #7b5cff; box-shadow: 0 3px 0 #4b33b8; font-size: 18px; width: 40px; padding: 0; }
+  .mini-ref { width: 40px; height: 40px; border-radius: 10px; border: 3px solid #e6c15a; background: #fff8e8; overflow: hidden; flex: none; box-shadow: 0 2px 0 #c9a24a; }
+  .mini-ref svg { width: 100%; height: 100%; }
 
-  /* Flipping leaf (right page turn) */
+  .zoombar { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 8; }
+  .zbtn { width: 46px; height: 46px; border-radius: 50%; border: 4px solid #fff; background: #7b5cff; color: #fff; font-size: 26px; font-weight: 700; box-shadow: 0 4px 0 #4b33b8; padding: 0; line-height: 1; }
+  .zbtn.all { background: #2fd27a; box-shadow: 0 4px 0 #17984f; font-size: 18px; }
+  .zbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #4b33b8; }
+
+  /* Flip leaf covers the whole play surface (or contents right page) */
   .leaf {
     position: absolute; inset: 0;
     transform-origin: left center;
     transform-style: preserve-3d;
-    z-index: 12;
-    pointer-events: none;
-    visibility: hidden;
+    z-index: 12; pointer-events: none; visibility: hidden;
   }
-  .leaf.on { visibility: visible; pointer-events: none; }
+  .leaf.on { visibility: visible; }
   .leaf .face {
     position: absolute; inset: 0;
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
-    background:
-      radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.45), transparent 55%),
-      linear-gradient(180deg, #f7ead0, #f0dcb6);
-    overflow: hidden;
-    border-radius: 0 8px 8px 0;
+    background: #f7ead0; overflow: hidden; border-radius: 0 8px 8px 0;
   }
   .leaf .face.back { transform: rotateY(180deg); border-radius: 8px 0 0 8px; }
   .leaf.flip { transition: transform .9s cubic-bezier(.2,.7,.2,1); transform: rotateY(-180deg); }
-  .leaf-shade {
-    position: absolute; inset: 0; pointer-events: none; z-index: 2;
-    background: linear-gradient(90deg, rgba(60,30,10,.18), transparent 24%, transparent 76%, rgba(60,30,10,.08));
-  }
+  .leaf-shade { position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    background: linear-gradient(90deg, rgba(60,30,10,.18), transparent 24%, transparent 76%, rgba(60,30,10,.08)); }
 
-  #pageRContent, #pageUnder { position: absolute; inset: 0; }
-  #pageUnder { z-index: 1; }
-  #pageRContent { z-index: 2; }
-
-  /* ===== Open-button under closed book ===== */
   #openBtn, .btn {
     font-weight: 700; font-size: clamp(22px, 4.5vw, 30px);
     border: 5px solid #fff; border-radius: 24px; padding: 12px 26px;
@@ -233,27 +241,19 @@
   .btn.blue { background: #3fb5ff; box-shadow: 0 7px 0 #1f86c7; }
   .btn.orange { background: #ff7a3d; box-shadow: 0 7px 0 #c9541d; }
   .btn:active, #openBtn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
-  #openRow {
-    flex: none; display: flex; flex-direction: column; align-items: center;
-    margin-top: 28px; z-index: 5; min-height: 90px;
-  }
-  #book.open ~ #openRow, #desk.reading #openRow { visibility: hidden; height: 0; min-height: 0; margin: 0; overflow: hidden; }
+  #openRow { flex: none; display: flex; flex-direction: column; align-items: center; margin-top: 28px; z-index: 5; min-height: 90px; }
+  #desk.reading #openRow { visibility: hidden; height: 0; min-height: 0; margin: 0; overflow: hidden; }
   .cover-sub { font-size: 18px; font-weight: 600; color: #fff6d4; text-shadow: 0 2px 0 rgba(60,20,20,.4); margin: 6px 0 0; }
 
-  /* ===== Inside typography ===== */
   .chap { font-family: "Playfair Display", Georgia, serif; font-weight: 800; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.05; color: #8c1c2b; margin: 0 0 6px; }
   .chap small { display: block; font-size: .45em; letter-spacing: .12em; text-transform: uppercase; color: #c44914; font-family: Fredoka, sans-serif; font-weight: 700; margin-bottom: 4px; }
   .story { font-size: clamp(16px, 1.7vw, 20px); font-weight: 600; line-height: 1.35; color: #3a2414; margin: 8px 0 12px; }
-  .refcard {
-    background: #fff8e8; border: 4px solid #e6c15a; border-radius: 18px;
-    padding: 8px 8px 10px; text-align: center; box-shadow: 0 4px 0 #c9a24a;
-  }
+  .refcard { background: #fff8e8; border: 4px solid #e6c15a; border-radius: 18px; padding: 8px 8px 10px; text-align: center; box-shadow: 0 4px 0 #c9a24a; }
   .refcard .lab { font-size: 15px; font-weight: 700; color: #8c1c2b; }
   .refcard .hinty { font-size: 14px; font-weight: 600; color: #6b4a28; margin-top: 2px; }
   .howto { font-size: 15px; font-weight: 600; color: #6b4a28; margin-top: 12px; line-height: 1.35; }
   .howto li { margin: 4px 0; }
 
-  /* Contents list */
   .toc { display: flex; flex-direction: column; gap: 7px; height: 100%; overflow: auto; padding: 14px 14px 14px 8px; }
   .toc h2 { font-family: "Playfair Display", Georgia, serif; font-size: clamp(28px, 4vw, 42px); color: #8c1c2b; margin: 0 0 4px; text-align: center; }
   .toc .belongs { text-align: center; font-size: 15px; font-weight: 600; color: #6b4a28; margin: 0 0 8px; }
@@ -267,38 +267,6 @@
   .ch .nm { flex: 1; font-weight: 700; font-size: clamp(15px, 2vw, 18px); }
   .ch .st { font-size: 16px; letter-spacing: 1px; }
   .ch.locked { opacity: .55; filter: grayscale(.3); cursor: default; }
-  .ch.current { border-color: #2fd27a; box-shadow: 0 3px 0 #17984f; background: #e8fff2; }
-
-  /* Play header + scene */
-  .playhead {
-    display: flex; align-items: center; gap: 6px; flex: none;
-    padding: 6px 8px 6px 10px;
-    background: rgba(255,248,232,.92);
-    border-bottom: 3px solid #e6c15a;
-    min-height: 56px;
-  }
-  .playhead .ttl { flex: 1; min-width: 0; font-weight: 700; font-size: clamp(14px, 2.4vw, 20px); color: #8c1c2b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tpill { font-weight: 700; font-size: clamp(13px, 2.2vw, 17px); background: #fff; border-radius: 14px; padding: 5px 8px; box-shadow: 0 2px 0 #e0c48a; white-space: nowrap; }
-  .tpill.bonus { background: #ffe066; color: #7a4a00; }
-  .tpill.bonus.out { background: #eee; color: #888; }
-  #hintBtn, #contentsBtn, #zoomFit {
-    font-weight: 700; font-size: clamp(14px, 2.2vw, 17px); color: #fff;
-    background: #ffb800; border: 3px solid #fff; border-radius: 16px;
-    padding: 5px 10px; box-shadow: 0 3px 0 #c98f00; height: 42px; white-space: nowrap;
-  }
-  #hintBtn:disabled { background: #c9c3d9; box-shadow: 0 3px 0 #9a93ad; }
-  #contentsBtn { background: #7b5cff; box-shadow: 0 3px 0 #4b33b8; font-size: 18px; width: 42px; padding: 0; }
-  .mini-ref { width: 42px; height: 42px; border-radius: 10px; border: 3px solid #e6c15a; background: #fff8e8; overflow: hidden; flex: none; }
-  .mini-ref svg { width: 100%; height: 100%; }
-
-  .scene-wrap { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; height: 100%; }
-  #view { flex: 1; position: relative; overflow: hidden; touch-action: none; cursor: grab; background: #d9f0ff; min-height: 0; }
-  #view.drag { cursor: grabbing; }
-  #view svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  .zoombar { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
-  .zbtn { width: 48px; height: 48px; border-radius: 50%; border: 4px solid #fff; background: #7b5cff; color: #fff; font-size: 28px; font-weight: 700; box-shadow: 0 4px 0 #4b33b8; padding: 0; line-height: 1; }
-  .zbtn.all { background: #2fd27a; box-shadow: 0 4px 0 #17984f; font-size: 20px; }
-  .zbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #4b33b8; }
 
   .fx { position: absolute; pointer-events: none; z-index: 8; }
   .ring { border-radius: 50%; border: 6px solid #ffb800; box-shadow: 0 0 0 4px #fff, 0 0 18px #ffb800; transform: translate(-50%,-50%); animation: ringpulse .8s ease-in-out infinite; }
@@ -307,75 +275,32 @@
   @keyframes fly { from { transform: translate(-50%,-50%) scale(.4); opacity: 1; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.2); opacity: 0; } }
   .miss { width: 40px; height: 40px; border-radius: 50%; border: 4px solid rgba(255,255,255,.9); transform: translate(-50%,-50%); animation: missa .45s ease-out forwards; }
   @keyframes missa { from { transform: translate(-50%,-50%) scale(.3); opacity: 1; } to { transform: translate(-50%,-50%) scale(1.4); opacity: 0; } }
-  #toast { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: #fff; color: #8c1c2b; font-weight: 700; font-size: clamp(16px, 3.4vw, 22px); border-radius: 18px; padding: 8px 14px; box-shadow: 0 4px 0 #e0c48a; z-index: 9; pointer-events: none; opacity: 0; transition: opacity .25s; white-space: nowrap; max-width: 92%; overflow: hidden; text-overflow: ellipsis; }
+  #toast { position: absolute; left: 50%; top: 58px; transform: translateX(-50%); background: #fff; color: #8c1c2b; font-weight: 700; font-size: clamp(15px, 3vw, 20px); border-radius: 18px; padding: 8px 14px; box-shadow: 0 4px 0 #e0c48a; z-index: 9; pointer-events: none; opacity: 0; transition: opacity .25s; white-space: nowrap; max-width: 80%; overflow: hidden; text-overflow: ellipsis; }
   #toast.show { opacity: 1; }
 
-  @keyframes bob {
-    0%,100% { transform: translateY(0) rotate(-1deg); }
-    50% { transform: translateY(-5px) rotate(2deg); }
-  }
-  g.bob { animation: bob 2.4s ease-in-out infinite; }
-
-  /* Win plate */
   .overlay { position: fixed; inset: 0; background: rgba(58,42,93,.45); display: none; align-items: center; justify-content: center; z-index: 90; padding: 16px; }
   .overlay.on { display: flex; }
   .box { background: #fffdf6; border: 6px solid #e6c15a; border-radius: 30px; padding: 20px 18px; text-align: center; max-width: 520px; width: 100%; max-height: 96vh; overflow-y: auto; animation: pop .35s ease-out; box-shadow: 0 18px 40px rgba(40,20,70,.35); position: relative; z-index: 1; }
   @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .box h1 { font-family: "Playfair Display", Georgia, serif; font-size: clamp(30px, 7vw, 48px); margin: 6px 0 10px; color: #8c1c2b; line-height: 1.05; }
-  .box p { font-size: clamp(18px, 4vw, 24px); margin: 8px 0; font-weight: 600; }
+  .box h1 { font-family: "Playfair Display", Georgia, serif; font-size: clamp(28px, 6.5vw, 46px); margin: 6px 0 10px; color: #8c1c2b; line-height: 1.05; }
+  .box p { font-size: clamp(17px, 3.6vw, 22px); margin: 8px 0; font-weight: 600; }
   .stars { font-size: clamp(40px, 10vw, 64px); letter-spacing: 6px; line-height: 1.1; margin: 4px 0 8px; }
   .stars .dim { opacity: .25; filter: grayscale(1); }
   .bigtime { font-size: clamp(30px, 8vw, 48px); font-weight: 700; color: #c44914; margin: 4px 0; }
-
-  /* Reduced motion: no 3D, simple fade/slide */
-  .leaf.slide-out { transition: transform .35s ease, opacity .35s ease; transform: translateX(-28%) ; opacity: 0; }
+  #book, #book .spread, #book .page.right, #book .leaf, #book .cover, #playLayout { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
   #book.reduce .cover { transition: opacity .4s ease, transform .4s ease; }
   #book.reduce.open .cover { transform: none; opacity: 0; }
-  #book.reduce { transition: width .4s ease, height .4s ease; }
 
   @media (prefers-reduced-motion: reduce) {
-    g.bob { animation: none; }
     .cover, #book, .leaf { transition-duration: .01s !important; }
     .box { animation: none; }
   }
   @media (max-width: 420px) {
     .roundbtn { width: 44px; height: 44px; font-size: 22px; }
     .pill { font-size: 16px; padding: 6px 10px; }
-    .zbtn { width: 44px; height: 44px; font-size: 24px; }
-    .playhead { gap: 4px; padding: 5px 6px; }
-    #hintBtn { height: 38px; padding: 4px 8px; }
-  }
-
-  .spread { display: block; }
-  .spine {
-    position: absolute; left: 50%; top: 0; bottom: 0; width: 16px;
-    transform: translateX(-50%); z-index: 6; flex: none; height: auto;
-  }
-  .page.right {
-    position: absolute; left: 50%; top: 0; right: 0; bottom: 0;
-    width: auto; height: auto;
-  }
-  #book.open .cover, #book.opened .cover { z-index: 5; }
-  #book.opened .cover { pointer-events: auto; }
-  #book.single.open .page.right { left: 12px; right: 0; width: auto; border-radius: 0 8px 8px 0; }
-  #book.single.open .spine { left: 0; width: 12px; transform: none; }
-  #book.single.opened .cover { opacity: 0; pointer-events: none; z-index: 1; }
-  #book.single .cover-inside { display: none; }
-  #pageRContent, #pageUnder { position: absolute; inset: 0; overflow: hidden; }
-  .scene-wrap { height: 100%; width: 100%; }
-  #pageL { -webkit-overflow-scrolling: touch; }
-
-  /* 3d-flip-fix */
-  #book, #book .spread, #book .page.right, #book .leaf, #book .cover {
-    transform-style: preserve-3d;
-    -webkit-transform-style: preserve-3d;
-  }
-  #book .page.right { overflow: visible; }
-  #pageRContent, #pageUnder, .scene-wrap, #view { overflow: hidden; border-radius: 0 0 8px 0; }
-  .leaf .zoombar { display: none !important; }
-  .leaf .face.front::after, .leaf .face.back::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
-    background: linear-gradient(90deg, rgba(40,20,10,.2), transparent 18%, transparent 80%, rgba(40,20,10,.12));
+    .zbtn { width: 42px; height: 42px; font-size: 22px; }
+    .playhead { gap: 4px; top: 6px; left: 6px; right: 6px; }
+    #hintBtn { height: 36px; padding: 4px 8px; }
   }
 </style>
 </head>
@@ -386,8 +311,6 @@
   <span class="wall-leaf" style="right:6%;top:22%;font-size:28px">🍂</span>
   <span class="wall-leaf" style="left:8%;bottom:10%;font-size:30px">🍁</span>
   <span class="wall-leaf" style="right:10%;bottom:14%">🍂</span>
-  <span class="wall-leaf" style="left:16%;top:8%;font-size:22px;opacity:.5">🍃</span>
-  <span class="wall-leaf" style="right:18%;top:10%;font-size:22px;opacity:.5">🍁</span>
 
   <div class="topline">
     <a class="pill" href="../">🏠 Kai's Kool Kwiz</a>
@@ -401,11 +324,21 @@
       <div class="spread" id="spread">
         <div class="spine" aria-hidden="true"></div>
         <div class="page right" id="pageR">
-          <div id="pageUnder"></div>
           <div id="pageRContent"></div>
-          <div class="leaf" id="leaf">
-            <div class="face front" id="leafFront"><div class="leaf-shade"></div></div>
-            <div class="face back" id="leafBack"><div class="leaf-shade"></div></div>
+        </div>
+        <div id="playLayout">
+          <div id="view"></div>
+          <div class="gutter" aria-hidden="true"></div>
+          <div class="playhead" id="playhead"></div>
+          <div class="zoombar">
+            <button type="button" class="zbtn" id="zin" aria-label="Zoom in">+</button>
+            <button type="button" class="zbtn" id="zout" aria-label="Zoom out">−</button>
+            <button type="button" class="zbtn all" id="zall" aria-label="Fit page">▣</button>
+          </div>
+          <div id="toast"></div>
+          <div class="leaf" id="playLeaf">
+            <div class="face front" id="playLeafFront"><div class="leaf-shade"></div></div>
+            <div class="face back" id="playLeafBack"><div class="leaf-shade"></div></div>
           </div>
         </div>
       </div>
@@ -427,6 +360,16 @@
   <div id="openRow">
     <button class="btn go" id="openBtn">▶ Open the book</button>
     <p class="cover-sub" id="coverHint">A Thanksgiving hunt for Kaileigh</p>
+  </div>
+</div>
+
+<div class="overlay" id="introBox">
+  <div class="box">
+    <div id="introChap" class="chap" style="font-size:18px;margin:0"><small>Chapter 1 of 10</small></div>
+    <h1 id="introTitle">The Garden Picnic</h1>
+    <p id="introStory"></p>
+    <div class="refcard" id="introRef"></div>
+    <button class="btn go" id="introGo">▶ Find him!</button>
   </div>
 </div>
 
@@ -460,27 +403,14 @@
 <script>
 const $ = function (id) { return document.getElementById(id); };
 const MUTE_KEY = "kkk_turkey_muted";
-const SAVE_KEY = "kkk_turkey_save_v1";
-const SW = 1200, SH = 800; // scene world size
-const VIEW_BG = {
-  1: "linear-gradient(180deg,#7ec8ff 0%,#d8f0ff 45%,#6bb34a 45%,#5a9e3c 100%)",
-  2: "linear-gradient(180deg,#ffb36a 0%,#ffe7b0 45%,#c9853a 45%,#b8742e 100%)",
-  3: "linear-gradient(180deg,#f3e0c4 0%,#f3e0c4 50%,#c4a07a 50%)",
-  4: "linear-gradient(180deg,#f7e6cf 0%,#f3d7b0 50%,#6b3f1a 50%)",
-  5: "linear-gradient(180deg,#7eb6e8 0%,#f7d9a8 45%,#8a6a3a 45%,#7a5a2e 100%)",
-  6: "linear-gradient(180deg,#87c8ff 0%,#cce8ff 45%,#7aae4a 45%,#5a8e32 100%)",
-  7: "linear-gradient(180deg,#6eb6ff 0%,#ffe0a0 45%,#8a8a90 45%,#6a6a70 100%)",
-  8: "linear-gradient(180deg,#f0a05a 0%,#f7d9a0 45%,#4a7a32 45%,#3e6a28 100%)",
-  9: "linear-gradient(180deg,#6b3040 0%,#6b3040 50%,#3e2414 50%)",
-  10: "linear-gradient(180deg,#142044 0%,#3a2a58 45%,#2a2438 45%,#1a1428 100%)"
-};
-
+const SAVE_KEY = "kkk_turkey_save_v2";
+const SW = 2400, SH = 1440;
+const STK = "#1c140c";
 
 const REDUCE_MQ = window.matchMedia("(prefers-reduced-motion: reduce)");
 let reduce = REDUCE_MQ.matches;
 REDUCE_MQ.addEventListener && REDUCE_MQ.addEventListener("change", function (e) { reduce = e.matches; layoutBook(); });
 
-/* ================= Save ================= */
 function defaultSave() {
   return { unlocked: 1, stars: [0,0,0,0,0,0,0,0,0,0], bestTime: [null,null,null,null,null,null,null,null,null,null] };
 }
@@ -502,7 +432,6 @@ function loadSave() {
 function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 let save = loadSave();
 
-/* ================= Sound ================= */
 let AC = null, muted = false;
 try { muted = localStorage.getItem(MUTE_KEY) === "1"; } catch (e) {}
 function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); return AC; }
@@ -540,166 +469,429 @@ const SFX = {
   bonus() { [784, 988, 1175].forEach(function (f, i) { tone(f, i * 0.09, 0.2, "triangle", 0.16); }); },
   lock() { tone(200, 0, 0.12, "sine", 0.07, 140); }
 };
-function say(text) {
-  if (muted || !window.speechSynthesis) return;
-  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(String(text).replace(/Kaileigh/gi, "Kai Lee")); u.rate = 1.06; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
-}
 function setMuted(m) {
   muted = m;
   try { localStorage.setItem(MUTE_KEY, m ? "1" : "0"); } catch (e) {}
   const b = $("muteBtn"); if (b) b.textContent = m ? "🔇" : "🔊";
-  if (m && window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
 }
-
 function fmt(ms) {
-  const s = Math.max(0, Math.floor(ms / 1000));
+  const s = Math.max(0, Math.floor((ms || 0) / 1000));
   const m = Math.floor(s / 60);
   return String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
 }
 
-/* ================= SVG helpers ================= */
+/* ================= SVG primitives ================= */
 function rng(seed) { let s = (seed >>> 0) || 1; return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
-function em(ch, x, y, size, rot, extra) {
-  return '<g transform="translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ') scale(' + (size / 100).toFixed(4) + ')" ' + (extra || "") + '><text x="0" y="0" font-size="100" text-anchor="middle" dominant-baseline="central" font-family="Apple Color Emoji, Noto Color Emoji, Segoe UI Emoji, sans-serif">' + ch + "</text></g>";
-}
+function rr(n) { return Math.round(n * 10) / 10; }
+function pick(a, R) { return a[(R() * a.length) | 0]; }
+function jit(R, n) { return (R() - 0.5) * 2 * n; }
 function el(cx, cy, rx, ry, fill, extra) {
-  return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + rx + '" ry="' + ry + '" fill="' + fill + '" ' + (extra || "") + "/>";
+  return '<ellipse cx="' + rr(cx) + '" cy="' + rr(cy) + '" rx="' + rr(rx) + '" ry="' + rr(ry) + '" fill="' + fill + '" ' + (extra || st()) + "/>";
 }
 function rec(x, y, w, h, fill, extra, rx) {
-  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + fill + '" ' + (rx ? 'rx="' + rx + '" ' : "") + (extra || "") + "/>";
+  return '<rect x="' + rr(x) + '" y="' + rr(y) + '" width="' + rr(w) + '" height="' + rr(h) + '" fill="' + fill + '" ' + (rx ? 'rx="' + rx + '" ' : "") + (extra || st()) + "/>";
 }
 function path(d, fill, extra) {
-  return '<path d="' + d + '" fill="' + (fill || "none") + '" ' + (extra || "") + "/>";
+  return '<path d="' + d + '" fill="' + (fill || "none") + '" ' + (extra || st()) + "/>";
+}
+function circ(cx, cy, r, fill, extra) {
+  return '<circle cx="' + rr(cx) + '" cy="' + rr(cy) + '" r="' + rr(r) + '" fill="' + fill + '" ' + (extra || st()) + "/>";
+}
+function st(sw) {
+  return 'stroke="' + STK + '" stroke-width="' + (sw || 2.3) + '" stroke-linejoin="round" stroke-linecap="round"';
+}
+function txt(x, y, s, t, fill, extra) {
+  return '<text x="' + rr(x) + '" y="' + rr(y) + '" font-size="' + s + '" font-family="Fredoka, sans-serif" font-weight="700" text-anchor="middle" fill="' + (fill || "#fff6d4") + '" ' + (extra || "") + ">" + t + "</text>";
 }
 
-/* The real turkey: black pilgrim hat + gold buckle + red wattle + blue scarf.
-   Coordinate system: origin at mid-body, facing right, ~100 units tall. */
-function turkeyMarkup(opt) {
+const SKINS = ["#fde0c4","#f6d0b0","#f0c4a0","#e8b88a","#d4a074","#c88a5a","#b07848","#a86b3c","#8d5524","#6f3d22","#ffe8d2","#e0b090"];
+const HAIRS = ["#1a1a1a","#2a1a10","#3a2414","#6b3f1a","#8a4a1a","#c47a2a","#e8c44a","#8a8a8a","#d0d0d0","#4a2060","#1a3a6a"];
+const SHIRTS = ["#c44914","#d32f2f","#3b6fd6","#1565c0","#2e7d32","#00897b","#ff7a3d","#f4c430","#7b5cff","#e91e63","#fff8e8","#1a1a1a","#6d4c41","#5d4037","#00838f","#ef6c00","#ad1457","#37474f"];
+const PANTS = ["#2c3e50","#3e2723","#1a1a1a","#1565c0","#4e342e","#37474f","#5d4037","#6d4c41","#b71c1c"];
+
+/* Person: feet at (0,0), head near (0,-40). Scale ~1 is ~52px tall. */
+function person(x, y, s, R, opt) {
+  opt = opt || {};
+  const face = opt.flip != null ? opt.flip : (R() < 0.5 ? -1 : 1);
+  const skin = opt.skin || pick(SKINS, R);
+  const hairC = opt.hair || pick(HAIRS, R);
+  const shirt = opt.shirt || pick(SHIRTS, R);
+  const pants = opt.pants || pick(PANTS, R);
+  const pose = opt.pose || "stand";
+  const role = opt.role || "civ";
+  const sw = 2.2;
+  const S = st(sw);
+  let legs = "", body = "", arms = "", hat = "", prop = "", hair = "";
+
+  if (pose === "table") {
+    body = rec(-10, -22, 20, 16, shirt, S, 3);
+    arms = rec(-16, -20, 7, 12, skin, S, 2) + rec(9, -20, 7, 12, skin, S, 2);
+  } else if (pose === "sit") {
+    legs = rec(-2, -8, 18, 7, pants, S, 2);
+    body = rec(-10, -26, 20, 18, shirt, S, 3);
+    arms = rec(-15, -24, 6, 12, skin, S, 2) + rec(9, -22, 6, 12, skin, S, 2);
+  } else if (pose === "cheer") {
+    legs = rec(-10, -14, 7, 15, pants, S, 2) + rec(3, -14, 7, 15, pants, S, 2);
+    body = rec(-10, -32, 20, 18, shirt, S, 3);
+    arms = rec(-18, -48, 6, 20, skin, S, 2) + rec(12, -48, 6, 20, skin, S, 2);
+  } else if (pose === "walk" || pose === "march") {
+    legs = rec(-12, -14, 7, 15, pants, S, 2) + rec(4, -14, 7, 15, pants, S, 2);
+    body = rec(-10, -32, 20, 18, shirt, S, 3);
+    arms = rec(-18, -30, 6, 16, skin, S, 2) + rec(11, -28, 6, 14, skin, S, 2);
+  } else if (pose === "bend") {
+    legs = rec(-9, -12, 7, 13, pants, S, 2) + rec(2, -12, 7, 13, pants, S, 2);
+    body = rec(-8, -24, 22, 14, shirt, S, 3);
+    arms = rec(8, -16, 14, 6, skin, S, 2);
+  } else if (pose === "wave") {
+    legs = rec(-9, -14, 7, 15, pants, S, 2) + rec(2, -14, 7, 15, pants, S, 2);
+    body = rec(-10, -32, 20, 18, shirt, S, 3);
+    arms = rec(-16, -30, 6, 16, skin, S, 2) + rec(10, -50, 6, 22, skin, S, 2);
+  } else if (pose === "run") {
+    legs = rec(-14, -12, 7, 14, pants, S, 2) + rec(6, -14, 7, 15, pants, S, 2);
+    body = rec(-10, -30, 20, 17, shirt, S, 3);
+    arms = rec(-20, -28, 7, 14, skin, S, 2) + rec(10, -34, 7, 14, skin, S, 2);
+  } else {
+    legs = rec(-9, -14, 7, 15, pants, S, 2) + rec(2, -14, 7, 15, pants, S, 2);
+    body = rec(-10, -32, 20, 18, shirt, S, 3);
+    arms = rec(-16, -30, 6, 16, skin, S, 2) + rec(10, -30, 6, 16, skin, S, 2);
+  }
+
+  const hy = (pose === "table") ? -30 : (pose === "bend") ? -32 : -40;
+  const head = circ(0, hy, 9, skin, S);
+  const eyes = circ(3.2, hy - 1.5, 1.5, STK, 'stroke="none"');
+  if (role !== "bald" && role !== "chef") {
+    if (R() > 0.15) hair = el(0, hy - 6, 9, 6, hairC, S);
+    if (R() > 0.65) hair += rec(-11, hy - 2, 5, 10, hairC, S, 2);
+  }
+
+  if (role === "chef") {
+    hat = rec(-8, hy - 18, 16, 10, "#fff8e8", S, 3) + rec(-10, hy - 10, 20, 5, "#fff8e8", S, 2);
+  } else if (role === "pilgrim") {
+    hat = rec(-8, hy - 16, 16, 12, "#1a1a1a", S, 1) + rec(-12, hy - 6, 24, 5, "#1a1a1a", S, 1) + rec(-3, hy - 12, 6, 5, "#f1c40f", S, 1);
+  } else if (role === "farmer") {
+    hat = el(0, hy - 10, 14, 5, "#e6c15a", S) + rec(-6, hy - 16, 12, 8, "#e6c15a", S, 2);
+  } else if (role === "band") {
+    hat = rec(-8, hy - 14, 16, 8, "#1a1a1a", S, 1) + rec(-3, hy - 16, 6, 4, "#c44914", S, 1);
+  } else if (role === "santa") {
+    hat = path("M-8 " + (hy - 6) + " L0 " + (hy - 20) + " L8 " + (hy - 6) + " Z", "#c44914", S) + circ(0, hy - 20, 3, "#fff8e8", S);
+  } else if (opt.hat === "blue") {
+    hat = rec(-8, hy - 14, 16, 8, "#3b6fd6", S, 2);
+  } else if (opt.hat === "cap") {
+    hat = rec(-8, hy - 12, 16, 6, opt.hatCol || "#1565c0", S, 2) + rec(4, hy - 9, 10, 4, opt.hatCol || "#1565c0", S, 1);
+  } else if (role === "player" && opt.helmet) {
+    hat = el(0, hy - 2, 10, 9, opt.helmet, S);
+  }
+
+  const pr = opt.prop;
+  if (pr === "pie") prop = el(16, -18, 8, 4, "#c47a2a", S) + el(16, -20, 7, 3, "#f0c35a", S);
+  else if (pr === "pumpkin") prop = el(16, -10, 8, 7, "#ef7a1a", S);
+  else if (pr === "flag") prop = rec(16, -52, 2, 36, "#6b3f1a", S) + rec(18, -52, 14, 10, "#c44914", S);
+  else if (pr === "drum") prop = el(0, -6, 10, 5, "#c44914", S) + rec(-10, -8, 20, 5, "#fff8e8", S);
+  else if (pr === "horn") prop = rec(12, -28, 16, 5, "#f4c430", S, 2);
+  else if (pr === "platter") prop = el(16, -16, 11, 4, "#d0d0d0", S) + el(16, -18, 6, 3, "#c44914", S);
+  else if (pr === "ball") prop = circ(16, -8, 6, opt.ball || "#fff", S);
+  else if (pr === "football") prop = el(16, -10, 8, 5, "#8a4a1a", S);
+  else if (pr === "balloon") prop = circ(8, -60, 8, pick(["#c44914","#3b6fd6","#f4c430","#2e7d32"], R), S) + rec(8, -52, 1.5, 16, STK, 'stroke="none"');
+  else if (pr === "basket") prop = rec(12, -12, 12, 9, "#c47a2a", S, 2);
+  else if (pr === "corn") prop = rec(14, -16, 6, 14, "#f4c430", S, 3);
+  else if (pr === "drumstick") prop = rec(14, -16, 5, 12, "#c47a2a", S, 2) + circ(16, -18, 4, "#e8b88a", S);
+  else if (pr === "rake") prop = rec(14, -40, 2, 36, "#6b3f1a", S) + rec(10, -42, 12, 4, "#8a4a1a", S);
+  else if (pr === "banner") prop = rec(12, -48, 2, 30, "#6b3f1a", S) + rec(14, -48, 12, 8, "#7b5cff", S);
+
+  if (role === "civ" && !hat && !opt.hat && R() < 0.3) {
+    hat = rec(-8, hy - 12, 16, 6, pick(SHIRTS, R), S, 2) + rec(4, hy - 9, 10, 4, pick(SHIRTS, R), S, 1);
+  }
+  if (opt.scarf === "blue") {
+    prop += rec(-8, hy + 8, 16, 5, "#3b6fd6", S, 2);
+  }
+  let shoes = "";
+  if (pose !== "table") {
+    shoes = rec(-10, -3, 8, 3.2, "#1a1a1a", S, 1) + rec(2, -3, 8, 3.2, "#1a1a1a", S, 1);
+  }
+
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s * face) + ',' + rr(s) + ')">' +
+    shoes + legs + body + arms + hair + head + eyes + hat + prop + "</g>";
+}
+
+function bust(x, y, s, R, opt) {
+  opt = opt || {};
+  const face = opt.flip != null ? opt.flip : (R() < 0.5 ? -1 : 1);
+  const skin = opt.skin || pick(SKINS, R);
+  const hairC = opt.hair || pick(HAIRS, R);
+  const shirt = opt.shirt || pick(SHIRTS, R);
+  const S = st(2);
+  const hair = el(0, -16, 8, 5, hairC, S);
+  const head = circ(0, -10, 8, skin, S);
+  const eye = circ(3, -11, 1.3, STK, 'stroke="none"');
+  const body = rec(-10, -4, 20, 12, shirt, S, 3);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s * face) + ',' + rr(s) + ')">' + body + hair + head + eye + "</g>";
+}
+
+function turkeyFig(x, y, s, opt) {
   opt = opt || {};
   const kind = opt.kind || "real";
-  const palName = opt.pal || (kind === "white" ? "white" : "real");
-  const PALS = {
-    real:  { body:"#c46a2c", dark:"#8a3d12", wing:"#e08948", head:"#d4783a", breast:"#a84e1c", beak:"#f4c430", tail:["#c62828","#ef6c00","#f9a825","#2e7d32","#6d4c41"] },
-    white: { body:"#f4eee3", dark:"#d4c8b4", wing:"#fffaf2", head:"#f0e0cc", breast:"#e8dcc8", beak:"#f4c430", tail:["#ef9a9a","#ffcc80","#fff59d","#a5d6a7","#bcaaa4"] },
-    dark:  { body:"#6a3a18", dark:"#3e2210", wing:"#8a5224", head:"#7a4620", breast:"#4e2a10", beak:"#e6b325", tail:["#8b1e1e","#bf360c","#c6a700","#1b5e20","#3e2723"] }
-  };
-  const p = PALS[palName] || PALS.real;
-  let tail = "";
-  const tails = p.tail;
-  const angles = [-70, -45, -22, 0, 22, 45, 68];
-  for (let i = 0; i < angles.length; i++) {
-    const col = tails[i % tails.length];
-    tail += '<g transform="rotate(' + angles[i] + ')"><ellipse cx="0" cy="-58" rx="12" ry="32" fill="' + col + '" stroke="#5a2a10" stroke-width="1.2"/></g>';
-  }
-  const wing = el(8, 6, 22, 14, p.wing, 'stroke="' + p.dark + '" stroke-width="1.2"');
-  const body = el(0, 8, 28, 24, p.body, 'stroke="' + p.dark + '" stroke-width="1.5"') +
-    el(-4, 12, 16, 14, p.breast);
-  const legs = '<g stroke="#c9a024" stroke-width="3" fill="none" stroke-linecap="round"><path d="M-8 28 L-10 40 L-16 42"/><path d="M8 28 L10 40 L16 42"/></g>';
-  let head = el(26, -10, 14, 13, p.head, 'stroke="' + p.dark + '" stroke-width="1.2"');
-  if (kind !== "back") {
-    head += el(32, -13, 3.2, 3.4, "#fff") + el(33, -13, 1.6, 1.8, "#1a1a1a");
-    head += path("M38 -10 L48 -7 L38 -4 Z", p.beak, 'stroke="#c9a024" stroke-width="0.8"');
-  } else {
-    head = el(-26, -10, 14, 13, p.head, 'stroke="' + p.dark + '" stroke-width="1.2"');
-  }
-  let wattle = "";
-  if (kind !== "back" && kind !== "nowattle") {
-    wattle = el(34, -2, 4, 8, "#e53935") + el(28, -16, 3.5, 6, "#e53935");
-  }
-  let scarf = "";
-  if (kind === "real") {
-    scarf = path("M16 0 Q26 10 22 18 Q18 8 12 4 Z", "#3b6fd6", 'stroke="#234a9a" stroke-width="1"') +
-      rec(12, -2, 22, 7, "#3b6fd6", 'stroke="#234a9a" stroke-width="1"', 3);
-  }
-  let hat = "";
-  if (kind === "real" || kind === "white") {
-    hat = rec(16, -36, 28, 14, "#1a1a1a", "", 2) +
-      rec(10, -24, 40, 6, "#1a1a1a", "", 2) +
-      rec(26, -31, 10, 7, "#f1c40f", 'stroke="#c9a024" stroke-width="0.8"', 1);
-  } else if (kind === "chef") {
-    hat = el(26, -38, 16, 14, "#fff") + rec(14, -30, 24, 10, "#fff", 'stroke="#ddd" stroke-width="0.8"', 2);
-  } else if (kind === "bluehat") {
-    hat = path("M14 -22 L28 -48 L42 -22 Z", "#3b6fd6", 'stroke="#234a9a" stroke-width="1.2"') +
-      el(28, -48, 5, 5, "#ff4fa3");
-  }
-  const bob = opt.bob ? ' class="bob"' : "";
   const flip = opt.flip ? -1 : 1;
-  const s = opt.scale || 1;
+  const S = st(2.2);
+  const bodyC = kind === "white" ? "#f4eee3" : "#c46a2c";
+  const wingC = kind === "white" ? "#fffaf2" : "#e08948";
+  const tails = kind === "white" ? ["#ef9a9a","#ffcc80","#fff59d","#a5d6a7"] : ["#c62828","#ef6c00","#f9a825","#2e7d32"];
+  let tail = "";
+  const angs = [-55, -28, 0, 28, 55];
+  for (let i = 0; i < angs.length; i++) {
+    tail += '<g transform="rotate(' + angs[i] + ' -2 -8)">' + el(-2, -22, 5, 16, tails[i % tails.length], S) + "</g>";
+  }
+  const legs = rec(-6, 6, 3, 8, "#c9a024", S, 1) + rec(3, 6, 3, 8, "#c9a024", S, 1);
+  const body = el(0, 0, 12, 10, bodyC, S) + el(6, -6, 7, 6, bodyC, S);
+  const wing = el(2, 1, 7, 5, wingC, S);
+  const eye = circ(9, -7, 1.4, STK, 'stroke="none"');
+  const beak = path("M12 -7 L18 -5 L12 -3 Z", "#f4c430", S);
+  let wattle = (kind === "nowattle" || kind === "back") ? "" : el(11, -2, 2.2, 4, "#e53935", S);
+  let scarf = (kind === "real") ? rec(-2, -2, 12, 4, "#3b6fd6", S, 1) : "";
+  let hat = "";
+  if (kind === "real" || kind === "white" || kind === "noscarf") {
+    hat = rec(2, -20, 12, 8, "#1a1a1a", S, 1) + rec(-1, -13, 18, 3.5, "#1a1a1a", S, 1) + rec(6, -17, 5, 4, "#f1c40f", S, 1);
+  } else if (kind === "chef") {
+    hat = rec(2, -20, 12, 8, "#fff8e8", S, 2) + rec(0, -14, 16, 4, "#fff8e8", S, 1);
+  } else if (kind === "bluehat") {
+    hat = path("M2 -12 L8 -22 L14 -12 Z", "#3b6fd6", S);
+  }
+  if (kind === "noscarf") scarf = "";
   const id = opt.id ? ' id="' + opt.id + '"' : "";
   const cls = opt.cls ? ' class="' + opt.cls + '"' : "";
-  return '<g' + id + cls + ' data-kind="' + kind + '" transform="translate(' + (opt.x || 0) + ' ' + (opt.y || 0) + ') scale(' + (s * flip) + ',' + s + ')"><g' + bob + '>' +
-    tail + legs + body + wing + scarf + head + wattle + hat +
-    "</g></g>";
+  return '<g' + id + cls + ' data-kind="' + kind + '" transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s * flip) + ',' + rr(s) + ')">' +
+    tail + legs + body + wing + scarf + eye + beak + wattle + hat + "</g>";
 }
 
-function turkeyHitSize(scale) { return 90 * (scale || 1); }
-
-function refTurkeySVG(w, h) {
-  w = w || 200; h = h || 200;
-  return '<svg viewBox="0 0 120 130" width="' + w + '" height="' + h + '" xmlns="http://www.w3.org/2000/svg">' +
-    rec(0, 0, 120, 130, "transparent") +
-    turkeyMarkup({ x: 54, y: 78, scale: 0.95, kind: "real", bob: false }) +
-    "</svg>";
+function costumeTurkey(x, y, s, R) {
+  /* A person in a turkey costume — body of a person, turkey tail and a felt hat */
+  const p = person(x, y, s, R, { role: "civ", shirt: "#c46a2c", pants: "#8a3d12" });
+  const tail = turkeyFig(x, y - 8 * s, s * 0.7, { kind: "nohat", flip: R() > 0.5 });
+  return tail + p;
 }
 
-/* Props */
-function pumpkin(x, y, s, col) {
-  col = col || "#ef7a1a";
-  const d = "#c45a0a";
-  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
-    el(-10, 0, 14, 16, col) + el(10, 0, 14, 16, col) + el(0, 0, 16, 18, col, 'stroke="' + d + '" stroke-width="1.5"') +
-    rec(-3, -22, 6, 10, "#3e7a22", "", 2) +
+function dog(x, y, s, R) {
+  const S = st(2); const col = pick(["#8a5a2b","#d4a074","#3a2414","#eee","#c47a2a"], R);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    rec(0, -8, 18, 10, col, S, 4) + circ(18, -10, 6, col, S) + rec(-2, 0, 5, 8, col, S, 1) + rec(10, 0, 5, 8, col, S, 1) +
+    rec(20, -6, 8, 3, col, S, 1) + circ(20, -12, 1.4, STK, 'stroke="none"') +
+    "</g>";
+}
+function chicken(x, y, s, R) {
+  const S = st(2); const col = pick(["#fff8e8","#f4c430","#e8b88a"], R);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    el(0, 0, 8, 6, col, S) + circ(7, -4, 4.5, col, S) + path("M10 -4 L15 -3 L10 -1 Z", "#ef6c00", S) +
+    rec(-1, 5, 2, 5, "#c9a024", S) + rec(3, 5, 2, 5, "#c9a024", S) +
+    path("M6 -9 L8 -13 L10 -9 Z", "#c44914", S) +
+    "</g>";
+}
+function duck(x, y, s) {
+  const S = st(2);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    el(0, 0, 9, 6, "#fff8e8", S) + circ(8, -3, 4, "#fff8e8", S) + path("M11 -3 L17 -2 L11 0 Z", "#ef6c00", S) +
+    "</g>";
+}
+function cow(x, y, s, R) {
+  const S = st(2.2);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    rec(0, -18, 28, 16, "#fff8e8", S, 4) + rec(-2, -2, 6, 12, "#3a2414", S, 1) + rec(10, -2, 6, 12, "#3a2414", S, 1) + rec(20, -2, 6, 12, "#3a2414", S, 1) +
+    circ(28, -20, 8, "#fff8e8", S) + rec(30, -16, 8, 4, "#e8b88a", S, 2) + circ(6, -14, 4, "#1a1a1a", 'stroke="none"') +
+    "</g>";
+}
+function pig(x, y, s) {
+  const S = st(2);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    rec(0, -12, 18, 12, "#f5a9c0", S, 5) + circ(18, -12, 7, "#f5a9c0", S) + rec(-1, 0, 4, 7, "#f5a9c0", S, 1) + rec(8, 0, 4, 7, "#f5a9c0", S, 1) +
+    el(22, -10, 4, 3, "#f5a9c0", S) +
+    "</g>";
+}
+function sheep(x, y, s) {
+  const S = st(2);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    el(8, -8, 12, 9, "#fff8e8", S) + circ(20, -10, 5, "#3a2414", S) + rec(2, 0, 3, 7, "#3a2414", S) + rec(12, 0, 3, 7, "#3a2414", S) +
+    "</g>";
+}
+function horse(x, y, s, R) {
+  const S = st(2.2); const col = pick(["#8a5a2b","#3a2414","#d4a074"], R);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    rec(0, -22, 26, 14, col, S, 4) + rec(2, -8, 5, 16, col, S, 1) + rec(16, -8, 5, 16, col, S, 1) +
+    rec(22, -28, 14, 8, col, S, 3) + circ(36, -26, 6, col, S) +
+    "</g>";
+}
+function cat(x, y, s, R) {
+  const S = st(2); const col = pick(["#c47a2a","#eee","#3a2414","#888"], R);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    rec(0, -8, 14, 8, col, S, 3) + circ(14, -10, 5, col, S) + path("M10 -14 L12 -20 L16 -14 Z", col, S) + path("M14 -14 L18 -20 L20 -14 Z", col, S) +
+    "</g>";
+}
+
+function pumpkin(x, y, s, R) {
+  const S = st(2.2); const col = pick(["#ef7a1a","#f0a030","#e85d04"], R || function(){return 0.3;});
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    el(-6, 0, 8, 9, col, S) + el(6, 0, 8, 9, col, S) + el(0, 0, 9, 10, col, S) + rec(-2, -12, 4, 6, "#3e7a22", S, 1) +
     "</g>";
 }
 function pie(x, y, s) {
-  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
-    el(0, 6, 26, 10, "#c47a2a") + el(0, 2, 24, 9, "#f0c35a") +
-    path("M-18 0 Q0 -16 18 0", "#d48a30") +
-    rec(-2, -14, 4, 10, "#3e7a22", "", 1) +
+  const S = st(2);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    el(0, 3, 12, 5, "#c47a2a", S) + el(0, 0, 11, 5, "#f0c35a", S) +
     "</g>";
 }
 function hay(x, y, s, rot) {
-  return '<g transform="translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ') scale(' + s + ')">' +
-    rec(-28, -16, 56, 32, "#e6c15a", 'stroke="#c9a024" stroke-width="2"', 8) +
-    rec(-20, -6, 40, 6, "#c9a024", "", 2) +
+  const S = st(2.2);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') rotate(' + (rot || 0) + ') scale(' + rr(s) + ')">' +
+    rec(-16, -10, 32, 20, "#e6c15a", S, 5) + rec(-12, -2, 24, 4, "#c9a024", S, 1) +
     "</g>";
 }
 function tree(x, y, s, col) {
-  col = col || "#c44914";
-  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
-    rec(-6, -10, 12, 40, "#6b3f1a") +
-    el(0, -28, 28, 26, col) + el(-16, -16, 16, 14, col) + el(16, -18, 16, 14, col) +
+  const S = st(2.4);
+  return '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + rr(s) + ')">' +
+    rec(-5, -10, 10, 28, "#6b3f1a", S) + el(0, -24, 22, 20, col || "#c44914", S) + el(-12, -14, 12, 10, col || "#e65100", S) + el(12, -16, 12, 10, col || "#ef6c00", S) +
     "</g>";
 }
-function fence(x, y, w, s) {
-  let o = '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')">';
-  o += rec(0, 10, w, 6, "#d4b07a");
-  o += rec(0, 28, w, 6, "#d4b07a");
-  for (let i = 0; i < w; i += 22) o += rec(i, 0, 8, 44, "#c9a06a", "", 2);
+function fence(x, y, w, h, s) {
+  h = h || 22; s = s || 1;
+  const S = st(2);
+  let o = '<g transform="translate(' + rr(x) + ' ' + rr(y) + ') scale(' + s + ')">';
+  o += rec(0, h * 0.3, w, 4, "#d4b07a", S) + rec(0, h * 0.65, w, 4, "#d4b07a", S);
+  for (let i = 0; i < w; i += 16) o += rec(i, 0, 6, h, "#c9a06a", S, 1);
   return o + "</g>";
 }
-function person(x, y, s, shirt, hair, flip) {
-  return '<g transform="translate(' + x + ' ' + y + ') scale(' + ((flip ? -s : s)) + ',' + s + ')">' +
-    el(0, -28, 10, 10, "#f0c9a0") +
-    el(0, -34, 11, 8, hair || "#3a2414") +
-    rec(-12, -18, 24, 22, shirt || "#3b6fd6", "", 4) +
-    rec(-10, 4, 8, 16, "#3a2414", "", 2) + rec(2, 4, 8, 16, "#3a2414", "", 2) +
-    "</g>";
+
+function windowGrid(x, y, floors, cols, ww, wh, gapX, gapY, R, s) {
+  s = s || 1;
+  let h = "";
+  for (let r = 0; r < floors; r++) {
+    for (let c = 0; c < cols; c++) {
+      const wx = x + c * (ww + gapX), wy = y + r * (wh + gapY);
+      h += rec(wx, wy, ww, wh, pick(["#8ec8ff","#a8d8ff","#ffe8c0","#d0e8ff"], R), st(2));
+      if (R() > 0.18) h += bust(wx + ww * 0.5, wy + wh * 0.85, 0.7 * s * (wh / 28), R, {});
+      if (R() > 0.72) h += bust(wx + ww * 0.32, wy + wh * 0.85, 0.65 * s * (wh / 28), R, {});
+    }
+  }
+  return h;
 }
 
-/* ================= Levels ================= */
+function building(x, y, w, h, col, R, opt) {
+  opt = opt || {};
+  const S = st(2.6);
+  const floors = opt.floors || Math.max(2, Math.round(h / 70));
+  const cols = opt.cols || Math.max(2, Math.round(w / 50));
+  const roofH = opt.roofH || 28;
+  const roofC = opt.roof || "#8a2418";
+  let o = rec(x, y, w, h, col, S) + path("M" + x + " " + y + " L" + (x + w / 2) + " " + (y - roofH) + " L" + (x + w) + " " + y + " Z", roofC, S);
+  const padX = 10, padY = 12;
+  const ww = (w - padX * 2 - (cols - 1) * 8) / cols;
+  const wh = (h - padY * 2 - (floors - 1) * 10) / floors;
+  o += windowGrid(x + padX, y + padY, floors, cols, ww, wh, 8, 10, R, opt.s || 1);
+  if (opt.door) o += rec(x + w / 2 - 10, y + h - 32, 20, 32, opt.door, S);
+  return o;
+}
+
+function table(x, y, w, h, col) {
+  const S = st(2.4);
+  return rec(x, y, w, h, col || "#8a5a2b", S, 3) + rec(x + 8, y + h, 8, 14, "#6b3f1a", S) + rec(x + w - 16, y + h, 8, 14, "#6b3f1a", S);
+}
+
+function sortY(arr) { arr.sort(function (a, b) { return a.y - b.y; }); return arr; }
+
+function packPts(R, zone, n) {
+  const pts = [], minD = zone.gap || 30;
+  for (let i = 0; i < n; i++) {
+    let x, y, ok, tries = 0;
+    do {
+      x = zone.x + R() * zone.w;
+      y = zone.y + R() * zone.h;
+      ok = true;
+      for (let j = 0; j < pts.length; j++) {
+        if (Math.abs(x - pts[j].x) < minD && Math.abs(y - pts[j].y) < minD * 0.65) { ok = false; break; }
+      }
+    } while (!ok && ++tries < 30);
+    pts.push({ x: x, y: y, s: zone.s || 1 });
+  }
+  return sortY(pts);
+}
+function rowPts(x, y, n, dx, dy, stagger, R, jx, jy) {
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    pts.push({
+      x: x + i * dx + (stagger ? (Math.floor(i) % 2) * dx * 0.15 : 0) + (R && jx ? jit(R, jx) : 0),
+      y: y + (dy || 0) + (R && jy ? jit(R, jy) : 0)
+    });
+  }
+  return pts;
+}
+
+function peopleFromPts(pts, R, optFn) {
+  let h = "", n = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    const opt = typeof optFn === "function" ? optFn(p, i, R) : (optFn || {});
+    h += person(p.x, p.y, p.s || opt.s || 1, R, opt);
+    n++;
+  }
+  return { h: h, n: n };
+}
+
+function foodOnTable(x, y, w, R) {
+  let h = "";
+  for (let i = 0; i < w / 40; i++) {
+    const px = x + 18 + i * 40 + jit(R, 6);
+    const kind = R();
+    if (kind < 0.25) h += pie(px, y - 2, 0.7 + R() * 0.3);
+    else if (kind < 0.45) h += rec(px - 6, y - 6, 12, 8, pick(["#c44914","#f0c35a","#2e7d32"], R), st(1.8), 2);
+    else if (kind < 0.65) h += pumpkin(px, y - 2, 0.35, R);
+    else if (kind < 0.8) h += rec(px - 4, y - 8, 5, 10, "#fff8e8", st(1.6), 1);
+    else h += circ(px, y - 3, 4, pick(["#c44914","#f4c430","#ef7a1a"], R), st(1.6));
+  }
+  return h;
+}
+
 const LEVELS = [
-  { n: 1, title: "The Garden Picnic", story: "Kaileigh laid a picnic in the garden. A hungry turkey popped by to nibble the corn!", seed: 101, turkey: { x: 860, y: 545, scale: 1.15, flip: false }, bob: true, decoys: [], birds: [{ch:"🐔",x:240,y:560,s:48},{ch:"🦆",x:1080,y:600,s:46}], occlude: 0, bonus: 0, timeLimit: 25000, clutter: 14 },
-  { n: 2, title: "The Pumpkin Patch", story: "Rows and rows of pumpkins! The turkey is hiding somewhere in the patch.", seed: 202, turkey: { x: 230, y: 500, scale: 0.95, flip: true }, bob: true, decoys: [{kind:"nohat",x:980,y:520,scale:0.9,pal:"real"}], birds: [{ch:"🦉",x:700,y:260,s:44}], occlude: 0, bonus: 0, timeLimit: 30000, clutter: 22 },
-  { n: 3, title: "Granny's Kitchen", story: "Pies are cooling on the counter. Don't mix our turkey up with the one in the oven!", seed: 303, turkey: { x: 980, y: 430, scale: 0.82, flip: false }, bob: true, decoys: [{kind:"chef",x:300,y:470,scale:0.8,pal:"white"}], birds: [{ch:"🐔",x:160,y:500,s:40},{ch:"🐤",x:200,y:530,s:28}], occlude: 0, bonus: 0, timeLimit: 35000, clutter: 20 },
-  { n: 4, title: "The Family Feast", story: "Everyone is at the table. Our turkey has a black hat and a blue scarf — he is a guest, not dinner!", seed: 404, turkey: { x: 150, y: 430, scale: 0.72, flip: false }, bob: false, decoys: [{kind:"nohat",x:640,y:390,scale:0.7},{kind:"white",x:1080,y:500,scale:0.7}], birds: [{ch:"🐔",x:900,y:240,s:36}], occlude: 0.12, bonus: 0, timeLimit: 40000, clutter: 24 },
-  { n: 5, title: "The Hayride", story: "Bump, bump went the wagon. The turkey ducked behind the hay — but his hat still peeks out.", seed: 505, turkey: { x: 620, y: 455, scale: 0.64, flip: true }, bob: false, decoys: [{kind:"nohat",x:200,y:520,scale:0.7},{kind:"bluehat",x:1040,y:500,scale:0.62}], birds: [{ch:"🦆",x:160,y:620,s:40},{ch:"🦉",x:980,y:250,s:38},{ch:"🐦",x:400,y:220,s:28}], occlude: 0.22, bonus: 0, timeLimit: 45000, clutter: 28 },
-  { n: 6, title: "The Farmyard Party", story: "Chickens, ducks and look-alike turkeys everywhere! Look for the black hat with the gold buckle.", seed: 606, turkey: { x: 1060, y: 310, scale: 0.55, flip: false }, bob: false, decoys: [{kind:"nohat",x:300,y:520,scale:0.55},{kind:"white",x:520,y:560,scale:0.5},{kind:"chef",x:800,y:500,scale:0.52},{kind:"back",x:180,y:400,scale:0.5,pal:"dark"}], birds: [{ch:"🐔",x:420,y:480,s:40},{ch:"🐔",x:700,y:600,s:36},{ch:"🦆",x:240,y:620,s:38},{ch:"🦉",x:900,y:220,s:34},{ch:"🐤",x:960,y:590,s:26}], occlude: 0.18, bonus: 0, timeLimit: 50000, clutter: 32 },
-  { n: 7, title: "The Thanksgiving Parade", story: "Bands, banners and floats fill the street. Can you spot him in the crowd? A bonus timer is on!", seed: 707, turkey: { x: 430, y: 620, scale: 0.48, flip: true }, bob: false, decoys: [{kind:"nohat",x:200,y:500,scale:0.48},{kind:"white",x:780,y:430,scale:0.45},{kind:"bluehat",x:1100,y:560,scale:0.48},{kind:"chef",x:80,y:360,scale:0.42}], birds: [{ch:"🦉",x:600,y:180,s:32},{ch:"🐦",x:300,y:160,s:24},{ch:"🐔",x:980,y:640,s:32}], occlude: 0.28, bonus: 45, timeLimit: 55000, clutter: 36 },
-  { n: 8, title: "The Autumn Forest", story: "Leaves, trees and shadows. The turkey is tucked behind a trunk — look for his gold buckle.", seed: 808, turkey: { x: 250, y: 430, scale: 0.42, flip: false }, bob: false, decoys: [{kind:"nohat",x:700,y:500,scale:0.42},{kind:"nohat",x:980,y:600,scale:0.4,pal:"dark"},{kind:"white",x:520,y:300,scale:0.38},{kind:"back",x:1100,y:380,scale:0.4},{kind:"bluehat",x:80,y:620,scale:0.4}], birds: [{ch:"🦉",x:400,y:200,s:34},{ch:"🦉",x:880,y:240,s:30},{ch:"🐦",x:600,y:140,s:22},{ch:"🦆",x:150,y:680,s:32}], occlude: 0.38, bonus: 40, timeLimit: 60000, clutter: 40 },
-  { n: 9, title: "The Grand Banquet", story: "A huge feast in a grand hall. Our turkey is small, and a pie is in the way. Hunt carefully!", seed: 909, turkey: { x: 900, y: 520, scale: 0.36, flip: true }, bob: false, decoys: [{kind:"nohat",x:200,y:480,scale:0.36},{kind:"white",x:400,y:360,scale:0.34},{kind:"chef",x:620,y:300,scale:0.34},{kind:"bluehat",x:80,y:300,scale:0.32},{kind:"back",x:1100,y:300,scale:0.34},{kind:"nohat",x:740,y:620,scale:0.33,pal:"dark"}], birds: [{ch:"🐔",x:320,y:640,s:28},{ch:"🦆",x:1080,y:640,s:28},{ch:"🦉",x:560,y:200,s:26}], occlude: 0.48, bonus: 35, timeLimit: 70000, clutter: 44 },
-  { n: 10, title: "The Harvest Fair at Night", story: "Lanterns glow, stalls bustle, and the turkey is tiny. Find his black hat before the lanterns fade!", seed: 1010, turkey: { x: 640, y: 268, scale: 0.30, flip: false }, bob: false, decoys: [{kind:"nohat",x:180,y:500,scale:0.3},{kind:"white",x:400,y:560,scale:0.3},{kind:"chef",x:860,y:500,scale:0.28},{kind:"bluehat",x:1040,y:360,scale:0.28},{kind:"back",x:300,y:300,scale:0.28,pal:"dark"},{kind:"nohat",x:980,y:640,scale:0.28},{kind:"white",x:80,y:360,scale:0.26},{kind:"chef",x:760,y:640,scale:0.28}], birds: [{ch:"🦉",x:200,y:180,s:26},{ch:"🦉",x:1000,y:200,s:24},{ch:"🐦",x:500,y:140,s:18},{ch:"🐔",x:1120,y:600,s:24},{ch:"🦆",x:60,y:640,s:24}], occlude: 0.52, bonus: 30, timeLimit: 80000, clutter: 50 }
+  { n: 1, title: "The Garden Picnic", story: "A backyard Thanksgiving picnic is in full swing. Find the turkey in the black hat!", seed: 1011, bonus: 0, timeLimit: 45000 },
+  { n: 2, title: "The Pumpkin Patch", story: "Rows of pumpkins, a corn maze and a hayride. The turkey is somewhere in the patch!", seed: 2022, bonus: 0, timeLimit: 50000 },
+  { n: 3, title: "Kitchen Chaos", story: "Granny's kitchen is bubbling over. Chefs, pies and a runaway chicken — and one turkey.", seed: 3033, bonus: 0, timeLimit: 55000 },
+  { n: 4, title: "The Feast Hall", story: "Long tables, heaps of food and a hall full of hungry guests. Look carefully!", seed: 4044, bonus: 0, timeLimit: 60000 },
+  { n: 5, title: "The Farm", story: "Barn, pens, a pond and a busy farmyard. Animals everywhere — and one special turkey.", seed: 5055, bonus: 0, timeLimit: 65000 },
+  { n: 6, title: "The Harvest Market", story: "The town square is packed with stalls and shoppers. Can you spot him in the crowd?", seed: 6066, bonus: 0, timeLimit: 70000 },
+  { n: 7, title: "The Thanksgiving Parade", story: "Floats, a marching band and giant balloons roll down the street. Hunt along the route!", seed: 7077, bonus: 45, timeLimit: 75000 },
+  { n: 8, title: "The Football Game", story: "The stands are packed, the teams are lined up, and the turkey is in there somewhere.", seed: 8088, bonus: 40, timeLimit: 80000 },
+  { n: 9, title: "The Grand Banquet", story: "A two-storey banquet, a balcony of guests and a toast in the middle. Look twice!", seed: 9099, bonus: 35, timeLimit: 85000 },
+  { n: 10, title: "The Harvest Fair at Night", story: "Lanterns, stalls, a wheel and a packed midway. The turkey is tiny in this crowd!", seed: 10101, bonus: 30, timeLimit: 90000 }
 ];
+
+
+function bush(x, y, s, col) {
+  const S = st(2.2);
+  col = col || "#2e7d32";
+  return el(x, y, 16 * s, 11 * s, col, S) + el(x - 12 * s, y + 3, 12 * s, 9 * s, col, S) + el(x + 12 * s, y + 3, 12 * s, 9 * s, col, S);
+}
+function cloud(x, y, s) {
+  const S = 'stroke="none"';
+  return el(x, y, 36 * s, 16 * s, "#fff", S) + el(x - 22 * s, y + 4, 22 * s, 12 * s, "#fff", S) + el(x + 22 * s, y + 4, 24 * s, 12 * s, "#fff", S);
+}
+function litter(R, zone, n, kinds) {
+  kinds = kinds || ["leaf", "grass", "flower"];
+  let h = "";
+  for (let i = 0; i < n; i++) {
+    const x = zone.x + R() * zone.w, y = zone.y + R() * zone.h;
+    const k = pick(kinds, R);
+    if (k === "leaf") h += el(x, y, 6, 3, pick(["#c44914","#ef6c00","#f4c430","#c62828"], R), 'stroke="none"');
+    else if (k === "grass") h += rec(x, y, 2, 8, "#3e7a22", 'stroke="none"') + rec(x + 3, y + 1, 2, 7, "#2e7d32", 'stroke="none"');
+    else if (k === "flower") h += circ(x, y, 3, pick(["#c44914","#f4c430","#fff8e8","#e91e63"], R), 'stroke="none"') + rec(x - 1, y, 2, 6, "#2e7d32", 'stroke="none"');
+    else if (k === "pebble") h += el(x, y, 4, 2.5, "#b8b0a4", 'stroke="none"');
+    else if (k === "pumpkin") h += pumpkin(x, y, 0.35 + R() * 0.25, R);
+    else if (k === "hay") h += hay(x, y, 0.5 + R() * 0.3, jit(R, 12));
+  }
+  return h;
+}
+function fillCrowd(R, zone, n, optFn) {
+  zone = Object.assign({ gap: 22 }, zone);
+  return peopleFromPts(packPts(R, zone, n), R, optFn || function (p, i, R) {
+    const poses = zone.poses || ["stand", "walk", "wave"];
+    const props = zone.props || ["", "", "basket", "balloon", ""];
+    return { pose: pick(poses, R), s: (p.s || zone.s || 1) * (0.92 + R() * 0.16), prop: pick(props, R), role: zone.role || "civ" };
+  });
+}
 
 function starRating(lv, timeMs, hints, bonusHit) {
   let s = 3;
@@ -710,313 +902,979 @@ function starRating(lv, timeMs, hints, bonusHit) {
   return s;
 }
 
-function scatterEmoji(R, chars, n, reg, smin, smax, avoid) {
-  let o = "";
-  avoid = avoid || [];
-  for (let i = 0; i < n; i++) {
-    let x, y, ok, tries = 0;
-    do {
-      x = reg[0] + R() * reg[2];
-      y = reg[1] + R() * reg[3];
-      ok = true;
-      for (let a = 0; a < avoid.length; a++) {
-        if (Math.hypot(x - avoid[a].x, y - avoid[a].y) < (avoid[a].r || 80)) { ok = false; break; }
+function placeHero(lv, x, y, s, flip, decoys) {
+  return {
+    turkey: { x: x, y: y, scale: s, size: 52 * s },
+    decoys: decoys || [],
+    hero: turkeyFig(x, y, s, { kind: "real", flip: flip, id: "turkey-real", cls: "hero-turkey" })
+  };
+}
+
+/* ---------- SCENE 1: Garden Picnic ---------- */
+function scenePicnic(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 260, "#8ec8ff", 'stroke="none"'));
+  b.push(rec(0, 200, SW, 280, "#7ec65a", 'stroke="none"'));
+  b.push(rec(0, 460, SW, SH - 460, "#6bb34a", 'stroke="none"'));
+  b.push(cloud(520, 70, 1.4) + cloud(980, 50, 1.1) + cloud(1500, 80, 1.6) + cloud(2000, 45, 1.2));
+  /* house left */
+  b.push(rec(20, 140, 360, 280, "#e8d2b0", st(3)));
+  b.push(path("M10 140 L200 40 L410 140 Z", "#c44914", st(3)));
+  b.push(rec(160, 300, 50, 120, "#6b3f1a", st(2.5)));
+  b.push(windowGrid(45, 165, 2, 3, 70, 70, 18, 16, R, 1.1));
+  b.push(rec(40, 390, 90, 30, "#d4b07a", st(2))); /* porch */
+  /* porch people */
+  const porch = rowPts(50, 400, 4, 36, 0, false, R, 3, 2);
+  let pr = peopleFromPts(porch, R, function (p, i) { return { pose: i === 1 ? "wave" : "stand", s: 1.05, role: i === 0 ? "pilgrim" : "civ" }; });
+  m.push(pr.h); count += pr.n;
+  /* trees and fence */
+  b.push(tree(480, 280, 2.2, "#c44914")); b.push(tree(620, 260, 1.8, "#e65100"));
+  b.push(tree(780, 270, 1.6, "#c44914")); b.push(tree(1100, 255, 2.0, "#ef6c00"));
+  b.push(tree(1320, 265, 1.7, "#e65100")); b.push(tree(1480, 250, 1.9, "#c44914"));
+  b.push(tree(2000, 240, 2.4, "#c44914")); b.push(tree(2200, 270, 2.0, "#ef6c00"));
+  b.push(tree(1680, 240, 1.7, "#e65100"));
+  b.push(fence(400, 330, 2000, 28, 1.2));
+  /* two packed fence-line rows, no gap */
+  pr = peopleFromPts(rowPts(420, 325, 50, 38, 0, true, R, 5, 3), R, function (p, i) { return { pose: i % 5 === 0 ? "wave" : "stand", s: 0.85, prop: i % 7 === 0 ? "flag" : (i % 6 === 0 ? "balloon" : "") }; });
+  m.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(410, 360, 52, 38, 0, true, R, 5, 3), R, function (p, i) { return { pose: i % 6 === 0 ? "wave" : "stand", s: 0.95, prop: i % 8 === 0 ? "balloon" : "" }; });
+  m.push(pr.h); count += pr.n;
+  for (let i = 0; i < 18; i++) m.push(bush(430 + i * 110, 390, 0.9 + (i % 3) * 0.15, pick(["#2e7d32","#1b5e20","#4caf50"], R)));
+  /* kites / balloons in sky */
+  for (let i = 0; i < 8; i++) {
+    b.push(circ(500 + i * 200 + jit(R, 40), 80 + jit(R, 40), 14, pick(SHIRTS, R), st(2)));
+    b.push(rec(500 + i * 200, 94, 1.5, 40, STK, 'stroke="none"'));
+  }
+  /* picnic blankets — 4 clusters */
+  const blankets = [
+    { x: 80, y: 620, w: 300, h: 190, col: "#c44914" },
+    { x: 420, y: 700, w: 300, h: 190, col: "#7b5cff" },
+    { x: 760, y: 600, w: 320, h: 200, col: "#3b6fd6" },
+    { x: 1140, y: 680, w: 300, h: 190, col: "#f4c430" },
+    { x: 1500, y: 620, w: 320, h: 200, col: "#fff8e8" },
+    { x: 1880, y: 700, w: 300, h: 190, col: "#ff7a3d" },
+    { x: 80, y: 980, w: 280, h: 170, col: "#2e7d32" },
+    { x: 1960, y: 980, w: 280, h: 170, col: "#e91e63" }
+  ];
+  blankets.forEach(function (bl) {
+    m.push(rec(bl.x, bl.y, bl.w, bl.h, bl.col, st(2.4), 8));
+    /* check pattern-ish inner */
+    m.push(rec(bl.x + 8, bl.y + 8, bl.w - 16, bl.h - 16, "transparent", 'stroke="' + STK + '" stroke-width="1.5" stroke-dasharray="12 8"'));
+    const pts = packPts(R, { x: bl.x + 12, y: bl.y + 28, w: bl.w - 24, h: bl.h - 36, gap: 22, s: 1.05 }, 16);
+    pr = peopleFromPts(pts, R, function (p, i) { return { pose: i % 3 === 0 ? "sit" : (i % 3 === 1 ? "sit" : "wave"), s: 1.05, prop: i === 2 ? "pie" : (i === 4 ? "drumstick" : "") }; });
+    f.push(pr.h); count += pr.n;
+    f.push(pie(bl.x + bl.w * 0.5, bl.y + 24, 1.1));
+    f.push(pie(bl.x + bl.w * 0.3, bl.y + 28, 0.9));
+  });
+  /* long picnic table */
+  m.push(table(850, 980, 700, 36, "#8a5a2b"));
+  m.push(foodOnTable(850, 980, 700, R));
+  const back = rowPts(860, 968, 20, 34, 0, false, R, 3, 2);
+  pr = peopleFromPts(back, R, function () { return { pose: "table", s: 1 }; });
+  m.push(pr.h); count += pr.n;
+  const front = rowPts(870, 1028, 20, 34, 0, false, R, 3, 2);
+  pr = peopleFromPts(front, R, function (p, i) { return { pose: "table", s: 1.08, role: i === 3 ? "chef" : "civ", prop: i === 7 ? "platter" : "" }; });
+  f.push(pr.h); count += pr.n;
+  /* grill group */
+  m.push(rec(150, 1100, 80, 40, "#37474f", st(2.5), 4));
+  pr = peopleFromPts(rowPts(120, 1148, 6, 40, 0, false, R, 4, 3), R, function (p, i) { return { pose: i === 0 ? "bend" : "stand", s: 1.15, role: i === 0 ? "chef" : "civ" }; });
+  f.push(pr.h); count += pr.n;
+  /* kids with a ball */
+  pr = peopleFromPts(rowPts(1600, 1180, 8, 44, 0, false, R, 8, 6), R, function (p, i) { return { pose: i % 2 ? "run" : "cheer", s: 0.85, shirt: pick(["#c44914","#3b6fd6","#f4c430"], R), prop: i === 3 ? "ball" : "" }; });
+  f.push(pr.h); count += pr.n;
+  /* lawn crowds filling every gap between blankets and table */
+  pr = fillCrowd(R, { x: 40, y: 500, w: 2300, h: 120, gap: 24, s: 0.95, poses: ["walk","stand","wave"], props: ["","balloon","basket","flag",""] }, 48);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 40, y: 860, w: 800, h: 120, gap: 24, s: 1, poses: ["stand","walk","sit","wave"], props: ["","basket","pie",""] }, 28);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 1500, y: 880, w: 850, h: 120, gap: 24, s: 1, poses: ["stand","walk","sit"] }, 28);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 400, y: 1120, w: 1500, h: 200, gap: 24, s: 1.1, poses: ["stand","walk","sit","wave","cheer"], props: ["","balloon","basket","pie",""] }, 55);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 40, y: 1180, w: 360, h: 220, gap: 24, s: 1.1 }, 16);
+  f.push(pr.h); count += pr.n;
+  m.push(litter(R, { x: 0, y: 480, w: SW, h: 900 }, 140, ["leaf","grass","flower"]));
+  for (let i = 0; i < 16; i++) f.push(bush(40 + (i % 8) * 300, 1320 + Math.floor(i / 8) * 40, 1.1, pick(["#2e7d32","#1b5e20"], R)));
+  /* animals */
+  f.push(dog(780, 1200, 1.3, R) + dog(1720, 1100, 1.2, R) + dog(400, 1000, 1.1, R));
+  f.push(chicken(300, 1080, 1.1, R) + chicken(330, 1090, 1, R) + duck(2100, 1200, 1.2) + cat(80, 400, 1, R));
+  count += 8;
+  /* pumpkins at the edge of the garden */
+  for (let i = 0; i < 10; i++) f.push(pumpkin(80 + i * 28, 1280, 0.8, R));
+  /* hero + decoys */
+  const hero = placeHero(1, 1188, 880, 1.0, false, [
+    { kind: "nohat", x: 560, y: 760, scale: 1, flip: true },
+    { kind: "noscarf", x: 2000, y: 820, scale: 1 }
+  ]);
+  f.push(hero.hero);
+  f.push(turkeyFig(560, 760, 1, { kind: "nohat", flip: true, cls: "decoy" }));
+  f.push(turkeyFig(2000, 820, 1, { kind: "noscarf", cls: "decoy" }));
+  count += 3;
+  /* a couple of pilgrims (people) with hats */
+  f.push(person(1000, 1260, 1.15, R, { role: "pilgrim", pose: "stand" }));
+  f.push(person(1080, 1260, 1.1, R, { role: "pilgrim", pose: "wave", scarf: "blue", shirt: "#3b6fd6" }));
+  count += 2;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
+}
+
+/* ---------- SCENE 2: Pumpkin Patch ---------- */
+function scenePatch(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 240, "#f0a05a", 'stroke="none"'));
+  b.push(rec(0, 200, SW, SH - 200, "#c9853a", 'stroke="none"'));
+  b.push(cloud(600, 60, 1.2) + cloud(1400, 40, 1.4) + cloud(2100, 70, 1));
+  /* barn */
+  b.push(rec(80, 80, 420, 320, "#c44914", st(3)));
+  b.push(path("M60 80 L290 -20 L520 80 Z", "#8a2418", st(3)));
+  b.push(rec(250, 260, 70, 140, "#6b3f1a", st(2.5)));
+  b.push(el(290, 200, 50, 50, "#f7d9a0", st(2.5)));
+  b.push(windowGrid(110, 110, 2, 3, 60, 50, 20, 16, R, 1));
+  b.push(rec(1600, 100, 280, 260, "#e8d2b0", st(3))); /* farmhouse */
+  b.push(path("M1580 100 L1740 20 L1900 100 Z", "#c44914", st(3)));
+  b.push(windowGrid(1630, 130, 2, 3, 50, 50, 14, 14, R, 0.95));
+  b.push(rec(2000, 80, 70, 300, "#d0d0d0", st(3))); /* silo */
+  b.push(el(2035, 80, 40, 22, "#c0c0c0", st(3)));
+  b.push(tree(1400, 220, 2.0, "#c44914") + tree(1200, 200, 1.7, "#e65100") + tree(2300, 240, 2.2, "#ef6c00"));
+  /* farm stand */
+  m.push(rec(560, 280, 220, 130, "#f4e4c1", st(2.5)));
+  m.push(rec(560, 250, 220, 30, "#c44914", st(2.5)));
+  m.push(txt(670, 272, 16, "PUMPKINS", "#fff6d4"));
+  pr = peopleFromPts(rowPts(580, 400, 5, 40, 0, false, R, 3, 2), R, function (p, i) { return { pose: "stand", s: 0.95, role: i === 0 ? "farmer" : "civ", prop: i === 1 ? "pumpkin" : (i === 2 ? "basket" : "") }; });
+  m.push(pr.h); count += pr.n;
+  /* pumpkin ROWS — the main composition */
+  for (let r = 0; r < 10; r++) {
+    const y = 430 + r * 68;
+    const cols = 28;
+    const dx = 70;
+    const x0 = 30 + (r % 2) * 22;
+    const rowW = r >= 7 ? 1600 : 2400;
+    for (let c = 0; c < cols; c++) {
+      const px = x0 + c * dx + jit(R, 8);
+      if (px > rowW - 40) continue;
+      const py = y + jit(R, 6);
+      m.push(pumpkin(px, py, 0.65 + (r / 10) * 0.45, R));
+      m.push(pumpkin(px + 22, py + 8, 0.5 + (r / 10) * 0.3, R));
+    }
+    const nPick = 14;
+    const pts = rowPts(x0 + 16, y + 30, nPick, 110, 0, true, R, 10, 5);
+    const pr2 = peopleFromPts(pts, R, function (p, i) { return { pose: i % 3 === 0 ? "bend" : (i % 3 === 1 ? "walk" : "stand"), s: 0.82 + r * 0.03, role: i % 8 === 0 ? "farmer" : "civ", prop: i % 4 === 0 ? "pumpkin" : (i % 4 === 1 ? "basket" : "") }; });
+    (r < 6 ? m : f).push(pr2.h); count += pr2.n;
+    if (rowW > 2000) {
+      const rightPts = rowPts(1600, y + 30, 8, 90, 0, true, R, 8, 5);
+      const prR = peopleFromPts(rightPts, R, function (p, i) { return { pose: i % 3 === 0 ? "bend" : "walk", s: 0.82 + r * 0.03, role: i % 5 === 0 ? "farmer" : "civ", prop: i % 3 === 0 ? "pumpkin" : "basket" }; });
+      (r < 6 ? m : f).push(prR.h); count += prR.n;
+    }
+  }
+  /* corn maze — a real block with winding paths */
+  for (let r = 0; r < 16; r++) {
+    for (let c = 0; c < 18; c++) {
+      if ((c === 2 && r < 12) || (r === 8 && c < 10) || (c === 10 && r >= 8) || (r === 3 && c >= 8) || (c === 15 && r % 4 !== 0)) continue;
+      const cx = 1680 + c * 38, cy = 980 + r * 26;
+      f.push(rec(cx, cy, 28, 34, (r + c) % 2 ? "#c6a700" : "#a89400", st(1.6), 2));
+    }
+  }
+  const mazeP = packPts(R, { x: 1700, y: 1000, w: 620, h: 380, gap: 28, s: 0.85 }, 22);
+  pr = peopleFromPts(mazeP, R, function () { return { pose: "walk", s: 0.85 }; });
+  f.push(pr.h); count += pr.n;
+  /* hay wagon + scarecrow */
+  m.push(rec(700, 1180, 260, 90, "#8a4a1a", st(3), 8));
+  m.push(el(730, 1280, 24, 24, "#1a1a1a", st(2.5)) + el(930, 1280, 24, 24, "#1a1a1a", st(2.5)));
+  m.push(hay(780, 1160, 1.4, -6) + hay(860, 1150, 1.3, 5) + hay(940, 1165, 1.2, -4));
+  pr = peopleFromPts(rowPts(740, 1170, 5, 44, 0, false, R, 3, 2), R, function () { return { pose: "sit", s: 1.05, role: "civ" }; });
+  m.push(pr.h); count += pr.n;
+  /* scarecrow */
+  f.push(rec(1260, 1180, 8, 80, "#8a5a2b", st(2)));
+  f.push(person(1264, 1200, 1.2, R, { role: "farmer", shirt: "#c44914", pose: "stand", flip: 1 }));
+  f.push(hay(1240, 1280, 1, 0) + hay(1300, 1284, 0.9, 8));
+  count += 1;
+  /* tractor queue of kids */
+  f.push(rec(80, 1260, 120, 50, "#2e7d32", st(2.5), 6) + rec(40, 1270, 50, 30, "#2e7d32", st(2.5), 4) + el(60, 1320, 16, 16, "#1a1a1a", st(2)) + el(160, 1320, 16, 16, "#1a1a1a", st(2)));
+  pr = peopleFromPts(rowPts(80, 1255, 4, 36, 0, false, R, 2, 1), R, function (p, i) { return { pose: "sit", s: 0.85, role: i === 0 ? "farmer" : "civ" }; });
+  f.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(220, 1300, 8, 36, 0, false, R, 4, 2), R, function () { return { pose: "stand", s: 0.8 }; });
+  f.push(pr.h); count += pr.n;
+  f.push(dog(400, 1320, 1.2, R) + dog(1500, 1300, 1.1, R) + horse(200, 400, 1.3, R));
+  count += 3;
+  pr = fillCrowd(R, { x: 40, y: 1280, w: 1600, h: 140, gap: 24, s: 1.1, poses: ["walk","stand","wave"], props: ["pumpkin","basket","",""], role: "civ" }, 40);
+  f.push(pr.h); count += pr.n;
+  for (let i = 0; i < 14; i++) f.push(hay(80 + i * 110, 1380, 0.9, jit(R, 8)));
+  m.push(litter(R, { x: 0, y: 400, w: SW, h: 1000 }, 80, ["pumpkin","leaf","hay"]));
+  const hero = placeHero(2, 980, 708, 0.95, true, [
+    { kind: "nohat", x: 300, y: 540, scale: 0.9 },
+    { kind: "white", x: 1600, y: 860, scale: 0.9 }
+  ]);
+  /* occlude slightly with a pumpkin in front */
+  f.push(hero.hero);
+  f.push(pumpkin(1000, 724, 0.9, R));
+  f.push(turkeyFig(300, 540, 0.9, { kind: "nohat", cls: "decoy" }));
+  f.push(turkeyFig(1600, 860, 0.9, { kind: "white", cls: "decoy" }));
+  count += 3;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
+}
+
+/* ---------- SCENE 3: Kitchen Chaos ---------- */
+function sceneKitchen(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 200, "#c44914", 'stroke="none"')); /* ceiling band */
+  b.push(rec(0, 200, SW, 700, "#f3e0c4", 'stroke="none"'));
+  /* tiles */
+  for (let y = 900; y < SH; y += 40) {
+    for (let x = 0; x < SW; x += 40) {
+      b.push(rec(x, y, 38, 38, (x + y) % 80 === 0 ? "#e8d2b0" : "#f7ead0", st(1.2)));
+    }
+  }
+  /* back counters and cabinets */
+  b.push(rec(0, 520, SW, 40, "#8a5a2b", st(2.6)));
+  b.push(rec(0, 200, 80, 320, "#e8c9a0", st(2)));
+  for (let i = 0; i < 14; i++) b.push(rec(90 + i * 160, 230, 140, 110, "#d4b07a", st(2), 4));
+  /* window */
+  b.push(rec(900, 230, 600, 280, "#8ec8ff", st(4)));
+  b.push(rec(1190, 230, 10, 280, "#fff", st(2)));
+  b.push(rec(900, 360, 600, 10, "#fff", st(2)));
+  /* stove left, fridge right, shelves */
+  b.push(rec(40, 360, 220, 200, "#d0d6e0", st(3)));
+  b.push(rec(60, 380, 80, 100, "#9aa3b2", st(2)));
+  b.push(rec(150, 380, 80, 100, "#9aa3b2", st(2)));
+  b.push(rec(2100, 280, 220, 280, "#eee", st(3)));
+  b.push(rec(2130, 310, 70, 100, "#ccc", st(2)) + rec(2220, 310, 70, 100, "#ccc", st(2)));
+  b.push(cat(2210, 280, 1.3, R));
+  /* hanging pans */
+  for (let i = 0; i < 10; i++) b.push(el(200 + i * 200, 210, 18, 12, pick(["#c0c0c0","#d4a024","#888"], R), st(2)));
+  /* island */
+  m.push(rec(700, 800, 1000, 160, "#8a5a2b", st(3), 6));
+  m.push(foodOnTable(700, 800, 1000, R));
+  m.push(pie(900, 790, 1.2) + pie(1100, 788, 1) + pie(1400, 792, 1.3) + pie(1600, 790, 1.1));
+  /* people at back counter */
+  pr = peopleFromPts(rowPts(60, 530, 36, 64, 0, false, R, 6, 3), R, function (p, i) { return { pose: i % 4 === 0 ? "bend" : "stand", s: 1, role: i % 5 === 0 ? "chef" : "civ", prop: i % 6 === 0 ? "pie" : (i % 6 === 1 ? "platter" : "") }; });
+  m.push(pr.h); count += pr.n;
+  /* island back + front */
+  pr = peopleFromPts(rowPts(740, 790, 16, 58, 0, false, R, 4, 2), R, function (p, i) { return { pose: "table", s: 1, role: i % 4 === 0 ? "chef" : "civ" }; });
+  m.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(760, 980, 15, 60, 0, false, R, 4, 2), R, function (p, i) { return { pose: "table", s: 1.1, role: i % 3 === 0 ? "chef" : "civ", prop: i === 2 ? "pie" : "" }; });
+  f.push(pr.h); count += pr.n;
+  /* chef chasing chicken through the middle */
+  f.push(person(1100, 1140, 1.25, R, { role: "chef", pose: "run", flip: 1, shirt: "#fff8e8" }));
+  f.push(chicken(1220, 1160, 1.5, R));
+  f.push(chicken(1280, 1180, 1.2, R));
+  count += 3;
+  /* someone dropping a pie */
+  f.push(person(500, 1200, 1.2, R, { pose: "wave", shirt: "#c44914" }));
+  f.push(pie(560, 1080, 1.3));
+  count += 1;
+  /* doorway right with servers */
+  f.push(rec(1880, 560, 160, 340, "#6b3f1a", st(3)));
+  f.push(rec(1900, 600, 120, 300, "#3a2414", st(2)));
+  pr = peopleFromPts(rowPts(1920, 900, 3, 30, 0, false, R, 2, 2), R, function (p, i) { return { pose: "walk", s: 1, prop: "platter", role: "civ" }; });
+  f.push(pr.h); count += pr.n;
+  /* floor crowd, kids sneaking */
+  pr = fillCrowd(R, { x: 40, y: 1020, w: 2200, h: 160, gap: 24, s: 1, poses: ["walk","stand","run","bend"], props: ["pie","platter","",""] }, 55);
+  f.push(pr.h); count += pr.n;
+  pr = peopleFromPts(packPts(R, { x: 80, y: 1180, w: 700, h: 230, gap: 24, s: 1.05 }, 32), R, function (p, i) { return { pose: pick(["stand","walk","bend","run"], R), s: i % 5 === 0 ? 0.8 : 1.05, role: i % 7 === 0 ? "chef" : "civ", prop: i % 4 === 0 ? "pie" : "" }; });
+  f.push(pr.h); count += pr.n;
+  pr = peopleFromPts(packPts(R, { x: 1400, y: 1180, w: 900, h: 230, gap: 24, s: 1.05 }, 36), R, function (p, i) { return { pose: pick(["stand","walk","wave"], R), s: 1.05, prop: i % 6 === 0 ? "platter" : "" }; });
+  f.push(pr.h); count += pr.n;
+  f.push(dog(800, 1300, 1.3, R) + dog(1700, 1280, 1.1, R) + cat(200, 520, 1.1, R));
+  count += 3;
+  const hero = placeHero(3, 1580, 980, 0.9, false, [
+    { kind: "chef", x: 400, y: 530, scale: 0.9 },
+    { kind: "nohat", x: 2000, y: 1200, scale: 0.9 }
+  ]);
+  f.push(hero.hero);
+  f.push(pie(1600, 996, 1.1)); /* slight hide */
+  f.push(turkeyFig(400, 530, 0.9, { kind: "chef", cls: "decoy" }));
+  f.push(turkeyFig(2000, 1200, 0.9, { kind: "nohat", cls: "decoy" }));
+  count += 3;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
+}
+
+/* ---------- SCENE 4: Feast Hall ---------- */
+function sceneFeast(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 420, "#6b3040", 'stroke="none"'));
+  b.push(rec(0, 420, SW, SH - 420, "#5a3a24", 'stroke="none"'));
+  /* banners and windows */
+  b.push(rec(80, 40, 360, 240, "#1a3050", st(3)));
+  b.push(windowGrid(100, 55, 2, 3, 90, 90, 16, 16, R, 1.2));
+  b.push(rec(1960, 40, 360, 240, "#1a3050", st(3)));
+  b.push(windowGrid(1980, 55, 2, 3, 90, 90, 16, 16, R, 1.2));
+  b.push(rec(40, 0, 50, 420, "#8c1c2b", st(2)) + rec(2310, 0, 50, 420, "#8c1c2b", st(2)));
+  b.push(rec(700, 20, 1000, 50, "#c44914", st(2.5)));
+  b.push(txt(1200, 55, 28, "HAPPY THANKSGIVING", "#fff6d4"));
+  /* chandeliers */
+  for (let i = 0; i < 5; i++) {
+    const cx = 350 + i * 430;
+    b.push(rec(cx, 20, 6, 50, "#c9a024", st(2)));
+    b.push(el(cx + 3, 80, 28, 8, "#c9a024", st(2)));
+    b.push(circ(cx - 16, 90, 5, "#ffe066", st(1.5)) + circ(cx + 22, 90, 5, "#ffe066", st(1.5)) + circ(cx + 3, 100, 5, "#ffe066", st(1.5)));
+  }
+  /* dais / head table at the back */
+  m.push(rec(700, 400, 1000, 24, "#5a3014", st(2.5), 3));
+  m.push(table(780, 430, 840, 34, "#8a5a2b"));
+  m.push(foodOnTable(780, 430, 840, R));
+  pr = peopleFromPts(rowPts(810, 420, 16, 50, 0, false, R, 3, 2), R, function (p, i) { return { pose: "table", s: 1, role: i === 7 ? "pilgrim" : "civ", shirt: i === 7 ? "#1a1a1a" : undefined }; });
+  m.push(pr.h); count += pr.n;
+  /* FOUR long tables in rows */
+  for (let r = 0; r < 4; r++) {
+    const y = 560 + r * 200;
+    const s = 0.95 + r * 0.08;
+    m.push(table(80, y, 1080, 32 + r * 2, "#8a5a2b"));
+    m.push(table(1240, y, 1080, 32 + r * 2, "#8a5a2b"));
+    m.push(foodOnTable(80, y, 1080, R) + foodOnTable(1240, y, 1080, R));
+    const backL = rowPts(110, y - 12, 22, 48, 0, false, R, 3, 2);
+    const backR = rowPts(1270, y - 12, 22, 48, 0, false, R, 3, 2);
+    let p1 = peopleFromPts(backL, R, function () { return { pose: "table", s: s }; });
+    let p2 = peopleFromPts(backR, R, function () { return { pose: "table", s: s }; });
+    m.push(p1.h + p2.h); count += p1.n + p2.n;
+    const frL = rowPts(130, y + 48, 21, 50, 0, false, R, 3, 2);
+    const frR = rowPts(1290, y + 48, 21, 50, 0, false, R, 3, 2);
+    p1 = peopleFromPts(frL, R, function (p, i) { return { pose: "table", s: s + 0.05, prop: i % 11 === 0 ? "drumstick" : "" }; });
+    p2 = peopleFromPts(frR, R, function (p, i) { return { pose: "table", s: s + 0.05, role: i % 15 === 0 ? "pilgrim" : "civ" }; });
+    f.push(p1.h + p2.h); count += p1.n + p2.n;
+  }
+  /* servers in the aisles + standing guests along the walls */
+  pr = peopleFromPts(rowPts(1180, 540, 12, 0, 120, false, R, 8, 6), R, function (p, i) { return { pose: "walk", s: 1.05, prop: "platter", shirt: "#fff8e8" }; });
+  f.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(80, 540, 10, 0, 130, false, R, 6, 6), R, function () { return { pose: "walk", s: 1.05, prop: "platter", shirt: "#fff8e8" }; });
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 40, y: 1280, w: 2300, h: 140, gap: 24, s: 1.1, poses: ["walk","stand","wave"], props: ["platter","drumstick","",""] }, 50);
+  f.push(pr.h); count += pr.n;
+  /* dog stealing drumstick, kid under table */
+  f.push(dog(600, 820, 1.3, R));
+  f.push(rec(640, 800, 8, 14, "#c47a2a", st(1.8), 2)); /* drumstick */
+  f.push(person(900, 900, 0.75, R, { pose: "sit", shirt: "#3b6fd6" })); /* kid under/near table */
+  count += 3;
+  /* kitchen door */
+  f.push(rec(40, 300, 100, 200, "#3a2414", st(3)));
+  pr = peopleFromPts(rowPts(60, 500, 3, 24, 0, false, R, 2, 2), R, function () { return { pose: "walk", s: 0.95, role: "chef", prop: "platter" }; });
+  f.push(pr.h); count += pr.n;
+  const hero = placeHero(4, 430, 1008, 0.85, false, [
+    { kind: "nohat", x: 1500, y: 610, scale: 0.85 },
+    { kind: "noscarf", x: 800, y: 1210, scale: 0.9 },
+    { kind: "white", x: 2000, y: 810, scale: 0.85 }
+  ]);
+  f.push(hero.hero);
+  hero.decoys.forEach(function (d) { f.push(turkeyFig(d.x, d.y, d.scale, { kind: d.kind, cls: "decoy" })); });
+  count += 4;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
+}
+
+/* ---------- SCENE 5: The Farm ---------- */
+function sceneFarm(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 230, "#87c8ff", 'stroke="none"'));
+  b.push(rec(0, 180, SW, 280, "#7aae4a", 'stroke="none"'));
+  b.push(rec(0, 440, SW, SH - 440, "#8a6a3a", 'stroke="none"'));
+  b.push(cloud(900, 50, 1.3) + cloud(1500, 40, 1.1) + cloud(2100, 60, 1.4));
+  /* crop fields back */
+  for (let r = 0; r < 6; r++) {
+    const y = 310 + r * 22;
+    b.push(rec(900, y, 1450, 18, r % 2 ? "#5a8e32" : "#6bb34a", 'stroke="none"'));
+    for (let c = 0; c < 40; c++) b.push(rec(910 + c * 36, y + 2, 3, 14, "#3e7a22", 'stroke="none"'));
+  }
+  /* people in the fields */
+  pr = peopleFromPts(rowPts(920, 300, 28, 48, 0, true, R, 6, 3), R, function (p, i) { return { pose: i % 3 === 0 ? "bend" : "walk", s: 0.65, role: "farmer", prop: i % 4 === 0 ? "rake" : (i % 4 === 1 ? "basket" : "corn") }; });
+  b.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(940, 350, 26, 50, 0, true, R, 6, 3), R, function (p, i) { return { pose: i % 3 === 0 ? "bend" : "walk", s: 0.7, role: "farmer", prop: i % 4 === 0 ? "rake" : "corn" }; });
+  b.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(960, 400, 24, 52, 0, true, R, 6, 3), R, function () { return { pose: "walk", s: 0.75, role: "farmer" }; });
+  b.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(980, 450, 22, 54, 0, true, R, 6, 3), R, function (p, i) { return { pose: i % 2 ? "bend" : "walk", s: 0.8, role: "farmer", prop: "basket" }; });
+  b.push(pr.h); count += pr.n;
+  /* barn */
+  b.push(rec(40, 80, 520, 420, "#c44914", st(3.2)));
+  b.push(path("M20 80 L300 -40 L580 80 Z", "#8a2418", st(3.2)));
+  b.push(rec(250, 300, 90, 200, "#6b3f1a", st(2.8)));
+  b.push(el(295, 220, 60, 60, "#f7d9a0", st(2.6)));
+  b.push(windowGrid(70, 120, 2, 3, 70, 60, 24, 20, R, 1.1));
+  /* loft people */
+  pr = peopleFromPts(rowPts(80, 200, 4, 50, 0, false, R, 3, 2), R, function () { return { pose: "wave", s: 0.85, role: "farmer" }; });
+  b.push(pr.h); count += pr.n;
+  b.push(rec(600, 160, 80, 360, "#d0d0d0", st(3))); /* silo */
+  b.push(el(640, 160, 44, 24, "#c0c0c0", st(3)));
+  b.push(tree(800, 260, 2.2, "#c44914") + tree(2100, 220, 2.4, "#e65100") + tree(2280, 280, 1.8, "#ef6c00"));
+  /* pens */
+  const pens = [
+    { x: 700, y: 560, w: 380, h: 220, kind: "cow" },
+    { x: 1120, y: 560, w: 360, h: 220, kind: "pig" },
+    { x: 1520, y: 560, w: 360, h: 220, kind: "sheep" },
+    { x: 1920, y: 560, w: 400, h: 220, kind: "chicken" }
+  ];
+  pens.forEach(function (pn) {
+    m.push(rec(pn.x, pn.y, pn.w, pn.h, "#c4a06a", st(2.6)));
+    m.push(fence(pn.x, pn.y, pn.w - 4, 26, 1));
+    m.push(fence(pn.x, pn.y + pn.h - 26, pn.w - 4, 26, 1));
+    let animals = "";
+    if (pn.kind === "cow") {
+      for (let i = 0; i < 10; i++) animals += cow(pn.x + 30 + i * 55, pn.y + 120 + (i % 2) * 40, 1.1, R);
+    } else if (pn.kind === "pig") {
+      for (let i = 0; i < 12; i++) animals += pig(pn.x + 30 + (i % 4) * 70, pn.y + 90 + Math.floor(i / 4) * 70, 1.1);
+    } else if (pn.kind === "sheep") {
+      for (let i = 0; i < 12; i++) animals += sheep(pn.x + 30 + (i % 4) * 70, pn.y + 90 + Math.floor(i / 4) * 70, 1.15);
+    } else {
+      for (let i = 0; i < 20; i++) animals += chicken(pn.x + 20 + (i % 7) * 50, pn.y + 80 + Math.floor(i / 7) * 70, 1.1, R);
+    }
+    m.push(animals);
+    count += 8;
+    const farmers = rowPts(pn.x + 20, pn.y + 40, 4, 70, 0, false, R, 6, 3);
+    const pr2 = peopleFromPts(farmers, R, function (p, i) { return { pose: "stand", s: 0.95, role: "farmer", prop: i === 0 ? "basket" : (i === 1 ? "rake" : "") }; });
+    m.push(pr2.h); count += pr2.n;
+  });
+  /* pond */
+  m.push(el(400, 1100, 280, 120, "#5a9ec8", st(3)));
+  m.push(el(400, 1100, 220, 80, "#7eb6e8", 'stroke="none"'));
+  for (let i = 0; i < 8; i++) m.push(duck(280 + i * 40, 1080 + (i % 2) * 30, 1 + (i % 3) * 0.1));
+  for (let i = 0; i < 6; i++) m.push(duck(250 + i * 50, 1120 + (i % 2) * 24, 1));
+  pr = peopleFromPts(rowPts(80, 1000, 10, 40, 0, false, R, 5, 3), R, function (p, i) { return { pose: i % 2 ? "sit" : "wave", s: 0.9 }; });
+  m.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(80, 1180, 12, 42, 0, false, R, 5, 3), R, function (p, i) { return { pose: i % 3 ? "stand" : "sit", s: 1 }; });
+  m.push(pr.h); count += pr.n;
+  /* tractor and wagon */
+  f.push(rec(900, 1180, 160, 70, "#2e7d32", st(2.8), 6) + rec(820, 1200, 90, 45, "#2e7d32", st(2.8), 4));
+  f.push(el(860, 1260, 22, 22, "#1a1a1a", st(2.4)) + el(1020, 1260, 22, 22, "#1a1a1a", st(2.4)));
+  f.push(rec(1080, 1190, 260, 80, "#8a4a1a", st(2.8), 6) + hay(1140, 1170, 1.3, -4) + hay(1240, 1165, 1.4, 6));
+  pr = peopleFromPts([{ x: 900, y: 1180, s: 1.1 }, { x: 1160, y: 1180, s: 1 }, { x: 1220, y: 1180, s: 0.9 }], R, function (p, i) { return { pose: i === 0 ? "stand" : "sit", s: p.s, role: "farmer" }; });
+  f.push(pr.h); count += pr.n;
+  /* yard crowd */
+  pr = fillCrowd(R, { x: 40, y: 800, w: 640, h: 180, gap: 24, s: 1, poses: ["stand","walk","bend","wave"], props: ["corn","basket","rake",""], role: "farmer" }, 36);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 1360, y: 820, w: 1000, h: 200, gap: 24, s: 1, poses: ["stand","walk","wave"], props: ["corn","basket","",""] }, 48);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 1360, y: 1040, w: 1000, h: 280, gap: 24, s: 1.05, poses: ["stand","walk","run","wave"], props: ["basket","corn","",""] }, 55);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 700, y: 1280, w: 700, h: 140, gap: 24, s: 1.1, poses: ["walk","stand"], props: ["basket","",""] }, 22);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 700, y: 800, w: 600, h: 160, gap: 24, s: 0.95, poses: ["walk","stand","bend"], props: ["basket","rake",""], role: "farmer" }, 28);
+  f.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 620, y: 1120, w: 280, h: 140, gap: 24, s: 1, poses: ["stand","walk"], props: ["basket",""] }, 14);
+  f.push(pr.h); count += pr.n;
+  for (let i = 0; i < 18; i++) f.push(hay(80 + (i % 9) * 80, 1340 + Math.floor(i / 9) * 40, 0.8, jit(R, 10)));
+  m.push(litter(R, { x: 0, y: 500, w: SW, h: 900 }, 90, ["hay","leaf","pebble"]));
+  f.push(horse(700, 900, 1.4, R) + horse(780, 920, 1.3, R) + dog(500, 1280, 1.3, R) + dog(1600, 1300, 1.2, R) + dog(2000, 1000, 1.1, R));
+  for (let i = 0; i < 22; i++) f.push(chicken(1280 + (i % 11) * 28, 1300 + Math.floor(i / 11) * 36 + jit(R, 8), 1, R));
+  count += 15;
+  const hero = placeHero(5, 1780, 1040, 0.85, true, [
+    { kind: "nohat", x: 400, y: 860, scale: 0.85 },
+    { kind: "white", x: 1000, y: 700, scale: 0.8 },
+    { kind: "noscarf", x: 2100, y: 1280, scale: 0.85 }
+  ]);
+  f.push(hero.hero);
+  f.push(hay(1800, 1060, 1.1, -8));
+  hero.decoys.forEach(function (d) { f.push(turkeyFig(d.x, d.y, d.scale, { kind: d.kind, cls: "decoy" })); });
+  count += 4;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
+}
+
+/* ---------- SCENE 6: Harvest Market ---------- */
+function sceneMarket(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 280, "#7eb6e8", 'stroke="none"'));
+  b.push(rec(0, 260, SW, SH - 260, "#c4a06a", 'stroke="none"'));
+  /* shop fronts */
+  const shops = [
+    { x: 0, y: 40, w: 400, h: 380, col: "#e24b3c", roof: "#8a2418", name: "BAKERY" },
+    { x: 400, y: 20, w: 380, h: 400, col: "#7b5cff", roof: "#4b33b8", name: "PIES" },
+    { x: 780, y: 0, w: 440, h: 420, col: "#c44914", roof: "#8a2418", name: "HALL" },
+    { x: 1220, y: 30, w: 400, h: 390, col: "#12b5a0", roof: "#0b7a6c", name: "CORN" },
+    { x: 1620, y: 20, w: 380, h: 400, col: "#ff7a3d", roof: "#c9541d", name: "JAMS" },
+    { x: 2000, y: 40, w: 400, h: 380, col: "#3b6fd6", roof: "#1f4fa0", name: "CIDER" }
+  ];
+  shops.forEach(function (s, i) {
+    b.push(building(s.x, s.y + 80, s.w, s.h - 40, s.col, R, { floors: 3, cols: i === 2 ? 4 : 3, roof: s.roof, roofH: 36, door: "#6b3f1a" }));
+    b.push(rec(s.x + 20, s.y + 40, s.w - 40, 36, s.roof, st(2)));
+    b.push(txt(s.x + s.w / 2, s.y + 66, 18, s.name, "#fff6d4"));
+  });
+  /* clock / tower on hall */
+  b.push(rec(960, -10, 80, 90, "#c44914", st(2.5)));
+  b.push(circ(1000, 40, 24, "#fff8e8", st(2.5)));
+  /* fountain center */
+  m.push(circ(1200, 780, 90, "#5a9ec8", st(3)));
+  m.push(circ(1200, 780, 60, "#7eb6e8", st(2)));
+  m.push(rec(1192, 700, 16, 50, "#d0d0d0", st(2)));
+  pr = peopleFromPts(rowPts(1080, 820, 8, 32, 0, false, R, 4, 3), R, function () { return { pose: "sit", s: 1 }; });
+  m.push(pr.h); count += pr.n;
+  /* stall rows */
+  function stallRow(y, n, x0, sScale, front) {
+    let h = "";
+    let c = 0;
+    for (let i = 0; i < n; i++) {
+      const x = x0 + i * 230;
+      const col = pick(["#c44914","#3b6fd6","#2e7d32","#f4c430","#ff7a3d","#7b5cff"], R);
+      h += rec(x, y - 70, 200, 90, "#f4e4c1", st(2.4));
+      h += rec(x, y - 100, 200, 32, col, st(2.4));
+      h += rec(x, y, 200, 16, "#8a5a2b", st(2));
+      /* goods */
+      for (let k = 0; k < 5; k++) {
+        if (R() > 0.4) h += pumpkin(x + 20 + k * 36, y - 20, 0.45, R);
+        else h += pie(x + 20 + k * 36, y - 22, 0.7);
       }
-    } while (!ok && ++tries < 20);
-    const ch = chars[Math.floor(R() * chars.length)];
-    const s = smin + R() * (smax - smin);
-    const rot = (R() * 50) - 25;
-    o += em(ch, x, y, s, rot);
+      const keepers = peopleFromPts([{ x: x + 70, y: y - 10, s: sScale }, { x: x + 120, y: y - 10, s: sScale }], R, function (p, i) { return { pose: "stand", s: sScale, role: i === 0 ? "farmer" : "civ", prop: "basket" }; });
+      h += keepers.h; c += keepers.n;
+      const shoppers = rowPts(x + 6, y + 44, 7, 28, 0, false, R, 4, 3);
+      const sh = peopleFromPts(shoppers, R, function (p, i) { return { pose: pick(["stand","walk","wave"], R), s: sScale + 0.05, prop: i === 2 ? "basket" : (i === 3 ? "pumpkin" : "") }; });
+      h += sh.h; c += sh.n;
+    }
+    (front ? f : m).push(h);
+    count += c;
   }
-  return o;
+  stallRow(620, 10, 40, 0.9, false);
+  stallRow(900, 10, 80, 1.0, false);
+  stallRow(1180, 10, 20, 1.08, true);
+  /* aisle crowds */
+  pr = fillCrowd(R, { x: 20, y: 660, w: 2360, h: 180, gap: 22, s: 0.95, poses: ["walk","stand","wave"], props: ["basket","balloon","pie",""] }, 80);
+  m.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 20, y: 960, w: 2360, h: 160, gap: 22, s: 1.0, poses: ["walk","stand","wave"], props: ["basket","balloon",""] }, 70);
+  m.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 20, y: 1240, w: 2360, h: 180, gap: 22, s: 1.1, poses: ["walk","stand","run","wave"], props: ["balloon","pie","basket",""] }, 80);
+  f.push(pr.h); count += pr.n;
+  /* buskers */
+  f.push(person(1200, 1360, 1.2, R, { role: "band", pose: "stand", prop: "horn", shirt: "#1a1a1a" }));
+  f.push(person(1260, 1360, 1.2, R, { role: "band", pose: "stand", prop: "drum", shirt: "#1a1a1a" }));
+  count += 2;
+  f.push(dog(400, 1360, 1.2, R) + dog(1800, 1320, 1.1, R) + dog(900, 1000, 1, R));
+  count += 3;
+  const hero = placeHero(6, 1510, 930, 0.8, false, [
+    { kind: "nohat", x: 300, y: 700, scale: 0.8 },
+    { kind: "white", x: 800, y: 1180, scale: 0.8 },
+    { kind: "noscarf", x: 2000, y: 900, scale: 0.8 },
+    { kind: "chef", x: 100, y: 1280, scale: 0.8 }
+  ]);
+  f.push(hero.hero);
+  hero.decoys.forEach(function (d) { f.push(turkeyFig(d.x, d.y, d.scale, { kind: d.kind, cls: "decoy" })); });
+  f.push(costumeTurkey(1700, 1300, 1, R));
+  f.push(person(600, 1360, 1.15, R, { role: "pilgrim", scarf: "blue", shirt: "#3b6fd6", pose: "walk" }));
+  count += 7;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
 }
 
-function backdrop(n) {
-  if (n === 1) {
-    return rec(0,0,SW,SH,"url(#sky1)") +
-      '<defs><linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ec8ff"/><stop offset="1" stop-color="#d8f0ff"/></linearGradient></defs>' +
-      el(1060, 90, 50, 50, "#ffe14d") +
-      el(200, 80, 70, 28, "#fff") + el(250, 90, 50, 22, "#fff") +
-      el(700, 70, 60, 24, "#fff") +
-      rec(0, 430, SW, 370, "#7ec65a") +
-      path("M0 460 Q300 400 600 450 T1200 430 L1200 800 L0 800 Z", "#6bb34a") +
-      rec(0, 200, 160, 260, "#e24b3c") + path("M-10 200 L80 120 L170 200 Z", "#a8302a") +
-      rec(60, 320, 40, 80, "#6b3f1a") + rec(20, 240, 36, 36, "#8ec8ff") +
-      fence(180, 400, 400, 1.1) +
-      rec(700, 520, 280, 160, "#f4e4c1", 'stroke="#c9a024" stroke-width="4"', 8) +
-      rec(700, 520, 280, 160, "transparent", 'stroke="#c44914" stroke-width="0" stroke-dasharray="18 14"') +
-      '<path d="M700 520 h280 v160 h-280 z" fill="url(#chk)" opacity=".35"/>' +
-      '<defs><pattern id="chk" width="28" height="28" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#c44914"/><rect x="14" y="14" width="14" height="14" fill="#c44914"/></pattern></defs>';
+/* ---------- SCENE 7: Parade ---------- */
+function sceneParade(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 200, "#6eb6ff", 'stroke="none"'));
+  /* buildings along the top */
+  const blds = [
+    { x: 0, w: 300, col: "#e24b3c" }, { x: 300, w: 280, col: "#7b5cff" }, { x: 580, w: 320, col: "#c44914" },
+    { x: 900, w: 260, col: "#12b5a0" }, { x: 1160, w: 300, col: "#ff7a3d" }, { x: 1460, w: 280, col: "#3b6fd6" },
+    { x: 1740, w: 320, col: "#2e7d32" }, { x: 2060, w: 340, col: "#ad1457" }
+  ];
+  blds.forEach(function (bd, i) {
+    const h = 420 + (i % 3) * 40;
+    b.push(building(bd.x, 200 + (460 - h), bd.w, h, bd.col, R, { floors: 4, cols: 3, roofH: 30, door: "#6b3f1a" }));
+  });
+  b.push(rec(200, 120, 2000, 46, "#c44914", st(2.6)));
+  b.push(txt(1200, 152, 30, "HAPPY THANKSGIVING", "#fff6d4"));
+  /* street */
+  b.push(rec(0, 700, SW, 280, "#8a8a90", 'stroke="none"'));
+  b.push(rec(0, 690, SW, 12, "#c9c9ce", 'stroke="none"'));
+  b.push(rec(0, 968, SW, 12, "#c9c9ce", 'stroke="none"'));
+  /* dashed road line */
+  for (let x = 0; x < SW; x += 80) b.push(rec(x, 830, 40, 8, "#f4e4c1", 'stroke="none"'));
+  /* sidewalks packed */
+  b.push(rec(0, 620, SW, 80, "#b8b0a4", 'stroke="none"'));
+  b.push(rec(0, 980, SW, 80, "#b8b0a4", 'stroke="none"'));
+  b.push(rec(0, 1060, SW, SH - 1060, "#5a4030", 'stroke="none"'));
+  /* barriers */
+  for (let x = 0; x < SW; x += 40) {
+    m.push(rec(x, 680, 8, 24, "#c44914", st(1.6)));
+    m.push(rec(x, 980, 8, 24, "#c44914", st(1.6)));
   }
-  if (n === 2) {
-    return rec(0,0,SW,SH,"url(#sky2)") +
-      '<defs><linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb36a"/><stop offset="1" stop-color="#ffe7b0"/></linearGradient></defs>' +
-      el(180, 90, 44, 44, "#ffef8a") +
-      rec(0, 380, SW, 420, "#c9853a") +
-      path("M0 400 Q200 340 400 390 T800 370 T1200 400 L1200 800 L0 800 Z", "#d4923e") +
-      rec(820, 200, 280, 220, "#b33a2a") + rec(840, 230, 40, 50, "#7ec8ff") + rec(1040, 230, 40, 50, "#7ec8ff") +
-      rec(930, 320, 50, 100, "#6b3f1a") + path("M800 200 L960 110 L1160 200 Z", "#7a2418") +
-      rec(760, 250, 40, 160, "#c9c3d0") + el(780, 230, 28, 40, "#c9c3d0") +
-      rec(760, 250, 40, 160, "transparent", 'stroke="#8a8490" stroke-width="2"') +
-      rec(748, 300, 16, 50, "#8a5a2b") + rec(836, 300, 16, 50, "#8a5a2b") +
-      em("🌻", 790, 220, 36);
+  /* back sidewalk crowd (behind barriers) — 3 packed rows */
+  for (let r = 0; r < 3; r++) {
+    const pts = rowPts(10, 628 + r * 24, 84, 28, 0, true, R, 3, 2);
+    const pr2 = peopleFromPts(pts, R, function (p, i) { return { pose: i % 5 === 0 ? "wave" : (i % 5 === 1 ? "cheer" : "stand"), s: 0.72 + r * 0.08, prop: i % 8 === 0 ? "flag" : (i % 8 === 1 ? "balloon" : "") }; });
+    m.push(pr2.h); count += pr2.n;
   }
-  if (n === 3) {
-    return rec(0,0,SW,SH,"#f3e0c4") +
-      rec(0, 0, SW, 80, "#c44914") +
-      rec(40, 100, 320, 280, "#8ec8ff", 'stroke="#fff" stroke-width="10"') +
-      rec(80, 130, 100, 220, "#a8d8ff") + rec(220, 130, 100, 220, "#a8d8ff") +
-      rec(0, 500, SW, 300, "#c4a07a") +
-      rec(40, 430, 500, 24, "#8a5a2b") +
-      rec(700, 430, 460, 24, "#8a5a2b") +
-      rec(760, 200, 160, 230, "#d0d6e0") + rec(780, 220, 120, 160, "#9aa3b2") + rec(820, 360, 40, 70, "#6b3f1a") +
-      rec(40, 250, 80, 180, "#e8c9a0") + rec(46, 256, 68, 50, "#f0d8b4") + rec(46, 316, 68, 50, "#f0d8b4") + rec(46, 376, 68, 50, "#f0d8b4") +
-      rec(980, 80, 180, 140, "#eee") + rec(1000, 100, 60, 80, "#ccc") + rec(1080, 100, 60, 80, "#ccc");
+  /* front sidewalk — 4 rows, larger toward the reader */
+  for (let r = 0; r < 4; r++) {
+    const pts = rowPts(8, 1040 + r * 36, 78 - r, 30 + r, 0, true, R, 4, 2);
+    const pr2 = peopleFromPts(pts, R, function (p, i) { return { pose: i % 4 === 0 ? "cheer" : (i % 4 === 1 ? "wave" : "stand"), s: 0.95 + r * 0.08, prop: i % 7 === 0 ? "flag" : (i % 7 === 1 ? "balloon" : "") }; });
+    f.push(pr2.h); count += pr2.n;
   }
-  if (n === 4) {
-    return rec(0,0,SW,SH,"#f7e6cf") +
-      rec(0,0,SW,SH,"#f3d7b0") +
-      '<defs><pattern id="wp" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="4" fill="#e8b88a"/></pattern></defs>' +
-      rec(0,0,SW,420,"url(#wp)") + rec(0,0,SW,420,"#f7e6cf") +
-      rec(0,0,SW,420,"transparent") +
-      rec(80, 60, 280, 220, "#8ec8ff", 'stroke="#fff" stroke-width="10"') +
-      rec(840, 60, 280, 220, "#8ec8ff", 'stroke="#fff" stroke-width="10"') +
-      rec(0, 500, SW, 300, "#6b3f1a") +
-      rec(200, 430, 800, 36, "#5a3014", "", 4) +
-      rec(230, 466, 740, 200, "#8a5a2b", "", 6) +
-      el(600, 80, 16, 16, "#f1c40f") +
-      rec(560, 20, 80, 14, "#c9a024") + rec(590, 34, 20, 40, "#c9a024") +
-      el(540, 90, 8, 8, "#ffe066") + el(660, 90, 8, 8, "#ffe066") + el(600, 120, 8, 8, "#ffe066");
-  }
-  if (n === 5) {
-    return rec(0,0,SW,SH,"url(#sky5)") +
-      '<defs><linearGradient id="sky5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7eb6e8"/><stop offset="1" stop-color="#f7d9a8"/></linearGradient></defs>' +
-      rec(0, 420, SW, 380, "#8a6a3a") +
-      path("M0 500 Q400 420 800 510 T1200 490 L1200 800 L0 800 Z", "#7a5a2e") +
-      rec(480, 360, 420, 160, "#8a4a1a", "", 10) +
-      rec(500, 300, 80, 80, "#6b3f1a", "", 4) + rec(800, 300, 80, 80, "#6b3f1a", "", 4) +
-      el(540, 380, 28, 28, "#2a2a2a") + el(840, 380, 28, 28, "#2a2a2a") +
-      rec(-20, 200, 160, 280, "#3e7a22") + rec(1040, 180, 200, 300, "#c44914");
-  }
-  if (n === 6) {
-    return rec(0,0,SW,SH,"url(#sky6)") +
-      '<defs><linearGradient id="sky6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#87c8ff"/><stop offset="1" stop-color="#cce8ff"/></linearGradient></defs>' +
-      rec(0, 460, SW, 340, "#7aae4a") +
-      rec(80, 180, 360, 300, "#c44914") + path("M60 180 L260 70 L440 180 Z", "#8a2418") +
-      rec(220, 360, 70, 120, "#6b3f1a") + rec(120, 230, 70, 70, "#8ec8ff") + rec(320, 230, 70, 70, "#8ec8ff") +
-      rec(500, 280, 180, 200, "#e8d8b0") + rec(530, 360, 50, 120, "#8a5a2b") + rec(500, 260, 180, 24, "#c44914") +
-      rec(980, 200, 70, 280, "#d0d0d0") + el(1015, 200, 40, 20, "#c0c0c0") +
-      fence(40, 430, 1100, 1);
-  }
-  if (n === 7) {
-    return rec(0,0,SW,SH,"url(#sky7)") +
-      '<defs><linearGradient id="sky7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6eb6ff"/><stop offset="1" stop-color="#ffe0a0"/></linearGradient></defs>' +
-      rec(0, 500, SW, 300, "#8a8a90") +
-      rec(0, 490, SW, 16, "#c9c9ce") +
-      rec(20, 140, 200, 350, "#e24b3c") + rec(40, 180, 50, 60, "#8ec8ff") + rec(140, 180, 50, 60, "#8ec8ff") +
-      rec(260, 100, 180, 390, "#7b5cff") + rec(280, 140, 50, 70, "#fff") + rec(360, 140, 50, 70, "#fff") +
-      rec(900, 120, 220, 370, "#12b5a0") + rec(930, 160, 60, 70, "#d8f8ff") + rec(1030, 160, 60, 70, "#d8f8ff") +
-      rec(480, 300, 320, 180, "#ff7a3d", "", 16) + rec(500, 250, 80, 60, "#ffe066", "", 8) +
-      rec(200, 200, 800, 50, "#c44914") +
-      '<text x="600" y="238" font-size="36" font-family="Fredoka, sans-serif" font-weight="700" text-anchor="middle" fill="#fff6d4">HAPPY THANKSGIVING</text>';
-  }
-  if (n === 8) {
-    return rec(0,0,SW,SH,"url(#sky8)") +
-      '<defs><linearGradient id="sky8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0a05a"/><stop offset="1" stop-color="#f7d9a0"/></linearGradient></defs>' +
-      rec(0, 560, SW, 240, "#4a7a32") +
-      path("M0 600 Q400 540 800 620 T1200 580 L1200 800 L0 800 Z", "#3e6a28") +
-      path("M80 620 Q300 640 400 700 T200 760 T80 620", "#6aa0c8") +
-      rec(180, 300, 36, 320, "#6b3f1a") +
-      rec(700, 280, 44, 340, "#5a3014") +
-      rec(980, 260, 40, 360, "#6b3f1a");
-  }
-  if (n === 9) {
-    return rec(0,0,SW,SH,"#4a2030") +
-      rec(0, 0, SW, 520, "#6b3040") +
-      rec(80, 40, 320, 260, "#1a3050") + rec(90, 50, 140, 240, "#8ec8ff") + rec(250, 50, 140, 240, "#8ec8ff") +
-      rec(800, 40, 320, 260, "#1a3050") + rec(810, 50, 140, 240, "#8ec8ff") + rec(970, 50, 140, 240, "#8ec8ff") +
-      rec(40, 20, 60, 500, "#8c1c2b") + rec(1100, 20, 60, 500, "#8c1c2b") +
-      rec(0, 520, SW, 280, "#3e2414") +
-      rec(140, 500, 920, 28, "#5a3014", "", 4) +
-      rec(160, 528, 880, 180, "#6b3f1a", "", 6) +
-      el(600, 70, 18, 18, "#f1c40f") + rec(560, 20, 80, 16, "#c9a024") +
-      el(520, 110, 7, 7, "#ffe066") + el(680, 110, 7, 7, "#ffe066") +
-      rec(580, 200, 40, 300, "#3a1020");
-  }
-  /* 10 night fair */
-  return rec(0,0,SW,SH,"url(#sky10)") +
-    '<defs><linearGradient id="sky10" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#142044"/><stop offset="1" stop-color="#3a2a58"/></linearGradient></defs>' +
-    el(1020, 90, 42, 42, "#f0e6b0") +
-    rec(0, 520, SW, 280, "#2a2438") +
-    rec(80, 340, 220, 220, "#c44914") + path("M60 340 L190 240 L320 340 Z", "#8a2418") +
-    rec(460, 360, 260, 200, "#7b5cff") + path("M440 360 L590 250 L740 360 Z", "#4b33b8") +
-    rec(860, 350, 240, 210, "#12b5a0") + path("M840 350 L980 250 L1120 350 Z", "#0b7a6c") +
-    rec(0, 510, SW, 14, "#e6c15a");
+  /* remaining front packed to the bottom */
+  pr = fillCrowd(R, { x: 10, y: 1180, w: 2380, h: 250, gap: 22, s: 1.15, poses: ["stand","cheer","wave","walk"], props: ["balloon","flag","",""] }, 90);
+  f.push(pr.h); count += pr.n;
+  /* FLOATS and band on the road */
+  /* float 1 pumpkin */
+  m.push(rec(80, 760, 280, 140, "#ef7a1a", st(3), 16));
+  m.push(el(220, 740, 80, 70, "#ef7a1a", st(3)));
+  m.push(txt(220, 830, 18, "HARVEST", "#fff6d4"));
+  pr = peopleFromPts(rowPts(120, 770, 6, 40, 0, false, R, 2, 2), R, function (p, i) { return { pose: "wave", s: 0.95, shirt: "#f4c430" }; });
+  m.push(pr.h); count += pr.n;
+  /* marching band */
+  pr = peopleFromPts(rowPts(420, 820, 10, 32, 0, false, R, 2, 2), R, function (p, i) { return { pose: "march", s: 0.95, role: "band", shirt: "#1a1a1a", prop: i % 2 ? "horn" : "drum" }; });
+  m.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(430, 880, 10, 32, 0, false, R, 2, 2), R, function (p, i) { return { pose: "march", s: 0.95, role: "band", shirt: "#1a1a1a", prop: i % 2 ? "horn" : "flag" }; });
+  m.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(440, 930, 10, 32, 0, false, R, 2, 2), R, function (p, i) { return { pose: "march", s: 0.95, role: "band", shirt: "#1a1a1a", prop: i % 2 ? "drum" : "horn" }; });
+  m.push(pr.h); count += pr.n;
+  /* float 2 cornucopia / table */
+  m.push(rec(820, 750, 300, 150, "#7b5cff", st(3), 16));
+  m.push(txt(970, 800, 16, "FEAST", "#fff6d4"));
+  m.push(pie(900, 820, 1) + pie(960, 820, 1.1) + pumpkin(1020, 830, 0.8, R));
+  pr = peopleFromPts(rowPts(860, 770, 6, 42, 0, false, R, 2, 2), R, function () { return { pose: "wave", s: 0.95, shirt: "#fff8e8" }; });
+  m.push(pr.h); count += pr.n;
+  /* giant turkey balloon (not the hero!) */
+  m.push(el(1280, 780, 90, 70, "#c46a2c", st(3)));
+  m.push(el(1280, 700, 50, 40, "#c46a2c", st(3)));
+  m.push(txt(1280, 790, 14, "BALLOON", "#fff6d4"));
+  /* float 3 */
+  m.push(rec(1480, 760, 280, 140, "#12b5a0", st(3), 16));
+  pr = peopleFromPts(rowPts(1520, 780, 6, 40, 0, false, R, 2, 2), R, function (p, i) { return { pose: "cheer", s: 0.95 }; });
+  m.push(pr.h); count += pr.n;
+  /* more marchers / flags */
+  pr = peopleFromPts(rowPts(1840, 820, 12, 34, 0, false, R, 2, 2), R, function (p, i) { return { pose: "march", s: 0.95, prop: "flag", shirt: pick(["#c44914","#3b6fd6","#f4c430"], R) }; });
+  m.push(pr.h); count += pr.n;
+  /* giant pumpkin balloon */
+  m.push(el(2260, 760, 80, 70, "#ef7a1a", st(3)));
+  m.push(rec(2252, 690, 16, 20, "#3e7a22", st(2)));
+  f.push(dog(200, 1260, 1.2, R) + dog(1400, 1300, 1.1, R) + dog(2000, 1220, 1.2, R));
+  count += 3;
+  const hero = placeHero(7, 640, 1120, 0.75, true, [
+    { kind: "nohat", x: 200, y: 820, scale: 0.75 },
+    { kind: "white", x: 1600, y: 880, scale: 0.75 },
+    { kind: "noscarf", x: 1000, y: 1260, scale: 0.8 },
+    { kind: "bluehat", x: 2200, y: 1080, scale: 0.75 }
+  ]);
+  f.push(hero.hero);
+  hero.decoys.forEach(function (d) { f.push(turkeyFig(d.x, d.y, d.scale, { kind: d.kind, cls: "decoy" })); });
+  f.push(costumeTurkey(400, 1280, 1.05, R));
+  f.push(person(900, 1320, 1.15, R, { role: "pilgrim", scarf: "blue", shirt: "#3b6fd6", pose: "cheer" }));
+  count += 7;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
 }
 
-function buildOccluder(lv, T) {
-  const o = lv.occlude || 0;
-  if (o <= 0) return "";
-  const s = T.scale;
-  /* Draw a prop overlapping the turkey from the bottom or side, leaving the hat mostly visible. */
-  if (lv.n === 4) return rec(T.x - 40, T.y + 10, 100, 50, "#8a5a2b", "", 6);
-  if (lv.n === 5) return hay(T.x + 10, T.y + 28, 1.1 + s, -8);
-  if (lv.n === 6) return pumpkin(T.x + 18, T.y + 22, 0.9, "#ef7a1a");
-  if (lv.n === 7) return rec(T.x - 30, T.y + 16, 90, 46, "#ff7a3d", "", 10) + em("🥁", T.x + 20, T.y + 20, 36);
-  if (lv.n === 8) return rec(T.x - 50, T.y - 10, 36, 220, "#6b3f1a") + el(T.x - 32, T.y - 80, 50, 44, "#c44914");
-  if (lv.n === 9) return pie(T.x + 6, T.y + 18, 1.35);
-  if (lv.n === 10) return rec(T.x - 36, T.y + 8, 80, 40, "#7b5cff", "", 8) + em("🎪", T.x + 8, T.y - 40, 48);
-  return pumpkin(T.x + 16, T.y + 24, 1, "#ef7a1a");
+/* ---------- SCENE 8: Football ---------- */
+function sceneFootball(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 200, "#6eb6ff", 'stroke="none"'));
+  /* STANDS — packed rows of fans, the density engine */
+  b.push(path("M0 200 L240 200 L200 700 L0 700 Z", "#6d4c41", st(2)));
+  b.push(path("M2400 200 L2160 200 L2200 700 L2400 700 Z", "#6d4c41", st(2)));
+  b.push(rec(200, 200, 2000, 500, "#5d4037", st(2)));
+  const teamA = ["#c44914","#b71c1c","#fff8e8"];
+  const teamB = ["#1565c0","#0d47a1","#f4c430"];
+  for (let r = 0; r < 10; r++) {
+    const y = 230 + r * 44;
+    const s = 0.62 + r * 0.04;
+    const n = 52 + r;
+    const dx = 2000 / n;
+    const pts = rowPts(220, y, n, dx, 0, true, R, 2, 1);
+    const pr2 = peopleFromPts(pts, R, function (p, i) {
+      const side = p.x < 1200;
+      return { pose: (r > 6 && i % 6 === 0) ? "cheer" : "sit", s: s, shirt: pick(side ? teamA : teamB, R), hat: i % 9 === 0 ? "cap" : undefined, hatCol: side ? "#c44914" : "#1565c0" };
+    });
+    m.push(pr2.h); count += pr2.n;
+  }
+  /* fans on the angled side stands */
+  for (let r = 0; r < 10; r++) {
+    const y = 240 + r * 44;
+    const nL = 6 + r;
+    const nR = 6 + r;
+    const left = peopleFromPts(rowPts(12, y, nL, 22, 0, true, R, 2, 1), R, function (p, i) { return { pose: "sit", s: 0.6 + r * 0.03, shirt: pick(teamA, R) }; });
+    const right = peopleFromPts(rowPts(2220, y, nR, 22, 0, true, R, 2, 1), R, function (p, i) { return { pose: "sit", s: 0.6 + r * 0.03, shirt: pick(teamB, R) }; });
+    m.push(left.h + right.h); count += left.n + right.n;
+  }
+  /* pitch */
+  m.push(rec(200, 720, 2000, 420, "#4caf50", st(3)));
+  m.push(rec(200, 720, 2000, 4, "#fff8e8", 'stroke="none"'));
+  m.push(rec(200, 1136, 2000, 4, "#fff8e8", 'stroke="none"'));
+  m.push(rec(1190, 720, 8, 420, "#fff8e8", 'stroke="none"'));
+  m.push(circ(1200, 930, 70, "transparent", 'stroke="#fff8e8" stroke-width="4"'));
+  /* yard lines */
+  for (let i = 1; i < 10; i++) m.push(rec(200 + i * 200, 720, 3, 420, "#fff8e8", 'stroke="none"'));
+  /* goals */
+  m.push(rec(180, 800, 8, 200, "#fff8e8", st(2)) + rec(140, 800, 90, 8, "#fff8e8", st(2)));
+  m.push(rec(2210, 800, 8, 200, "#fff8e8", st(2)) + rec(2170, 800, 90, 8, "#fff8e8", st(2)));
+  /* team formations */
+  const off = rowPts(700, 900, 5, 70, 0, false, R, 6, 8);
+  const off2 = rowPts(750, 980, 6, 60, 0, false, R, 6, 6);
+  const def = rowPts(1400, 900, 5, 70, 0, false, R, 6, 8);
+  const def2 = rowPts(1350, 980, 6, 60, 0, false, R, 6, 6);
+  let p1 = peopleFromPts(off.concat(off2), R, function () { return { pose: "stand", s: 1, shirt: "#c44914", pants: "#fff8e8", helmet: "#c44914" }; });
+  let p2 = peopleFromPts(def.concat(def2), R, function () { return { pose: "stand", s: 1, shirt: "#1565c0", pants: "#f4c430", helmet: "#1565c0", flip: -1 }; });
+  m.push(p1.h + p2.h); count += p1.n + p2.n;
+  m.push(el(1180, 940, 10, 6, "#8a4a1a", st(2))); /* football */
+  /* refs + cheerleaders */
+  pr = peopleFromPts(rowPts(1180, 1080, 3, 40, 0, false, R, 3, 2), R, function () { return { pose: "stand", s: 1, shirt: "#f4c430", pants: "#1a1a1a", hat: "cap", hatCol: "#f4c430" }; });
+  m.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(400, 1100, 8, 36, 0, false, R, 3, 2), R, function (p, i) { return { pose: "cheer", s: 0.95, shirt: "#c44914" }; });
+  m.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(1800, 1100, 8, 36, 0, false, R, 3, 2), R, function () { return { pose: "cheer", s: 0.95, shirt: "#1565c0" }; });
+  m.push(pr.h); count += pr.n;
+  /* sideline fans / fence */
+  pr = peopleFromPts(rowPts(220, 1160, 64, 30, 0, true, R, 3, 2), R, function (p, i) { return { pose: i % 4 === 0 ? "cheer" : "stand", s: 1.0, shirt: pick(teamA.concat(teamB), R) }; });
+  f.push(pr.h); count += pr.n;
+  pr = peopleFromPts(rowPts(210, 1200, 62, 32, 0, true, R, 3, 2), R, function (p, i) { return { pose: i % 4 === 0 ? "cheer" : "stand", s: 1.08, shirt: pick(teamA.concat(teamB), R) }; });
+  f.push(pr.h); count += pr.n;
+  /* food stalls in front */
+  for (let i = 0; i < 8; i++) {
+    const x = 80 + i * 290;
+    f.push(rec(x, 1280, 200, 80, "#f4e4c1", st(2.4)));
+    f.push(rec(x, 1250, 200, 30, pick(["#c44914","#1565c0","#f4c430","#2e7d32"], R), st(2.4)));
+    const keep = peopleFromPts([{ x: x + 60, y: 1300, s: 1 }, { x: x + 130, y: 1300, s: 1 }], R, function () { return { pose: "stand", s: 1, prop: "platter" }; });
+    f.push(keep.h); count += keep.n;
+    const line = peopleFromPts(rowPts(x + 10, 1380, 5, 38, 0, false, R, 3, 2), R, function () { return { pose: "stand", s: 1.1, shirt: pick(teamA.concat(teamB), R) }; });
+    f.push(line.h); count += line.n;
+  }
+  f.push(dog(200, 1400, 1.2, R) + dog(2000, 1400, 1.1, R));
+  count += 2;
+  const hero = placeHero(8, 1680, 1188, 0.72, false, [
+    { kind: "nohat", x: 500, y: 1100, scale: 0.72 },
+    { kind: "white", x: 1000, y: 400, scale: 0.65 },
+    { kind: "noscarf", x: 800, y: 1320, scale: 0.75 },
+    { kind: "bluehat", x: 2000, y: 500, scale: 0.65 }
+  ]);
+  f.push(hero.hero);
+  hero.decoys.forEach(function (d) { f.push(turkeyFig(d.x, d.y, d.scale, { kind: d.kind, cls: "decoy" })); });
+  f.push(costumeTurkey(300, 1380, 1, R));
+  f.push(person(1400, 1380, 1.1, R, { role: "pilgrim", scarf: "blue", shirt: "#3b6fd6", pose: "cheer" }));
+  count += 7;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
 }
+
+/* ---------- SCENE 9: Grand Banquet ---------- */
+function sceneBanquet(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 280, "#3a1020", 'stroke="none"'));
+  b.push(rec(0, 260, SW, SH - 260, "#4a2030", 'stroke="none"'));
+  /* balcony / gallery packed */
+  b.push(rec(0, 80, SW, 280, "#5a1a2c", st(2)));
+  b.push(rec(0, 340, SW, 24, "#c9a024", st(2.4)));
+  for (let r = 0; r < 4; r++) {
+    const pts = rowPts(20, 140 + r * 50, 58, 41, 0, true, R, 3, 2);
+    const pr2 = peopleFromPts(pts, R, function (p, i) { return { pose: r === 3 && i % 5 === 0 ? "wave" : "sit", s: 0.72 + r * 0.05, shirt: pick(["#c44914","#1a1a1a","#f4c430","#fff8e8","#3b6fd6"], R) }; });
+    b.push(pr2.h); count += pr2.n;
+  }
+  /* tall windows */
+  b.push(rec(40, 380, 280, 260, "#1a3050", st(3)));
+  b.push(windowGrid(55, 395, 2, 2, 110, 100, 16, 16, R, 1.15));
+  b.push(rec(2080, 380, 280, 260, "#1a3050", st(3)));
+  b.push(windowGrid(2095, 395, 2, 2, 110, 100, 16, 16, R, 1.15));
+  b.push(rec(700, 380, 1000, 40, "#c9a024", st(2)));
+  b.push(txt(1200, 408, 24, "THE GRAND BANQUET", "#3a1020"));
+  /* chandeliers */
+  for (let i = 0; i < 5; i++) {
+    const cx = 400 + i * 400;
+    b.push(rec(cx, 370, 6, 40, "#c9a024", st(2)) + el(cx + 3, 420, 30, 10, "#c9a024", st(2)));
+    b.push(circ(cx - 18, 430, 5, "#ffe066", st(1.5)) + circ(cx + 24, 430, 5, "#ffe066", st(1.5)));
+  }
+  /* tables — 5 rows, two columns, plus a center toast */
+  for (let r = 0; r < 5; r++) {
+    const y = 500 + r * 160;
+    const s = 0.9 + r * 0.07;
+    m.push(table(60, y, 900, 30 + r * 2, "#8a5a2b"));
+    m.push(table(1440, y, 900, 30 + r * 2, "#8a5a2b"));
+    m.push(foodOnTable(60, y, 900, R) + foodOnTable(1440, y, 900, R));
+    const b1 = peopleFromPts(rowPts(90, y - 12, 18, 48, 0, false, R, 3, 2), R, function () { return { pose: "table", s: s }; });
+    const b2 = peopleFromPts(rowPts(1470, y - 12, 18, 48, 0, false, R, 3, 2), R, function () { return { pose: "table", s: s }; });
+    m.push(b1.h + b2.h); count += b1.n + b2.n;
+    const f1 = peopleFromPts(rowPts(110, y + 46, 17, 50, 0, false, R, 3, 2), R, function (p, i) { return { pose: "table", s: s + 0.06, role: i % 12 === 0 ? "pilgrim" : "civ" }; });
+    const f2 = peopleFromPts(rowPts(1490, y + 46, 17, 50, 0, false, R, 3, 2), R, function () { return { pose: "table", s: s + 0.06 }; });
+    f.push(f1.h + f2.h); count += f1.n + f2.n;
+  }
+  /* center aisle toast / dancers */
+  pr = peopleFromPts(rowPts(1180, 520, 10, 0, 80, false, R, 8, 6), R, function (p, i) { return { pose: i === 0 ? "cheer" : "walk", s: 1.05, prop: i === 0 ? "platter" : (i % 2 ? "platter" : ""), shirt: i === 0 ? "#1a1a1a" : "#fff8e8" }; });
+  f.push(pr.h); count += pr.n;
+  /* waiters along sides */
+  pr = peopleFromPts(rowPts(20, 500, 8, 0, 110, false, R, 4, 4), R, function () { return { pose: "walk", s: 1, prop: "platter", shirt: "#fff8e8" }; });
+  f.push(pr.h); count += pr.n;
+  f.push(dog(700, 900, 1.2, R) + dog(1800, 1100, 1.1, R));
+  count += 2;
+  pr = fillCrowd(R, { x: 20, y: 1280, w: 2360, h: 150, gap: 22, s: 1.12, poses: ["walk","stand","wave"], props: ["platter","drumstick","",""] }, 60);
+  f.push(pr.h); count += pr.n;
+  const hero = placeHero(9, 980, 1020, 0.68, true, [
+    { kind: "nohat", x: 400, y: 660, scale: 0.68 },
+    { kind: "white", x: 1600, y: 500, scale: 0.65 },
+    { kind: "noscarf", x: 2000, y: 1180, scale: 0.7 },
+    { kind: "chef", x: 200, y: 820, scale: 0.68 },
+    { kind: "bluehat", x: 1200, y: 200, scale: 0.6 }
+  ]);
+  f.push(hero.hero);
+  hero.decoys.forEach(function (d) { f.push(turkeyFig(d.x, d.y, d.scale, { kind: d.kind, cls: "decoy" })); });
+  f.push(costumeTurkey(1100, 1360, 0.95, R));
+  f.push(person(1300, 1360, 1.05, R, { role: "pilgrim", scarf: "blue", shirt: "#3b6fd6", pose: "walk" }));
+  count += 8;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
+}
+
+/* ---------- SCENE 10: Night Fair ---------- */
+function sceneFair(R) {
+  let b = [], m = [], f = [], count = 0;
+  b.push(rec(0, 0, SW, 280, "#142044", 'stroke="none"'));
+  b.push(rec(0, 240, SW, SH - 240, "#2a2438", 'stroke="none"'));
+  /* moon + stars + fireworks + lights — fill the sky */
+  b.push(circ(2200, 90, 44, "#f0e6b0", st(2)));
+  for (let i = 0; i < 80; i++) b.push(circ(20 + (i * 97) % 2360, 20 + (i * 53) % 160, 1.4 + (i % 3) * 0.7, "#fff8d0", 'stroke="none"'));
+  for (let i = 0; i < 6; i++) {
+    const fx = 200 + i * 380, fy = 80 + (i % 2) * 40;
+    const col = pick(["#c44914","#f4c430","#7b5cff","#2fd27a","#ff7a3d"], R);
+    for (let k = 0; k < 10; k++) {
+      const a = k * Math.PI / 5;
+      b.push(rec(fx, fy, 2, 28, col, 'stroke="none" transform="rotate(' + (k * 36) + ' ' + fx + ' ' + fy + ')"'));
+    }
+  }
+  /* string lights across */
+  for (let i = 0; i < 40; i++) {
+    b.push(circ(40 + i * 60, 180 + Math.sin(i) * 16, 5, "#ffe066", st(1.2)));
+    if (i < 39) b.push(rec(40 + i * 60, 180, 60, 2, "#e6c15a", 'stroke="none"'));
+  }
+  /* ferris wheel left, packed with riders */
+  const wx = 280, wy = 300;
+  b.push(circ(wx, wy, 200, "transparent", 'stroke="#e6c15a" stroke-width="6"'));
+  b.push(circ(wx, wy, 8, "#e6c15a", st(2)));
+  for (let k = 0; k < 12; k++) {
+    const a = k * Math.PI / 6;
+    const cx = wx + Math.cos(a) * 170, cy = wy + Math.sin(a) * 170;
+    b.push(rec(wx, wy, 2, 170, "#e6c15a", 'stroke="none" transform="rotate(' + (k * 30 - 90) + ' ' + wx + ' ' + wy + ')"'));
+    b.push(rec(cx - 18, cy - 16, 36, 28, "#7b5cff", st(2), 4));
+    b.push(bust(cx - 6, cy + 8, 0.7, R, {}) + bust(cx + 8, cy + 8, 0.65, R, {}));
+    count += 2;
+  }
+  b.push(rec(wx - 10, wy, 20, 280, "#c9a024", st(2.5)));
+  /* ticket booth + queue under the wheel */
+  b.push(rec(40, 560, 160, 100, "#c44914", st(2.6)));
+  b.push(txt(120, 590, 14, "TICKETS", "#fff6d4"));
+  pr = peopleFromPts(rowPts(40, 680, 8, 28, 0, false, R, 3, 2), R, function () { return { pose: "stand", s: 0.85 }; });
+  m.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 20, y: 700, w: 480, h: 200, gap: 22, s: 0.9, poses: ["walk","stand","wave"], props: ["balloon","",""] }, 36);
+  m.push(pr.h); count += pr.n;
+  /* stage right */
+  b.push(rec(1760, 220, 620, 170, "#4b33b8", st(3), 6));
+  b.push(rec(1760, 200, 620, 30, "#7b5cff", st(2)));
+  b.push(txt(2070, 222, 18, "HOEDOWN!", "#fff6d4"));
+  pr = peopleFromPts(rowPts(1800, 340, 14, 40, 0, false, R, 3, 2), R, function (p, i) { return { pose: i % 2 ? "cheer" : "stand", s: 1, role: "band", shirt: "#1a1a1a", prop: i % 3 === 0 ? "horn" : (i % 3 === 1 ? "drum" : "") }; });
+  b.push(pr.h); count += pr.n;
+  /* audience in front of stage */
+  for (let r = 0; r < 5; r++) {
+    const pts = rowPts(1740, 420 + r * 30, 20, 32, 0, true, R, 3, 2);
+    const pr2 = peopleFromPts(pts, R, function (p, i) { return { pose: i % 3 === 0 ? "cheer" : "sit", s: 0.8 + r * 0.07 }; });
+    m.push(pr2.h); count += pr2.n;
+  }
+  /* stall midways — 3 packed rows of booths */
+  function fairStalls(y, n, x0, sScale, front) {
+    let h = "", c = 0;
+    for (let i = 0; i < n; i++) {
+      const x = x0 + i * 220;
+      const col = pick(["#c44914","#7b5cff","#12b5a0","#ff7a3d","#f4c430","#3b6fd6","#e91e63"], R);
+      h += rec(x, y - 80, 200, 100, col, st(2.6));
+      h += path("M" + (x - 10) + " " + (y - 80) + " L" + (x + 100) + " " + (y - 130) + " L" + (x + 210) + " " + (y - 80) + " Z", pick(["#8a2418","#4b33b8","#0b7a6c"], R), st(2.4));
+      /* lanterns on the stall */
+      h += circ(x + 30, y - 90, 6, "#ffe066", st(1.5)) + circ(x + 170, y - 90, 6, "#ffe066", st(1.5));
+      for (let k = 0; k < 4; k++) {
+        h += rec(x + 16 + k * 44, y - 30, 28, 22, pick(["#f4e4c1","#c44914","#3b6fd6","#ef7a1a"], R), st(1.8), 2);
+      }
+      const keep = peopleFromPts([{ x: x + 70, y: y - 8, s: sScale }, { x: x + 120, y: y - 8, s: sScale }], R, function (p, i) { return { pose: "stand", s: sScale, prop: i ? "platter" : "balloon" }; });
+      h += keep.h; c += keep.n;
+      const sh = peopleFromPts(rowPts(x + 8, y + 40, 5, 38, 0, false, R, 4, 3), R, function (p, i) { return { pose: pick(["stand","wave","cheer"], R), s: sScale + 0.08, prop: i === 1 ? "balloon" : (i === 3 ? "pie" : "") }; });
+      h += sh.h; c += sh.n;
+    }
+    (front ? f : m).push(h);
+    count += c;
+  }
+  /* packed midway under the wheel / stage so the sky-band isn't empty */
+  pr = fillCrowd(R, { x: 500, y: 560, w: 1240, h: 120, gap: 20, s: 0.85, poses: ["walk","stand","wave","cheer"], props: ["balloon","flag","",""] }, 55);
+  m.push(pr.h); count += pr.n;
+  fairStalls(700, 10, 40, 0.9, false);
+  fairStalls(960, 10, 20, 1.0, false);
+  fairStalls(1220, 10, 60, 1.1, true);
+  /* packed midways between stall rows */
+  pr = fillCrowd(R, { x: 20, y: 760, w: 2360, h: 150, gap: 20, s: 0.95, poses: ["walk","stand","wave","cheer"], props: ["balloon","pie","flag",""] }, 95);
+  m.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 20, y: 1020, w: 2360, h: 150, gap: 20, s: 1.05, poses: ["walk","stand","run","wave"], props: ["balloon","flag",""] }, 95);
+  m.push(pr.h); count += pr.n;
+  pr = fillCrowd(R, { x: 20, y: 1280, w: 2360, h: 150, gap: 20, s: 1.15, poses: ["walk","stand","cheer","wave"], props: ["balloon","flag","pie",""] }, 90);
+  f.push(pr.h); count += pr.n;
+  /* carousel suggestion mid-left */
+  m.push(circ(200, 980, 90, "#c44914", st(3)));
+  m.push(circ(200, 980, 20, "#f4c430", st(2)));
+  for (let k = 0; k < 8; k++) {
+    const a = k * Math.PI / 4;
+    m.push(horse(200 + Math.cos(a) * 60 - 10, 980 + Math.sin(a) * 60, 0.7, R));
+  }
+  pr = peopleFromPts(rowPts(140, 1080, 5, 30, 0, false, R, 3, 2), R, function () { return { pose: "sit", s: 0.85 }; });
+  m.push(pr.h); count += pr.n;
+  f.push(dog(400, 1400, 1.2, R) + dog(1200, 1400, 1.1, R) + dog(2000, 1380, 1.2, R) + cat(700, 800, 1, R));
+  count += 4;
+  const hero = placeHero(10, 970, 1108, 0.62, false, [
+    { kind: "nohat", x: 300, y: 860, scale: 0.62 },
+    { kind: "white", x: 800, y: 1040, scale: 0.62 },
+    { kind: "noscarf", x: 1600, y: 1280, scale: 0.65 },
+    { kind: "chef", x: 1900, y: 900, scale: 0.62 },
+    { kind: "bluehat", x: 600, y: 1320, scale: 0.65 },
+    { kind: "nohat", x: 2100, y: 1360, scale: 0.62 },
+    { kind: "white", x: 1400, y: 840, scale: 0.6 }
+  ]);
+  f.push(hero.hero);
+  /* partial hide behind a stall guest / counter already in midground - add a balloon cluster */
+  f.push(circ(990, 1080, 10, "#c44914", st(1.8)) + circ(1006, 1070, 8, "#3b6fd6", st(1.8)));
+  hero.decoys.forEach(function (d) { f.push(turkeyFig(d.x, d.y, d.scale, { kind: d.kind, cls: "decoy" })); });
+  f.push(costumeTurkey(500, 1380, 0.95, R));
+  f.push(costumeTurkey(1500, 1400, 0.95, R));
+  f.push(person(1100, 1400, 1.1, R, { role: "pilgrim", scarf: "blue", shirt: "#3b6fd6", pose: "walk" }));
+  f.push(person(800, 1400, 1.05, R, { role: "pilgrim", scarf: "blue", shirt: "#1a1a1a", pose: "stand" }));
+  count += 12;
+  return { back: b.join(""), mid: m.join(""), front: f.join(""), count: count, hero: hero };
+}
+
+const BUILDERS = [scenePicnic, scenePatch, sceneKitchen, sceneFeast, sceneFarm, sceneMarket, sceneParade, sceneFootball, sceneBanquet, sceneFair];
 
 function buildScene(lv) {
   const R = rng(lv.seed);
-  const T = lv.turkey;
-  const avoid = [{ x: T.x, y: T.y, r: 90 * T.scale + 40 }];
-  (lv.decoys || []).forEach(function (d) { avoid.push({ x: d.x, y: d.y, r: 70 }); });
-  let mid = "", front = "", birds = "";
-
-  if (lv.n === 1) {
-    mid += em("🧺", 760, 500, 64) + em("🌽", 820, 500, 50) + em("🍎", 900, 500, 36) + em("🥖", 780, 580, 48);
-    mid += pumpkin(400, 560, 1.1) + pumpkin(460, 580, 0.8, "#f0a030");
-    mid += scatterEmoji(R, ["🍁","🍂","🌼","🍃"], lv.clutter, [40, 440, 1100, 300], 22, 40, avoid);
-  } else if (lv.n === 2) {
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 10; c++) {
-        const x = 80 + c * 110 + (r % 2) * 30 + (R() * 16 - 8);
-        const y = 430 + r * 80 + (R() * 12 - 6);
-        if (Math.hypot(x - T.x, y - T.y) < 70) continue;
-        mid += pumpkin(x, y, 0.7 + R() * 0.45, R() > 0.3 ? "#ef7a1a" : "#f0a030");
-      }
-    }
-    mid += em("🌾", 600, 400, 70) + em("🌽", 540, 420, 48);
-    mid += scatterEmoji(R, ["🍁","🍂"], 18, [20, 360, 1160, 400], 20, 36, avoid);
-  } else if (lv.n === 3) {
-    mid += pie(200, 418, 1.1) + pie(280, 418, 1) + pie(820, 418, 1.2) + pie(900, 418, 0.9);
-    mid += em("🥘", 400, 418, 50) + em("🧂", 470, 410, 30) + em("🥛", 520, 410, 32);
-    mid += em("🥧", 110, 418, 44) + em("🍞", 1080, 418, 40) + em("🧈", 600, 418, 32);
-    mid += em("🍳", 840, 340, 40) + pumpkin(80, 560, 1) + pumpkin(160, 600, 0.7);
-    mid += scatterEmoji(R, ["🍁","🍎","🥕","🌽","🍂"], lv.clutter, [40, 520, 1100, 250], 22, 40, avoid);
-    mid += em("🍗", 500, 560, 48); /* roasted decoy */
-  } else if (lv.n === 4) {
-    mid += person(300, 500, 1.3, "#c44914", "#3a2414") + person(400, 500, 1.2, "#3b6fd6", "#6b3f1a") +
-      person(820, 500, 1.25, "#2e7d32", "#1a1a1a") + person(920, 500, 1.1, "#ff7a3d", "#c47a2a", true);
-    mid += person(500, 500, 1.0, "#7b5cff", "#f0c430"); /* kid */
-    mid += pie(500, 455, 1) + pie(620, 455, 1.1) + em("🥗", 700, 450, 40) + em("🥖", 420, 450, 40) + em("🥘", 780, 450, 44);
-    mid += em("🍗", 560, 450, 46) + em("🍷", 360, 445, 28).replace("🍷","🧃") + em("🧃", 360, 445, 30);
-    mid += pumpkin(80, 620, 1.2) + pumpkin(1140, 620, 1) + em("🕯️", 240, 440, 30) + em("🕯️", 960, 440, 30);
-    mid += scatterEmoji(R, ["🍁","🍂","🌽","🍎"], 16, [40, 540, 1120, 230], 20, 34, avoid);
-  } else if (lv.n === 5) {
-    mid += hay(300, 500, 1.3, -6) + hay(400, 530, 1.1, 8) + hay(860, 510, 1.4, -4) + hay(980, 560, 1, 12);
-    mid += tree(80, 380, 1.6, "#c44914") + tree(1100, 360, 1.8, "#e65100") + tree(200, 340, 1.2, "#ef6c00");
-    mid += scatterEmoji(R, ["🍁","🍂","🍃","🌾","🌽"], lv.clutter, [20, 300, 1160, 460], 22, 44, avoid);
-  } else if (lv.n === 6) {
-    mid += em("🐄", 600, 500, 70) + em("🐷", 740, 560, 56) + em("🐴", 420, 500, 66) + em("🐑", 900, 540, 50);
-    mid += pumpkin(140, 560, 1) + pumpkin(1000, 580, 0.9) + hay(620, 600, 1, 0);
-    mid += scatterEmoji(R, ["🍁","🍂","🌽","🍎","🌾"], lv.clutter, [20, 440, 1160, 330], 20, 40, avoid);
-  } else if (lv.n === 7) {
-    for (let i = 0; i < 14; i++) mid += person(80 + i * 80 + (i%3)*10, 530 + (i%2)*16, 0.85 + (i%3)*0.08, ["#c44914","#3b6fd6","#2e7d32","#ff7a3d","#7b5cff"][i%5], "#3a2414", i%2===0);
-    mid += em("🎈", 520, 260, 40) + em("🎈", 700, 240, 36) + em("🎺", 560, 400, 36) + em("🥁", 640, 400, 36);
-    mid += em("🚩", 200, 300, 40) + em("🚩", 1000, 300, 40);
-    mid += scatterEmoji(R, ["🍁","🍂","🎉","🎊","⭐"], lv.clutter, [20, 200, 1160, 560], 18, 36, avoid);
-  } else if (lv.n === 8) {
-    mid += tree(120, 400, 2.2, "#c44914") + tree(400, 360, 2.6, "#e65100") + tree(620, 390, 2.0, "#ef6c00") +
-      tree(860, 350, 2.4, "#c44914") + tree(1100, 380, 2.1, "#bf360c") + tree(500, 420, 1.6, "#d84315");
-    mid += em("🍄", 300, 640, 32) + em("🍄", 800, 660, 28) + em("🧺", 600, 660, 48);
-    mid += scatterEmoji(R, ["🍁","🍂","🍃"], lv.clutter + 10, [0, 200, 1200, 560], 22, 50, avoid);
-  } else if (lv.n === 9) {
-    mid += person(280, 560, 1.1, "#c44914") + person(360, 560, 1.05, "#3b6fd6") + person(860, 560, 1.1, "#2e7d32", "#1a1a1a", true) + person(960, 560, 1, "#ff7a3d");
-    mid += pie(400, 515, 1.1) + pie(520, 515, 1) + pie(700, 515, 1.2) + em("🥘", 600, 510, 44) + em("🥗", 780, 510, 36);
-    mid += em("🕯️", 240, 500, 28) + em("🕯️", 1000, 500, 28) + em("🕯️", 600, 470, 32);
-    mid += em("🍗", 480, 510, 40) + pumpkin(60, 680, 1) + pumpkin(1140, 680, 0.9);
-    mid += scatterEmoji(R, ["🍁","🍂","🥧","🍎","🌽"], lv.clutter, [40, 540, 1120, 240], 18, 34, avoid);
-  } else {
-    mid += em("🎡", 200, 300, 90) + em("🎠", 1050, 430, 80) + em("🎟️", 500, 500, 36);
-    mid += em("🍭", 400, 500, 32) + em("🍩", 800, 500, 32) + em("🌽", 300, 540, 36);
-    for (let i = 0; i < 18; i++) mid += el(80 + i * 60, 500, 5, 5, "#ffe066") + rec(80 + i * 60, 500, 2, 30, "#e6c15a");
-    mid += scatterEmoji(R, ["⭐","✨","🍁","🍂","🏮"], lv.clutter, [20, 80, 1160, 680], 16, 32, avoid);
-    /* stars in the sky */
-    for (let i = 0; i < 30; i++) mid += el(20 + R() * 1160, 20 + R() * 220, 1.4 + R() * 2, 1.4 + R() * 2, "#fff8d0");
-  }
-
-  (lv.birds || []).forEach(function (b) { birds += em(b.ch, b.x, b.y, b.s); });
-
-  let decoys = "";
-  (lv.decoys || []).forEach(function (d, i) {
-    decoys += turkeyMarkup({
-      x: d.x, y: d.y, scale: d.scale, flip: d.flip, kind: d.kind || "nohat", pal: d.pal, bob: false,
-      id: "decoy-" + i, cls: "decoy"
-    });
-  });
-
-  const hero = turkeyMarkup({
-    x: T.x, y: T.y, scale: T.scale, flip: T.flip, kind: "real", bob: !!lv.bob,
-    id: "turkey-real", cls: "hero-turkey"
-  });
-  const occ = buildOccluder(lv, T);
-
+  const sc = BUILDERS[lv.n - 1](R);
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + SW + ' ' + SH + '" preserveAspectRatio="xMidYMid meet" id="sceneSvg">' +
-    backdrop(lv.n) + mid + birds + decoys + hero + occ +
-    "</svg>";
-  return { svg: svg, turkey: { x: T.x, y: T.y, scale: T.scale, size: turkeyHitSize(T.scale) } };
+    sc.back + sc.mid + sc.front + "</svg>";
+  return {
+    svg: svg,
+    turkey: sc.hero.turkey,
+    decoys: sc.hero.decoys,
+    count: sc.count
+  };
 }
 
-/* ================= Book layout ================= */
-const book = $("book"), desk = $("desk"), cover = $("cover");
+/* ================= Book + game ================= */
+const book = $("book"), desk = $("desk");
 function isSingle() {
-  return window.innerWidth < 740 || (window.innerHeight > window.innerWidth * 1.05 && window.innerWidth < 1000);
+  return window.innerWidth < 740 || (window.innerHeight > window.innerWidth * 1.15 && window.innerWidth < 1000);
 }
 function layoutBook() {
   book.classList.toggle("single", isSingle());
   book.classList.toggle("reduce", reduce);
-  if (screen === "play" && st) {
-    measure(); renderView();
-  }
+  if (screen === "play" && gs) { measure(); renderView(); }
 }
 
-/* ================= State ================= */
-let screen = "cover"; // cover | contents | play
-let st = null; // play state
-let opening = false;
-let flipping = false;
-let timerId = null, gameGen = 0;
-let fxRing = null, anim = null;
-let V = { cx: SW/2, cy: SH/2, s: 1 }, VW = 1, VH = 1, minS = 1;
-const viewHost = { get el() { return $("view"); } };
+let screen = "cover";
+let gs = null;
+let opening = false, flipping = false;
+let timerId = null, gameGen = 0, fxRing = null, anim = null;
+let V = { cx: SW / 2, cy: SH / 2, s: 1 }, VW = 1, VH = 1, minS = 1;
+let viewBound = false;
 
-function setChrome(reading) {
-  desk.classList.toggle("reading", !!reading);
-}
+function setChrome(reading) { desk.classList.toggle("reading", !!reading); }
 
-/* ================= Contents & left page ================= */
 function starsHtml(n) {
   let s = "";
   for (let i = 1; i <= 3; i++) s += i <= n ? "⭐" : "☆";
   return s;
 }
-
 function renderLeftHow() {
   $("pageL").innerHTML =
     '<div class="chap"><small>This book belongs to</small>Kaileigh</div>' +
-    '<div class="refcard">' +
-      '<div class="lab">Find this turkey!</div>' +
-      refTurkeySVG(180, 150) +
-      '<div class="hinty">Black hat • gold buckle • blue scarf</div>' +
-    "</div>" +
+    '<div class="refcard"><div class="lab">Find this turkey!</div>' +
+    refTurkeySVG(180, 150) +
+    '<div class="hinty">Black hat • gold buckle • blue scarf</div></div>' +
     '<div class="howto"><b>How to play</b><ul>' +
-      "<li>🔍 Look carefully in the picture.</li>" +
-      "<li>👆 Tap the turkey with the black hat.</li>" +
-      "<li>🤏 Pinch or use + − to zoom and pan.</li>" +
+      "<li>🔍 The picture fills both pages. Search everywhere.</li>" +
+      "<li>👆 Tap the turkey with the black hat and blue scarf.</li>" +
+      "<li>🤏 Pinch, drag, or use + − to zoom and pan.</li>" +
       "<li>💡 Use a hint if you get stuck.</li>" +
     "</ul></div>";
 }
-
 function renderContents() {
   screen = "contents";
-  st = null;
+  gs = null;
   clearTimers();
+  book.classList.remove("playing");
   renderLeftHow();
-  let rows = '<div class="toc"><h2>Contents</h2><p class="belongs">Ten pages of Thanksgiving hiding fun!</p>';
+  let rows = '<div class="toc"><h2>Contents</h2><p class="belongs">Ten crowded Thanksgiving pages!</p>';
   LEVELS.forEach(function (lv, i) {
     const locked = (i + 1) > save.unlocked;
     const stars = save.stars[i] || 0;
@@ -1024,8 +1882,7 @@ function renderContents() {
     rows += '<button type="button" class="ch' + (locked ? " locked" : "") + '" data-level="' + (i + 1) + '" ' + (locked ? "disabled" : "") + ">" +
       '<span class="num">' + lv.n + "</span>" +
       '<span class="nm">' + (locked ? "🔒 " : "") + lv.title + (best != null ? '<br><span style="font-size:12px;font-weight:600;color:#6b4a28">Best ' + fmt(best) + "</span>" : "") + "</span>" +
-      '<span class="st">' + (stars ? starsHtml(stars) : (locked ? "" : "○")) + "</span>" +
-      "</button>";
+      '<span class="gs">' + (stars ? starsHtml(stars) : (locked ? "" : "○")) + "</span></button>";
   });
   rows += "</div>";
   if (isSingle()) {
@@ -1043,95 +1900,44 @@ function renderContents() {
     });
   });
 }
-
-function leftForLevel(lv) {
-  return '<div class="chap"><small>Chapter ' + lv.n + " of 10</small>" + lv.title + "</div>" +
-    '<p class="story">' + lv.story + "</p>" +
-    '<div class="refcard">' +
-      '<div class="lab">Find this turkey!</div>' +
-      refTurkeySVG(200, 170) +
-      '<div class="hinty">He wears a black hat with a gold buckle and a blue scarf.</div>' +
-    "</div>" +
-    (lv.bonus ? '<p class="story" style="margin-top:10px">⏱ Bonus timer! Find him quickly for extra sparkle.</p>' : "");
+function refTurkeySVG(w, h) {
+  w = w || 200; h = h || 200;
+  return '<svg viewBox="-30 -40 70 70" width="' + w + '" height="' + h + '" xmlns="http://www.w3.org/2000/svg">' +
+    turkeyFig(0, 8, 1.35, { kind: "real" }) + "</svg>";
 }
 
-function playPageHtml(lv, sceneSvg) {
-  const single = isSingle();
-  return '<div class="scene-wrap">' +
-    '<div class="playhead">' +
-      '<button type="button" id="contentsBtn" aria-label="Contents">📜</button>' +
-      '<div class="mini-ref" title="Find this turkey">' + refTurkeySVG(42, 42) + "</div>" +
-      '<div class="ttl">' + (single ? "Ch. " + lv.n + " · " : "") + lv.title + "</div>" +
-      '<div class="tpill" id="timer">⏱ 00:00</div>' +
-      (lv.bonus ? '<div class="tpill bonus" id="bonusPill">⭐ ' + lv.bonus + "s</div>" : "") +
-      '<button type="button" id="hintBtn">💡 2</button>' +
-    "</div>" +
-    '<div id="view">' +
-      sceneSvg +
-      '<div id="toast"></div>' +
-      '<div class="zoombar">' +
-        '<button type="button" class="zbtn" id="zin" aria-label="Zoom in">+</button>' +
-        '<button type="button" class="zbtn" id="zout" aria-label="Zoom out">−</button>' +
-        '<button type="button" class="zbtn all" id="zall" aria-label="Fit page">▣</button>' +
-      "</div>" +
-    "</div>" +
-  "</div>";
+function paintPlayhead(lv) {
+  $("playhead").innerHTML =
+    '<button type="button" id="contentsBtn" aria-label="Contents">📜</button>' +
+    '<div class="mini-ref" title="Find this turkey">' + refTurkeySVG(40, 40) + "</div>" +
+    '<div class="ttl">Ch. ' + lv.n + " · " + lv.title + "</div>" +
+    '<div class="tpill" id="timer">⏱ 00:00</div>' +
+    (lv.bonus ? '<div class="tpill bonus" id="bonusPill">⭐ ' + lv.bonus + "s</div>" : "") +
+    '<button type="button" id="hintBtn">💡 2</button>';
+  $("contentsBtn").onclick = function () { SFX.click(); goContents(true); };
+  $("hintBtn").onclick = useHint;
 }
 
-function bindPlayControls() {
-  const c = $("contentsBtn"); if (c) c.onclick = function () { SFX.click(); goContents(true); };
-  const h = $("hintBtn"); if (h) h.onclick = useHint;
-  const zi = $("zin"); if (zi) zi.onclick = function () { SFX.click(); zoomSmooth(1.7); };
-  const zo = $("zout"); if (zo) zo.onclick = function () { SFX.click(); zoomSmooth(1 / 1.7); };
-  const za = $("zall"); if (za) za.onclick = function () { SFX.click(); fitAll(true); };
-  bindViewPointers();
-}
-
-/* ================= Open cover ================= */
 function openBook(done) {
   if (opening || book.classList.contains("open")) { if (done) done(); return; }
   opening = true;
-  ac();
-  paperSound();
-  layoutBook();
+  ac(); paperSound(); layoutBook();
   if (reduce) {
     book.classList.add("open", "opened", "reduce");
-    setChrome(true);
-    opening = false;
-    if (done) done();
-    return;
+    setChrome(true); opening = false; if (done) done(); return;
   }
-  book.classList.add("open");
-  setChrome(true);
-  setTimeout(function () {
-    book.classList.add("opened");
-    opening = false;
-    if (done) done();
-  }, 1050);
+  book.classList.add("open"); setChrome(true);
+  setTimeout(function () { book.classList.add("opened"); opening = false; if (done) done(); }, 1050);
 }
 
-/* ================= Page flip ================= */
-function snapshotNode(el) {
-  return el ? el.innerHTML : "";
-}
-function flipTo(prepare, done) {
-  if (flipping) return;
+function flipPlay(prepare, done) {
+  if (flipping || reduce) { prepare(); flipping = false; if (done) done(); return; }
   flipping = true;
-  const leaf = $("leaf"), front = $("leafFront"), back = $("leafBack");
-  const content = $("pageRContent");
-  const oldHtml = snapshotNode(content);
-  if (reduce) {
-    prepare();
-    flipping = false;
-    if (done) done();
-    return;
-  }
-  front.innerHTML = '<div style="position:absolute;inset:0;overflow:hidden">' + oldHtml + '</div><div class="leaf-shade"></div>';
+  const leaf = $("playLeaf"), front = $("playLeafFront"), back = $("playLeafBack");
+  const view = $("view");
+  front.innerHTML = '<div style="position:absolute;inset:0;overflow:hidden">' + (view ? view.innerHTML : "") + '</div><div class="leaf-shade"></div>';
   prepare();
-  const newHtml = snapshotNode(content);
-  back.innerHTML = '<div style="position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#f7ead0,#f0dcb6)">' +
-    (isSingle() ? "" : snapshotNode($("pageL"))) +
-    '</div><div class="leaf-shade"></div>';
+  back.innerHTML = '<div style="position:absolute;inset:0;background:#1a120c"></div><div class="leaf-shade"></div>';
   leaf.classList.add("on");
   leaf.classList.remove("flip");
   leaf.style.transition = "none";
@@ -1145,34 +1951,28 @@ function flipTo(prepare, done) {
   });
   setTimeout(function () {
     leaf.classList.remove("on", "flip");
-    leaf.style.transition = "";
-    leaf.style.transform = "";
+    leaf.style.transition = ""; leaf.style.transform = "";
     front.innerHTML = ""; back.innerHTML = "";
-    flipping = false;
-    if (done) done();
+    flipping = false; if (done) done();
   }, 950);
 }
-
 function setFlipProgress(p) {
-  const leaf = $("leaf");
+  const leaf = $("playLeaf");
   p = Math.max(0, Math.min(1, p));
-  leaf.classList.add("on");
-  leaf.classList.remove("flip");
+  leaf.classList.add("on"); leaf.classList.remove("flip");
   leaf.style.transition = "none";
   leaf.style.transform = "rotateY(" + (-180 * p) + "deg)";
 }
 
-/* ================= Play / camera ================= */
 function measure() {
   const view = $("view"); if (!view) return;
   const b = view.getBoundingClientRect();
   VW = Math.max(1, b.width); VH = Math.max(1, b.height);
-  minS = Math.min(VW / SW, VH / SH) * 0.995;
+  minS = Math.min(VW / SW, VH / SH) * 0.998;
 }
 function clampV() {
-  const maxS = 6;
-  V.s = Math.max(minS, Math.min(maxS, V.s));
-  const vw = VW / V.s, vh = VH / V.s, px = vw * 0.28, py = vh * 0.28;
+  V.s = Math.max(minS, Math.min(8, V.s));
+  const vw = VW / V.s, vh = VH / V.s, px = vw * 0.22, py = vh * 0.22;
   const lox = Math.min(SW / 2, vw / 2 - px), hix = Math.max(SW / 2, SW - vw / 2 + px);
   const loy = Math.min(SH / 2, vh / 2 - py), hiy = Math.max(SH / 2, SH - vh / 2 + py);
   V.cx = vw >= SW ? SW / 2 : Math.max(lox, Math.min(hix, V.cx));
@@ -1189,7 +1989,7 @@ function toScreen(wx, wy) { return { x: (wx - V.cx) * V.s + VW / 2, y: (wy - V.c
 function toWorld(sx, sy) { return { x: (sx - VW / 2) / V.s + V.cx, y: (sy - VH / 2) / V.s + V.cy }; }
 function zoomAt(sx, sy, f) {
   const w = toWorld(sx, sy);
-  V.s = Math.max(minS, Math.min(6, V.s * f));
+  V.s = Math.max(minS, Math.min(8, V.s * f));
   V.cx = w.x - (sx - VW / 2) / V.s;
   V.cy = w.y - (sy - VH / 2) / V.s;
   renderView();
@@ -1210,19 +2010,19 @@ function animateTo(T, dur, done) {
   };
   anim.raf = requestAnimationFrame(step);
 }
-function zoomSmooth(f) { animateTo({ cx: V.cx, cy: V.cy, s: Math.max(minS, Math.min(6, V.s * f)) }, 280); }
+function zoomSmooth(f) { animateTo({ cx: V.cx, cy: V.cy, s: Math.max(minS, Math.min(8, V.s * f)) }, 280); }
 function fitAll(animated) {
   const T = { cx: SW / 2, cy: SH / 2, s: minS };
   if (animated && !reduce) animateTo(T, 500); else { stopAnim(); V = T; renderView(); }
 }
 
 const ptrs = new Map();
-let gesture = null, viewBound = false;
+let gesture = null;
 function localPt(e, view) { const b = view.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
 function bindViewPointers() {
   if (viewBound) return;
   viewBound = true;
-  const root = $("pageR");
+  const root = $("playLayout");
   root.addEventListener("pointerdown", onPd);
   root.addEventListener("pointermove", onPm);
   root.addEventListener("pointerup", onPu);
@@ -1230,8 +2030,8 @@ function bindViewPointers() {
   root.addEventListener("wheel", onWheel, { passive: false });
 }
 function onPd(e) {
-  const view = $("view"); if (!view || !e.target.closest("#view") || e.target.closest(".zoombar")) return;
-  if (!st || st.finished) return;
+  const view = $("view"); if (!view || !e.target.closest("#view") || e.target.closest(".zoombar") || e.target.closest(".playhead")) return;
+  if (!gs || gs.finished || gs.waiting) return;
   ac(); stopAnim();
   try { view.setPointerCapture(e.pointerId); } catch (err) {}
   ptrs.set(e.pointerId, localPt(e, view));
@@ -1261,7 +2061,7 @@ function onPu(e) {
   else if (ptrs.size === 0) { gesture = null; view.classList.remove("drag"); }
 }
 function onWheel(e) {
-  if (!$("view") || !st || st.finished || !e.target.closest("#view")) return;
+  if (!$("view") || !gs || gs.finished || gs.waiting || !e.target.closest("#view")) return;
   e.preventDefault(); stopAnim();
   const q = localPt(e, $("view"));
   const dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY;
@@ -1274,45 +2074,42 @@ function toast(t, ms) {
   e.textContent = t; e.classList.add("show");
   clearTimeout(toast.t); toast.t = setTimeout(function () { e.classList.remove("show"); }, ms || 1800);
 }
-
 function hitTurkey(sx, sy) {
-  if (!st) return false;
-  const half = st.turkey.size / 2 * V.s;
-  if (half < 6) return false;
-  const q = toScreen(st.turkey.x, st.turkey.y);
-  const hr = Math.max(half * 1.15, 28);
+  if (!gs) return false;
+  const half = gs.turkey.size / 2 * V.s;
+  if (half < 5) return false;
+  const q = toScreen(gs.turkey.x, gs.turkey.y);
+  const hr = Math.max(half * 1.2, 26);
   return Math.hypot(q.x - sx, q.y - sy) <= hr;
 }
 function hitDecoy(sx, sy) {
-  if (!st) return false;
-  const lv = LEVELS[st.n - 1];
-  for (let i = 0; i < (lv.decoys || []).length; i++) {
-    const d = lv.decoys[i];
-    const size = turkeyHitSize(d.scale);
+  if (!gs) return null;
+  for (let i = 0; i < (gs.decoys || []).length; i++) {
+    const d = gs.decoys[i];
+    const size = 52 * d.scale;
     const half = size / 2 * V.s;
-    if (half < 6) continue;
+    if (half < 5) continue;
     const q = toScreen(d.x, d.y);
-    const hr = Math.max(half * 1.1, 24);
-    if (Math.hypot(q.x - sx, q.y - sy) <= hr) return d;
+    if (Math.hypot(q.x - sx, q.y - sy) <= Math.max(half * 1.15, 22)) return d;
   }
   return null;
 }
 function tapAt(sx, sy) {
-  if (!st || st.finished || flipping) return;
+  if (!gs || gs.finished || gs.waiting || flipping) return;
   if (hitTurkey(sx, sy)) { foundTurkey(); return; }
   const d = hitDecoy(sx, sy);
   SFX.miss();
   fx("miss", sx, sy);
   if (d) {
-    const msg = d.kind === "nohat" || d.kind === "back" ? "No hat! That's not him." :
-      d.kind === "chef" ? "That's a chef, not our turkey!" :
+    const msg = d.kind === "nohat" || d.kind === "back" ? "No hat — that's not him!" :
+      d.kind === "chef" ? "That's a chef turkey!" :
       d.kind === "white" ? "Wrong colours! Look for the blue scarf." :
       d.kind === "bluehat" ? "Wrong hat! He has a black hat." :
+      d.kind === "noscarf" ? "He needs a blue scarf too!" :
       "That's not him!";
     toast(msg, 1600);
   }
 }
-
 function fx(kind, x, y, ch, dx, dy) {
   const view = $("view"); if (!view) return;
   const d = document.createElement("div"); d.className = "fx " + kind; d.style.left = x + "px"; d.style.top = y + "px";
@@ -1322,34 +2119,28 @@ function fx(kind, x, y, ch, dx, dy) {
 }
 function clearFx() { if (fxRing) { fxRing.el.remove(); clearTimeout(fxRing.t); fxRing = null; } }
 function placeRing() {
-  if (!fxRing || !st) return;
-  const q = toScreen(st.turkey.x, st.turkey.y);
-  const d = Math.max(80, st.turkey.size * V.s * 1.8);
+  if (!fxRing || !gs) return;
+  const q = toScreen(gs.turkey.x, gs.turkey.y);
+  const d = Math.max(80, gs.turkey.size * V.s * 2);
   Object.assign(fxRing.el.style, { left: q.x + "px", top: q.y + "px", width: d + "px", height: d + "px" });
 }
-
 function useHint() {
-  if (!st || st.finished || st.hints <= 0) return;
-  st.hints--;
-  updateHint();
-  SFX.hint();
-  say("Look here!");
-  clearFx();
+  if (!gs || gs.finished || gs.waiting || gs.hints <= 0) return;
+  gs.hints--; updateHint(); SFX.hint(); clearFx();
   const view = $("view"); if (!view) return;
   const ring = document.createElement("div"); ring.className = "fx ring"; view.appendChild(ring);
   fxRing = { el: ring, t: setTimeout(clearFx, 4500) };
-  const targetS = Math.max(minS, Math.min(6, 90 / st.turkey.size));
-  animateTo({ cx: st.turkey.x, cy: st.turkey.y, s: targetS }, 900);
+  const targetS = Math.max(minS, Math.min(8, 110 / gs.turkey.size));
+  animateTo({ cx: gs.turkey.x, cy: gs.turkey.y, s: targetS }, 900);
 }
-
 function updateHint() {
-  const b = $("hintBtn"); if (b) { b.textContent = "💡 " + st.hints; b.disabled = st.hints <= 0 || !!(st && st.finished); }
+  const b = $("hintBtn"); if (b) { b.textContent = "💡 " + gs.hints; b.disabled = gs.hints <= 0 || !!(gs && gs.finished); }
 }
 function updateTimer() {
-  if (!st || !st.t0 || st.finished) return;
-  const t = $("timer"); if (t) t.textContent = "⏱ " + fmt(Date.now() - st.t0);
-  if (st.bonus && $("bonusPill")) {
-    const left = Math.max(0, st.bonus - (Date.now() - st.t0) / 1000);
+  if (!gs || !gs.t0 || gs.finished || gs.waiting) return;
+  const t = $("timer"); if (t) t.textContent = "⏱ " + fmt(Date.now() - gs.t0);
+  if (gs.bonus && $("bonusPill")) {
+    const left = Math.max(0, gs.bonus - (Date.now() - gs.t0) / 1000);
     const p = $("bonusPill");
     p.textContent = left > 0 ? "⭐ " + Math.ceil(left) + "s" : "⭐ —";
     p.classList.toggle("out", left <= 0);
@@ -1357,58 +2148,79 @@ function updateTimer() {
 }
 function clearTimers() {
   if (timerId) { clearInterval(timerId); timerId = null; }
-  stopAnim(); clearFx();
-  gameGen += 1;
+  stopAnim(); clearFx(); gameGen += 1;
 }
 
-function startLevel(n, doFlip) {
+function loadLevelScene(n) {
+  const lv = LEVELS[n - 1];
+  const built = buildScene(lv);
+  book.classList.add("playing");
+  $("view").innerHTML = built.svg;
+  paintPlayhead(lv);
+  gs = {
+    n: n, t0: 0, hints: 2, finished: false, waiting: true,
+    turkey: built.turkey, decoys: built.decoys || [], bonus: lv.bonus || 0, bonusHit: false,
+    count: built.count
+  };
+  screen = "play";
+  layoutBook();
+  measure();
+  V = { cx: SW / 2, cy: SH / 2, s: minS };
+  renderView();
+  updateHint();
+  return lv;
+}
+function showIntro(lv) {
+  $("introChap").innerHTML = "<small>Chapter " + lv.n + " of 10</small>";
+  $("introTitle").textContent = lv.title;
+  $("introStory").textContent = lv.story;
+  $("introRef").innerHTML = '<div class="lab">Find this turkey!</div>' + refTurkeySVG(200, 160) +
+    '<div class="hinty">Black hat • gold buckle • blue scarf</div>';
+  $("introBox").classList.add("on");
+}
+function beginPlay() {
+  if (!gs) return;
+  $("introBox").classList.remove("on");
+  gs.waiting = false;
+  gs.t0 = Date.now();
+  if (timerId) clearInterval(timerId);
+  timerId = setInterval(updateTimer, 200);
+  updateTimer();
+}
+function startLevel(n, doFlip, opts) {
   const lv = LEVELS[n - 1]; if (!lv) return;
   gameGen += 1;
   clearTimeout(showWin.t);
   $("winBox").classList.remove("on");
   $("endBox").classList.remove("on");
+  $("introBox").classList.remove("on");
   const go = function () {
-    const built = buildScene(lv);
-    if (!isSingle()) $("pageL").innerHTML = leftForLevel(lv);
-    $("pageRContent").innerHTML = playPageHtml(lv, built.svg);
-    bindPlayControls();
-    st = {
-      n: n, t0: Date.now(), hints: 2, finished: false,
-      turkey: built.turkey, bonus: lv.bonus || 0, bonusHit: false
-    };
-    screen = "play";
-    layoutBook();
-    measure();
-    V = { cx: SW / 2, cy: SH / 2, s: minS };
-    const view = $("view");
-    if (view) view.style.background = VIEW_BG[lv.n] || "#d9f0ff";
-    renderView();
-    updateHint();
-    updateTimer();
-    if (timerId) clearInterval(timerId);
-    timerId = setInterval(updateTimer, 200);
-    say("Find the turkey, Kai Lee! He is wearing a black hat.");
+    loadLevelScene(n);
+    if (opts && opts.play) beginPlay();
+    else showIntro(lv);
   };
-  if (doFlip && book.classList.contains("open") && !reduce) flipTo(go, function () { measure(); renderView(); });
-  else go();
+  if (doFlip && book.classList.contains("playing") && !reduce) flipPlay(go, function () { measure(); renderView(); });
+  else if (doFlip && book.classList.contains("open") && !book.classList.contains("playing") && !reduce) {
+    /* contents -> play: just load (cover already open) */
+    go();
+  } else go();
 }
 
 function foundTurkey() {
-  if (!st || st.finished) return;
-  st.finished = true;
-  const time = Math.max(0, Date.now() - st.t0);
-  st.time = time;
-  if (st.bonus && time <= st.bonus * 1000) st.bonusHit = true;
-  const lv = LEVELS[st.n - 1];
-  const stars = starRating(lv, time, 2 - st.hints, st.bonusHit);
-  st.stars = stars;
-  const idx = st.n - 1;
+  if (!gs || gs.finished) return;
+  gs.finished = true;
+  const time = Math.max(0, Date.now() - gs.t0);
+  gs.time = time;
+  if (gs.bonus && time <= gs.bonus * 1000) gs.bonusHit = true;
+  const lv = LEVELS[gs.n - 1];
+  const stars = starRating(lv, time, 2 - gs.hints, gs.bonusHit);
+  gs.stars = stars;
+  const idx = gs.n - 1;
   if (stars > (save.stars[idx] || 0)) save.stars[idx] = stars;
   if (save.bestTime[idx] == null || time < save.bestTime[idx]) save.bestTime[idx] = time;
-  if (save.unlocked < 10 && st.n >= save.unlocked) save.unlocked = Math.min(10, st.n + 1);
+  if (save.unlocked < 10 && gs.n >= save.unlocked) save.unlocked = Math.min(10, gs.n + 1);
   persist();
-
-  const q = toScreen(st.turkey.x, st.turkey.y);
+  const q = toScreen(gs.turkey.x, gs.turkey.y);
   for (let i = 0; i < 12; i++) {
     const a = i / 12 * Math.PI * 2, d = 50 + Math.random() * 40;
     fx("spark", q.x, q.y, ["✨","⭐","🍁","💛"][i % 4], Math.cos(a) * d, Math.sin(a) * d);
@@ -1416,147 +2228,136 @@ function foundTurkey() {
   const hero = document.getElementById("turkey-real");
   if (hero) {
     const halo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    halo.setAttribute("cx", "0"); halo.setAttribute("cy", "0"); halo.setAttribute("r", "55");
+    halo.setAttribute("cx", "0"); halo.setAttribute("cy", "0"); halo.setAttribute("r", "28");
     halo.setAttribute("fill", "rgba(47,210,122,.22)");
-    halo.setAttribute("stroke", "#2fd27a"); halo.setAttribute("stroke-width", "5");
+    halo.setAttribute("stroke", "#2fd27a"); halo.setAttribute("stroke-width", "3");
     hero.insertBefore(halo, hero.firstChild);
   }
   SFX.found();
-  if (st.bonusHit) SFX.bonus();
+  if (gs.bonusHit) SFX.bonus();
   const gen = gameGen;
   clearTimeout(showWin.t);
   showWin.t = setTimeout(function () {
-    if (gameGen !== gen || !st || !st.finished) return;
+    if (gameGen !== gen || !gs || !gs.finished) return;
     showWin();
   }, 700);
 }
-
 function showWin() {
-  if (!st) return;
-  const stars = st.stars;
+  if (!gs) return;
+  const stars = gs.stars;
   let html = "";
   for (let i = 1; i <= 3; i++) html += i <= stars ? "⭐" : '<span class="dim">⭐</span>';
   $("winStars").innerHTML = html;
   $("winStars").setAttribute("aria-label", stars + " star" + (stars === 1 ? "" : "s"));
-  $("winTime").textContent = "⏱ " + fmt(st.time || 0);
-  const msgs = { 3: "Super spotting!", 2: "Great finding!", 1: "You found him!" };
-  $("winSub").textContent = msgs[stars] || msgs[1];
-  $("winBonus").textContent = st.bonusHit ? "⭐ Bonus time! You were super speedy!" : "";
-  const best = save.bestTime[st.n - 1];
-  $("winBest").textContent = best === st.time ? "🏆 New best time!" : ("Best: ⏱ " + fmt(best));
-  $("winNext").style.display = st.n < 10 ? "" : "none";
+  $("winTime").textContent = "⏱ " + fmt(gs.time || 0);
+  $("winSub").textContent = ({ 3: "Super spotting!", 2: "Great finding!", 1: "You found him!" })[stars] || "You found him!";
+  $("winBonus").textContent = gs.bonusHit ? "⭐ Bonus time! You were super speedy!" : "";
+  const best = save.bestTime[gs.n - 1];
+  $("winBest").textContent = best === gs.time ? "🏆 New best time!" : ("Best: ⏱ " + fmt(best));
+  $("winNext").style.display = gs.n < 10 ? "" : "none";
   $("winBox").classList.add("on");
   SFX.win();
-  say("You did it, Kai Lee!");
   confetti();
 }
-
 function showEnd() {
   $("winBox").classList.remove("on");
   const total = save.stars.reduce(function (a, b) { return a + b; }, 0);
   let html = "";
-  const avg = Math.round(total / 10);
   for (let i = 1; i <= 3; i++) html += i <= Math.max(1, Math.min(3, Math.ceil(total / 10))) ? "⭐" : '<span class="dim">⭐</span>';
   $("endStars").innerHTML = html;
   $("endTotal").textContent = "You earned " + total + " out of 30 stars!";
   $("endBox").classList.add("on");
   SFX.win(); confetti();
-  say("You found every turkey, Kai Lee!");
 }
-
 function goContents(doFlip) {
   $("winBox").classList.remove("on");
   $("endBox").classList.remove("on");
+  $("introBox").classList.remove("on");
   clearTimers();
-  st = null;
+  gs = null;
   const go = function () { renderContents(); };
-  if (doFlip && book.classList.contains("open") && !reduce) flipTo(go); else go();
+  if (doFlip && book.classList.contains("playing") && !reduce) {
+    flipPlay(function () { book.classList.remove("playing"); renderContents(); });
+  } else { book.classList.remove("playing"); go(); }
 }
 
-/* ================= Confetti ================= */
 function confetti() {
   const cv = $("confetti"), x = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
   const cols = ["#c44914","#e6c15a","#7b5cff","#2fd27a","#ff7a3d","#fff","#3fb5ff"];
   const P = [];
   for (let i = 0; i < 110; i++) P.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*0.3, vx: Math.random()*6-3, vy: 3+Math.random()*4, a: Math.random()*6, r: 6+Math.random()*7, c: cols[i%cols.length] });
   const run = ++confetti.run; let n = 0;
-  (function f() {
+  (function frame() {
     if (run !== confetti.run) { x.clearRect(0, 0, cv.width, cv.height); return; }
     x.clearRect(0, 0, cv.width, cv.height);
     for (let i = 0; i < P.length; i++) { const q = P[i]; q.x += q.vx; q.y += q.vy; q.a += .1; x.fillStyle = q.c; x.save(); x.translate(q.x, q.y); x.rotate(q.a); x.fillRect(-q.r, -q.r / 2, q.r * 2, q.r); x.restore(); }
-    if (++n < 200) requestAnimationFrame(f); else x.clearRect(0, 0, cv.width, cv.height);
+    if (++n < 200) requestAnimationFrame(frame); else x.clearRect(0, 0, cv.width, cv.height);
   })();
 }
 confetti.run = 0;
 
-/* ================= Cover art ================= */
 function paintCoverArt() {
   $("coverArt").innerHTML = '<svg viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg">' +
-    el(130, 200, 110, 16, "rgba(0,0,0,.18)") +
-    pumpkin(40, 180, 1.1) + pumpkin(220, 184, 0.9, "#f0a030") +
-    em("🍁", 30, 40, 36, -20) + em("🍂", 230, 50, 32, 20) + em("🌽", 50, 120, 34, -10) +
-    turkeyMarkup({ x: 130, y: 130, scale: 1.45, kind: "real", bob: false }) +
+    el(130, 200, 110, 16, "rgba(0,0,0,.18)", 'stroke="none"') +
+    pumpkin(40, 180, 1.1) + pumpkin(220, 184, 0.9) +
+    turkeyFig(130, 140, 3.2, { kind: "real" }) +
     "</svg>";
 }
 
-/* ================= Wire up ================= */
-$("openBtn").addEventListener("click", function () {
-  ac(); SFX.click();
-  renderContents();
-  openBook();
-});
+$("openBtn").addEventListener("click", function () { ac(); SFX.click(); renderContents(); openBook(); });
 $("muteBtn").addEventListener("click", function () { ac(); setMuted(!muted); SFX.click(); });
+$("introGo").addEventListener("click", function () { SFX.click(); beginPlay(); });
+$("zin").addEventListener("click", function () { SFX.click(); zoomSmooth(1.7); });
+$("zout").addEventListener("click", function () { SFX.click(); zoomSmooth(1 / 1.7); });
+$("zall").addEventListener("click", function () { SFX.click(); fitAll(true); });
 $("winNext").addEventListener("click", function () {
-  SFX.click();
-  $("winBox").classList.remove("on");
-  confetti.run = (confetti.run || 0) + 1;
-  if (!st) return;
-  if (st.n >= 10) showEnd();
-  else startLevel(st.n + 1, true);
+  SFX.click(); $("winBox").classList.remove("on"); confetti.run = (confetti.run || 0) + 1;
+  if (!gs) return;
+  if (gs.n >= 10) showEnd();
+  else startLevel(gs.n + 1, true);
 });
 $("winAgain").addEventListener("click", function () {
   SFX.click(); $("winBox").classList.remove("on"); confetti.run = (confetti.run || 0) + 1;
-  if (st) startLevel(st.n, false);
+  if (gs) startLevel(gs.n, false);
 });
 $("winContents").addEventListener("click", function () { SFX.click(); confetti.run = (confetti.run || 0) + 1; goContents(true); });
 $("endContents").addEventListener("click", function () { SFX.click(); $("endBox").classList.remove("on"); confetti.run = (confetti.run || 0) + 1; goContents(true); });
-
-window.addEventListener("resize", function () { layoutBook(); });
+window.addEventListener("resize", layoutBook);
 window.addEventListener("orientationchange", function () { setTimeout(layoutBook, 80); });
-
+bindViewPointers();
 setMuted(muted);
 paintCoverArt();
 layoutBook();
 
-/* test hook */
 window.__turkey = {
   LEVELS: LEVELS, SW: SW, SH: SH,
   openBook: function (cb) { renderContents(); openBook(cb); },
-  showContents: function () { if (!book.classList.contains("open")) { renderContents(); openBook(function () {}); } else goContents(false); },
-  startLevel: function (n, flip) { if (!book.classList.contains("open")) { renderContents(); openBook(function () { startLevel(n, false); }); } else startLevel(n, !!flip); },
-  tapTurkey: function () { if (!st) return false; const q = toScreen(st.turkey.x, st.turkey.y); tapAt(q.x, q.y); return true; },
-  tapWrong: function () { if (!st) return; tapAt(10, 10); },
+  showContents: function () { if (!book.classList.contains("open")) { renderContents(); openBook(); } else goContents(false); },
+  startLevel: function (n, flip) {
+    const run = function () { startLevel(n, false, { play: true }); };
+    if (!book.classList.contains("open")) { renderContents(); openBook(function () { run(); }); }
+    else startLevel(n, !!flip, { play: true });
+  },
+  dismissIntro: beginPlay,
+  tapTurkey: function () { if (!gs) return false; const q = toScreen(gs.turkey.x, gs.turkey.y); tapAt(q.x, q.y); return true; },
+  tapWrong: function () { if (!gs) return; tapAt(10, 10); },
   hint: useHint,
   foundTurkey: foundTurkey,
-  nextLevel: function () { if (st && st.n < 10) startLevel(st.n + 1, true); },
+  nextLevel: function () { if (gs && gs.n < 10) startLevel(gs.n + 1, true, { play: true }); },
   setFlip: setFlipProgress,
   prepareFlipShot: function (from, to) {
-    /* Build a mid-flip: old page on leaf front, new under it */
-    startLevel(from, false);
-    const content = $("pageRContent");
-    const oldHtml = content.innerHTML;
-    const built = buildScene(LEVELS[to - 1]);
-    $("leafFront").innerHTML = '<div style="position:absolute;inset:0;overflow:hidden">' + oldHtml + '</div><div class="leaf-shade"></div>';
-    $("leafBack").innerHTML = '<div style="position:absolute;inset:0;background:#f7ead0"></div><div class="leaf-shade"></div>';
-    startLevel(to, false);
-    setFlipProgress(0.38);
+    startLevel(from, false, { play: true });
+    const old = $("view").innerHTML;
+    $("playLeafFront").innerHTML = '<div style="position:absolute;inset:0;overflow:hidden">' + old + '</div><div class="leaf-shade"></div>';
+    $("playLeafBack").innerHTML = '<div style="position:absolute;inset:0;background:#1a120c"></div><div class="leaf-shade"></div>';
+    startLevel(to, false, { play: true });
+    setFlipProgress(0.42);
   },
   goContents: goContents,
-  showWin: showWin,
-  showEnd: showEnd,
+  showWin: showWin, showEnd: showEnd,
   setReduce: function (v) { reduce = !!v; layoutBook(); },
   starRating: starRating, fmt: fmt, buildScene: buildScene,
-  get state() { return st; },
+  get state() { return gs; },
   get screen() { return screen; },
   get save() { return save; },
   get V() { return V; },
@@ -1566,9 +2367,7 @@ window.__turkey = {
   unlockAll: function () { save.unlocked = 10; persist(); }
 };
 </script>
-
 <script>
-  /* Count a visit once per browser session; stay silent if it fails */
   (function () {
     var PAGE = "turkey";
     var SK = "kq_hit_" + PAGE;
