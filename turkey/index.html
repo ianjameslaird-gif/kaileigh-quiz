@@ -3,27 +3,43 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Find the Turkey">
+<meta name="theme-color" content="#6e3a48">
 <title>Find the Turkey · Kai's Kool Kwiz</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🦃%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; height: 100%; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    height: 100dvh;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
   body {
     font-family: "Fredoka", "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", Arial, sans-serif;
     color: #3a2a5d;
     user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
     overflow: hidden;
     background: #3d2430;
+    -webkit-text-size-adjust: 100%;
   }
-  button { font-family: inherit; cursor: pointer; }
+  button { font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 95; width: 100%; height: 100%; }
 
   #desk {
     position: fixed; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: max(8px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    min-height: 100%;
+    min-height: 100dvh;
+    overscroll-behavior: none;
     background:
       radial-gradient(ellipse at 50% 120%, rgba(255,186,80,.28), transparent 50%),
       linear-gradient(180deg, #6e3a48 0 38%, #8a5a32 38% 40.4%, #c9a36c 40.4% 100%);
@@ -31,7 +47,7 @@
   }
   .wall-leaf { position: absolute; font-size: 34px; opacity: .7; pointer-events: none; z-index: 0; }
   .topline {
-    position: absolute; top: max(8px, env(safe-area-inset-top)); left: 10px; right: 10px;
+    position: absolute; top: max(8px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right));
     display: flex; justify-content: space-between; align-items: center; z-index: 40;
     pointer-events: none;
   }
@@ -47,9 +63,10 @@
     display: flex; align-items: center; justify-content: center;
     width: 100%; flex: 1 1 auto; min-height: 0;
   }
+  #desk.reading #bookStage { padding-top: 62px; }
   #book {
     --cw: min(400px, 86vw);
-    --ch: min(580px, 74vh);
+    --ch: min(580px, 70dvh);
     position: relative;
     width: var(--cw); height: var(--ch);
     transform-style: preserve-3d;
@@ -57,13 +74,14 @@
     flex: none;
   }
   #book.open {
-    --sw: min(1240px, 97vw);
-    --sh: min(760px, 84vh);
+    --sw: min(1240px, 96vw);
+    --sh: min(760px, 82dvh);
     width: var(--sw); height: var(--sh);
   }
-  #book.single.open {
-    width: min(97vw, 720px);
-    height: min(58vh, calc(min(97vw, 720px) * 0.62));
+  #book.phone { transition: none; }
+  #book.phone.open:not(.playing) {
+    width: min(96vw, 720px);
+    height: min(58dvh, calc(min(96vw, 720px) * 0.62));
   }
   .book-shadow {
     position: absolute; left: 6%; right: 6%; bottom: -22px; height: 30px;
@@ -154,6 +172,9 @@
   .cover-art svg { width: min(86%, 280px); height: auto; max-height: 100%; }
   .cover-front .for { font-size: clamp(16px, 3.4vw, 20px); font-weight: 700; color: #fff6d4; margin-top: 4px; }
   .cover-front .goldline { width: 70%; height: 2px; background: linear-gradient(90deg, transparent, #e6c15a, transparent); margin: 6px 0; }
+  #book:not(.open) .cover-inside { visibility: hidden; }
+  #book.open:not(.playing) .cover-inside { visibility: visible; }
+  #book.playing .cover-inside { visibility: hidden; }
   .cover-inside {
     transform: rotateY(180deg);
     background:
@@ -171,11 +192,38 @@
     overflow: hidden;
     background: #1a120c;
     transform-style: preserve-3d;
+    touch-action: none;
+    overscroll-behavior: none;
   }
   #book.playing #playLayout { display: block; }
-  #view { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; background: #1a120c; }
+  #view { position: absolute; inset: 0; overflow: hidden; touch-action: none; overscroll-behavior: none; cursor: grab; background: #1a120c; -webkit-user-select: none; user-select: none; }
   #view.drag { cursor: grabbing; }
-  #view svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #sceneLayer {
+    position: absolute; left: 0; top: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+    pointer-events: none;
+  }
+  #sceneLayer canvas, #sceneLayer img, #sceneLayer svg {
+    width: 100%; height: 100%; display: block;
+    pointer-events: none;
+  }
+  #sceneLoading {
+    position: absolute; inset: 0; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(26,18,12,.4); color: #fff6d4;
+    font-weight: 700; font-size: 18px; z-index: 6; pointer-events: none;
+  }
+  #sceneLoading.on { display: flex; }
+  #rotateTip {
+    position: absolute; left: 50%; bottom: 64px;
+    transform: translateX(-50%);
+    background: rgba(255,248,232,.94); border: 3px solid #e6c15a; border-radius: 16px;
+    padding: 8px 14px; font-weight: 700; font-size: 14px; color: #6b4a28;
+    z-index: 9; display: none; pointer-events: none; white-space: nowrap;
+    box-shadow: 0 3px 0 #c9a24a; max-width: 90%; overflow: hidden; text-overflow: ellipsis;
+  }
+  #book.phone.portrait.playing #rotateTip.show { display: block; }
   .gutter {
     position: absolute; left: 50%; top: 0; bottom: 0; width: 14px;
     transform: translateX(-50%);
@@ -202,15 +250,16 @@
   #hintBtn, #contentsBtn {
     font-weight: 700; font-size: clamp(14px, 2.2vw, 17px); color: #fff;
     background: #ffb800; border: 3px solid #fff; border-radius: 16px;
-    padding: 5px 10px; box-shadow: 0 3px 0 #c98f00; height: 40px; white-space: nowrap;
+    padding: 5px 10px; box-shadow: 0 3px 0 #c98f00;
+    min-width: 44px; min-height: 44px; height: 44px; white-space: nowrap;
   }
   #hintBtn:disabled { background: #c9c3d9; box-shadow: 0 3px 0 #9a93ad; }
-  #contentsBtn { background: #7b5cff; box-shadow: 0 3px 0 #4b33b8; font-size: 18px; width: 40px; padding: 0; }
-  .mini-ref { width: 40px; height: 40px; border-radius: 10px; border: 3px solid #e6c15a; background: #fff8e8; overflow: hidden; flex: none; box-shadow: 0 2px 0 #c9a24a; }
+  #contentsBtn { background: #7b5cff; box-shadow: 0 3px 0 #4b33b8; font-size: 18px; width: 44px; padding: 0; }
+  .mini-ref { width: 44px; height: 44px; border-radius: 10px; border: 3px solid #e6c15a; background: #fff8e8; overflow: hidden; flex: none; box-shadow: 0 2px 0 #c9a24a; }
   .mini-ref svg { width: 100%; height: 100%; }
 
   .zoombar { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 8; }
-  .zbtn { width: 46px; height: 46px; border-radius: 50%; border: 4px solid #fff; background: #7b5cff; color: #fff; font-size: 26px; font-weight: 700; box-shadow: 0 4px 0 #4b33b8; padding: 0; line-height: 1; }
+  .zbtn { width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%; border: 4px solid #fff; background: #7b5cff; color: #fff; font-size: 26px; font-weight: 700; box-shadow: 0 4px 0 #4b33b8; padding: 0; line-height: 1; }
   .zbtn.all { background: #2fd27a; box-shadow: 0 4px 0 #17984f; font-size: 18px; }
   .zbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #4b33b8; }
 
@@ -261,6 +310,7 @@
     display: flex; align-items: center; gap: 10px; text-align: left;
     border: 3px solid #e6c15a; border-radius: 16px; background: #fff8e8;
     padding: 7px 10px; color: #3a2414; box-shadow: 0 3px 0 #e0c48a; width: 100%;
+    min-height: 44px;
   }
   .ch:active { transform: translateY(2px); box-shadow: 0 1px 0 #e0c48a; }
   .ch .num { font-family: "Playfair Display", Georgia, serif; font-weight: 800; font-size: 22px; color: #c44914; min-width: 28px; }
@@ -278,7 +328,7 @@
   #toast { position: absolute; left: 50%; top: 58px; transform: translateX(-50%); background: #fff; color: #8c1c2b; font-weight: 700; font-size: clamp(15px, 3vw, 20px); border-radius: 18px; padding: 8px 14px; box-shadow: 0 4px 0 #e0c48a; z-index: 9; pointer-events: none; opacity: 0; transition: opacity .25s; white-space: nowrap; max-width: 80%; overflow: hidden; text-overflow: ellipsis; }
   #toast.show { opacity: 1; }
 
-  .overlay { position: fixed; inset: 0; background: rgba(58,42,93,.45); display: none; align-items: center; justify-content: center; z-index: 90; padding: 16px; }
+  .overlay { position: fixed; inset: 0; background: rgba(58,42,93,.45); display: none; align-items: center; justify-content: center; z-index: 90; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
   .overlay.on { display: flex; }
   .box { background: #fffdf6; border: 6px solid #e6c15a; border-radius: 30px; padding: 20px 18px; text-align: center; max-width: 520px; width: 100%; max-height: 96vh; overflow-y: auto; animation: pop .35s ease-out; box-shadow: 0 18px 40px rgba(40,20,70,.35); position: relative; z-index: 1; }
   @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -295,12 +345,16 @@
     .cover, #book, .leaf { transition-duration: .01s !important; }
     .box { animation: none; }
   }
+  #book.phone .playhead { gap: 4px; top: 6px; left: 6px; right: 6px; }
+  #book.phone .playhead .ttl { font-size: 13px; padding: 6px 8px; }
+  #book.phone .tpill { font-size: 13px; padding: 6px 7px; }
+  #book.lite #playLayout.slide-out { opacity: 0; transition: opacity .28s ease; }
+  #book.lite #playLayout.slide-in { animation: pagein .35s ease-out; }
+  @keyframes pagein { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
   @media (max-width: 420px) {
     .roundbtn { width: 44px; height: 44px; font-size: 22px; }
-    .pill { font-size: 16px; padding: 6px 10px; }
-    .zbtn { width: 42px; height: 42px; font-size: 22px; }
-    .playhead { gap: 4px; top: 6px; left: 6px; right: 6px; }
-    #hintBtn { height: 36px; padding: 4px 8px; }
+    .pill { font-size: 16px; padding: 8px 10px; min-height: 44px; }
+    .zbtn { width: 44px; height: 44px; font-size: 22px; }
   }
 </style>
 </head>
@@ -336,6 +390,7 @@
             <button type="button" class="zbtn all" id="zall" aria-label="Fit page">▣</button>
           </div>
           <div id="toast"></div>
+          <div id="rotateTip">↻ Turn sideways for the full page</div>
           <div class="leaf" id="playLeaf">
             <div class="face front" id="playLeafFront"><div class="leaf-shade"></div></div>
             <div class="face back" id="playLeafBack"><div class="leaf-shade"></div></div>
@@ -1832,13 +1887,54 @@ function buildScene(lv) {
 
 /* ================= Book + game ================= */
 const book = $("book"), desk = $("desk");
-function isSingle() {
-  return window.innerWidth < 740 || (window.innerHeight > window.innerWidth * 1.15 && window.innerWidth < 1000);
+function isPhone() {
+  return Math.min(window.innerWidth, window.innerHeight) < 600;
 }
+function isPortrait() {
+  return window.innerHeight > window.innerWidth * 1.08;
+}
+function isIOS() {
+  const ua = navigator.userAgent || "";
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function isTouchish() {
+  return isPhone() || isIOS() || (window.matchMedia && matchMedia("(pointer: coarse)").matches);
+}
+function liteMotion() {
+  return reduce || isPhone();
+}
+function isSingle() { return isPhone(); }
+
 function layoutBook() {
-  book.classList.toggle("single", isSingle());
+  book.classList.toggle("single", isPhone());
+  book.classList.toggle("phone", isPhone());
+  book.classList.toggle("portrait", isPortrait());
   book.classList.toggle("reduce", reduce);
+  book.classList.toggle("lite", liteMotion());
+  if (book.classList.contains("open")) {
+    const stage = $("bookStage");
+    const r = stage ? stage.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight * 0.7 };
+    const cs = stage ? getComputedStyle(stage) : null;
+    const padX = cs ? (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0) : 0;
+    const padY = cs ? (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0) : 0;
+    let maxW = Math.max(200, r.width - padX);
+    let maxH = Math.max(180, r.height - padY);
+    const aspect = SW / SH;
+    if (book.classList.contains("playing") && isPhone() && isPortrait()) {
+      book.style.width = Math.round(maxW) + "px";
+      book.style.height = Math.round(maxH) + "px";
+    } else {
+      let w = maxW, h = w / aspect;
+      if (h > maxH) { h = maxH; w = h * aspect; }
+      book.style.width = Math.round(w) + "px";
+      book.style.height = Math.round(h) + "px";
+    }
+  } else {
+    book.style.width = "";
+    book.style.height = "";
+  }
   if (screen === "play" && gs) { measure(); renderView(); }
+  syncRotateTip();
 }
 
 let screen = "cover";
@@ -1847,6 +1943,9 @@ let opening = false, flipping = false;
 let timerId = null, gameGen = 0, fxRing = null, anim = null;
 let V = { cx: SW / 2, cy: SH / 2, s: 1 }, VW = 1, VH = 1, minS = 1;
 let viewBound = false;
+let sceneBmp = null;
+let lastTapAt = 0, lastTapX = 0, lastTapY = 0;
+let velX = 0, velY = 0, velT = 0;
 
 function setChrome(reading) { desk.classList.toggle("reading", !!reading); }
 
@@ -1872,7 +1971,9 @@ function renderContents() {
   screen = "contents";
   gs = null;
   clearTimers();
+  disposeBmp();
   book.classList.remove("playing");
+  layoutBook();
   renderLeftHow();
   let rows = '<div class="toc"><h2>Contents</h2><p class="belongs">Ten crowded Thanksgiving pages!</p>';
   LEVELS.forEach(function (lv, i) {
@@ -1882,10 +1983,10 @@ function renderContents() {
     rows += '<button type="button" class="ch' + (locked ? " locked" : "") + '" data-level="' + (i + 1) + '" ' + (locked ? "disabled" : "") + ">" +
       '<span class="num">' + lv.n + "</span>" +
       '<span class="nm">' + (locked ? "🔒 " : "") + lv.title + (best != null ? '<br><span style="font-size:12px;font-weight:600;color:#6b4a28">Best ' + fmt(best) + "</span>" : "") + "</span>" +
-      '<span class="gs">' + (stars ? starsHtml(stars) : (locked ? "" : "○")) + "</span></button>";
+      '<span class="st">' + (stars ? starsHtml(stars) : (locked ? "" : "○")) + "</span></button>";
   });
   rows += "</div>";
-  if (isSingle()) {
+  if (isPhone()) {
     $("pageL").innerHTML = "";
     $("pageRContent").innerHTML = rows;
   } else {
@@ -1918,25 +2019,59 @@ function paintPlayhead(lv) {
   $("hintBtn").onclick = useHint;
 }
 
+function syncRotateTip() {
+  const tip = $("rotateTip"); if (!tip) return;
+  const show = screen === "play" && isPhone() && isPortrait() && book.classList.contains("playing");
+  tip.classList.toggle("show", !!show);
+}
+
 function openBook(done) {
   if (opening || book.classList.contains("open")) { if (done) done(); return; }
   opening = true;
-  ac(); paperSound(); layoutBook();
+  unlockAudio(); paperSound(); layoutBook();
   if (reduce) {
     book.classList.add("open", "opened", "reduce");
+    layoutBook();
     setChrome(true); opening = false; if (done) done(); return;
   }
   book.classList.add("open"); setChrome(true);
+  layoutBook();
   setTimeout(function () { book.classList.add("opened"); opening = false; if (done) done(); }, 1050);
 }
 
+function snapshotLayer() {
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "position:absolute;inset:0;overflow:hidden;background:#1a120c";
+  if (sceneBmp) {
+    const c = document.createElement("canvas");
+    c.width = sceneBmp.width; c.height = sceneBmp.height;
+    try { c.getContext("2d").drawImage(sceneBmp, 0, 0); } catch (e) {}
+    c.style.cssText = "position:absolute;left:0;top:0;width:" + SW + "px;height:" + SH + "px;transform-origin:0 0;transform:" + layerTransform();
+    wrap.appendChild(c);
+  }
+  const shade = document.createElement("div");
+  shade.className = "leaf-shade";
+  wrap.appendChild(shade);
+  return wrap;
+}
+function layerTransform() {
+  clampV();
+  const x = VW / 2 - V.cx * V.s, y = VH / 2 - V.cy * V.s;
+  return "translate3d(" + x + "px," + y + "px,0) scale(" + V.s + ")";
+}
+
 function flipPlay(prepare, done) {
-  if (flipping || reduce) { prepare(); flipping = false; if (done) done(); return; }
+  if (flipping || reduce || liteMotion()) {
+    const p = typeof prepare === "function" ? prepare() : null;
+    const after = function () { flipping = false; if (done) done(); };
+    if (p && typeof p.then === "function") p.then(after); else after();
+    return;
+  }
   flipping = true;
   const leaf = $("playLeaf"), front = $("playLeafFront"), back = $("playLeafBack");
-  const view = $("view");
-  front.innerHTML = '<div style="position:absolute;inset:0;overflow:hidden">' + (view ? view.innerHTML : "") + '</div><div class="leaf-shade"></div>';
-  prepare();
+  front.innerHTML = "";
+  front.appendChild(snapshotLayer());
+  const p = typeof prepare === "function" ? prepare() : null;
   back.innerHTML = '<div style="position:absolute;inset:0;background:#1a120c"></div><div class="leaf-shade"></div>';
   leaf.classList.add("on");
   leaf.classList.remove("flip");
@@ -1945,16 +2080,37 @@ function flipPlay(prepare, done) {
   void leaf.offsetWidth;
   paperSound();
   requestAnimationFrame(function () {
-    leaf.style.transition = "transform .9s cubic-bezier(.2,.7,.2,1)";
+    leaf.style.transition = "transform .7s cubic-bezier(.2,.7,.2,1)";
     leaf.classList.add("flip");
     leaf.style.transform = "rotateY(-180deg)";
   });
-  setTimeout(function () {
-    leaf.classList.remove("on", "flip");
-    leaf.style.transition = ""; leaf.style.transform = "";
-    front.innerHTML = ""; back.innerHTML = "";
-    flipping = false; if (done) done();
-  }, 950);
+  const finish = function () {
+    setTimeout(function () {
+      leaf.classList.remove("on", "flip");
+      leaf.style.transition = ""; leaf.style.transform = "";
+      front.innerHTML = ""; back.innerHTML = "";
+      flipping = false; if (done) done();
+    }, 760);
+  };
+  if (p && typeof p.then === "function") p.then(finish); else finish();
+}
+function slideThen(prepare) {
+  flipping = true;
+  const layout = $("playLayout");
+  paperSound();
+  layout.classList.add("slide-out");
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      const p = prepare();
+      const go = function () {
+        layout.classList.remove("slide-out");
+        layout.classList.add("slide-in");
+        measure(); renderView();
+        setTimeout(function () { layout.classList.remove("slide-in"); flipping = false; resolve(); }, 360);
+      };
+      if (p && typeof p.then === "function") p.then(go); else go();
+    }, 200);
+  });
 }
 function setFlipProgress(p) {
   const leaf = $("playLeaf");
@@ -1979,11 +2135,20 @@ function clampV() {
   V.cy = vh >= SH ? SH / 2 : Math.max(loy, Math.min(hiy, V.cy));
 }
 function renderView() {
-  const svg = document.getElementById("sceneSvg"); if (!svg) return;
+  const layer = document.getElementById("sceneLayer"); if (!layer) return;
   clampV();
-  const vw = VW / V.s, vh = VH / V.s;
-  svg.setAttribute("viewBox", (V.cx - vw / 2) + " " + (V.cy - vh / 2) + " " + vw + " " + vh);
+  layer.style.transform = layerTransform();
   if (fxRing) placeRing();
+}
+function applyInitialView() {
+  measure();
+  if (isPhone() && isPortrait()) {
+    const cover = Math.max(VW / SW, VH / SH) * 1.08;
+    V = { cx: SW / 2, cy: SH * 0.58, s: Math.max(minS, Math.min(8, cover)) };
+  } else {
+    V = { cx: SW / 2, cy: SH / 2, s: minS };
+  }
+  renderView();
 }
 function toScreen(wx, wy) { return { x: (wx - V.cx) * V.s + VW / 2, y: (wy - V.cy) * V.s + VH / 2 }; }
 function toWorld(sx, sy) { return { x: (sx - VW / 2) / V.s + V.cx, y: (sy - VH / 2) / V.s + V.cy }; }
@@ -2015,6 +2180,80 @@ function fitAll(animated) {
   const T = { cx: SW / 2, cy: SH / 2, s: minS };
   if (animated && !reduce) animateTo(T, 500); else { stopAnim(); V = T; renderView(); }
 }
+function fling(vx, vy) {
+  stopAnim();
+  if (Math.hypot(vx, vy) < 0.12) return;
+  anim = { raf: 0 };
+  let last = performance.now();
+  const step = function (now) {
+    const dt = Math.min(32, now - last); last = now;
+    const decay = Math.pow(0.92, dt / 16);
+    vx *= decay; vy *= decay;
+    V.cx -= vx * dt / V.s;
+    V.cy -= vy * dt / V.s;
+    renderView();
+    if (Math.hypot(vx, vy) > 0.04) anim.raf = requestAnimationFrame(step);
+    else anim = null;
+  };
+  anim.raf = requestAnimationFrame(step);
+}
+
+function bmpScale() {
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const want = isPhone() ? Math.min(1.75, dpr) : (isIOS() ? Math.min(1.5, dpr) : Math.min(3, dpr * 1.5));
+  const maxPx = (isPhone() || isIOS()) ? 12e6 : 32e6;
+  const cap = Math.sqrt(maxPx / (SW * SH));
+  return Math.max(1, Math.min(want, cap));
+}
+function disposeBmp() {
+  if (sceneBmp) {
+    try { sceneBmp.width = 1; sceneBmp.height = 1; } catch (e) {}
+    sceneBmp = null;
+  }
+}
+function rasterizeSvg(svgMarkup) {
+  return new Promise(function (resolve) {
+    disposeBmp();
+    let svg = svgMarkup;
+    if (!/\swidth=/.test(svg.slice(0, 200))) {
+      svg = svg.replace("<svg ", '<svg width="' + SW + '" height="' + SH + '" ');
+    } else {
+      svg = svg.replace(/<svg\s/, '<svg width="' + SW + '" height="' + SH + '" ');
+    }
+    const scale = bmpScale();
+    const w = Math.round(SW * scale), h = Math.round(SH * scale);
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    let settled = false;
+    const fail = function () {
+      if (settled) return;
+      settled = true;
+      URL.revokeObjectURL(url);
+      resolve({ ok: false, svg: svgMarkup });
+    };
+    const timer = setTimeout(fail, 8000);
+    img.onload = function () {
+      if (settled) return;
+      try {
+        const cv = document.createElement("canvas");
+        cv.width = w; cv.height = h;
+        cv.id = "sceneBmp";
+        const ctx = cv.getContext("2d", { alpha: false });
+        ctx.fillStyle = "#1a120c";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        sceneBmp = cv;
+        settled = true;
+        clearTimeout(timer);
+        URL.revokeObjectURL(url);
+        resolve({ ok: true, canvas: cv });
+      } catch (e) { fail(); }
+    };
+    img.onerror = fail;
+    img.src = url;
+  });
+}
 
 const ptrs = new Map();
 let gesture = null;
@@ -2032,11 +2271,17 @@ function bindViewPointers() {
 function onPd(e) {
   const view = $("view"); if (!view || !e.target.closest("#view") || e.target.closest(".zoombar") || e.target.closest(".playhead")) return;
   if (!gs || gs.finished || gs.waiting) return;
-  ac(); stopAnim();
+  unlockAudio(); stopAnim();
   try { view.setPointerCapture(e.pointerId); } catch (err) {}
-  ptrs.set(e.pointerId, localPt(e, view));
-  if (ptrs.size === 1) { const q = localPt(e, view); gesture = { type: "drag", sx: q.x, sy: q.y, lx: q.x, ly: q.y, t: performance.now(), moved: 0 }; }
-  else if (ptrs.size === 2) { const a = [...ptrs.values()]; gesture = { type: "pinch", d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y), mx: (a[0].x + a[1].x) / 2, my: (a[0].y + a[1].y) / 2 }; }
+  const q = localPt(e, view);
+  ptrs.set(e.pointerId, q);
+  velX = 0; velY = 0; velT = performance.now();
+  if (ptrs.size === 1) {
+    gesture = { type: "drag", sx: q.x, sy: q.y, lx: q.x, ly: q.y, t: performance.now(), moved: 0 };
+  } else if (ptrs.size === 2) {
+    const a = [...ptrs.values()];
+    gesture = { type: "pinch", d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y), mx: (a[0].x + a[1].x) / 2, my: (a[0].y + a[1].y) / 2 };
+  }
 }
 function onPm(e) {
   const view = $("view"); if (!view || !ptrs.has(e.pointerId) || !gesture) return;
@@ -2044,7 +2289,9 @@ function onPm(e) {
   if (gesture.type === "drag" && ptrs.size === 1) {
     const dx = q.x - gesture.lx, dy = q.y - gesture.ly; gesture.lx = q.x; gesture.ly = q.y;
     gesture.moved = Math.max(gesture.moved, Math.hypot(q.x - gesture.sx, q.y - gesture.sy));
-    if (gesture.moved > 8) { view.classList.add("drag"); V.cx -= dx / V.s; V.cy -= dy / V.s; renderView(); }
+    const now = performance.now(), dt = Math.max(8, now - velT);
+    velX = dx / dt; velY = dy / dt; velT = now;
+    if (gesture.moved > 12) { view.classList.add("drag"); V.cx -= dx / V.s; V.cy -= dy / V.s; renderView(); }
   } else if (gesture.type === "pinch" && ptrs.size >= 2) {
     const a = [...ptrs.values()];
     const d = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y), mx = (a[0].x + a[1].x) / 2, my = (a[0].y + a[1].y) / 2;
@@ -2056,7 +2303,27 @@ function onPm(e) {
 function onPu(e) {
   const view = $("view"); if (!view || !ptrs.has(e.pointerId)) return;
   const q = localPt(e, view); ptrs.delete(e.pointerId);
-  if (gesture && gesture.type === "drag" && ptrs.size === 0 && gesture.moved <= 10 && performance.now() - gesture.t < 700 && e.type === "pointerup") tapAt(q.x, q.y);
+  if (gesture && gesture.type === "drag" && ptrs.size === 0 && e.type === "pointerup") {
+    const moved = gesture.moved;
+    if (moved > 12) {
+      fling(velX, velY);
+    } else if (moved <= 12 && performance.now() - gesture.t < 700) {
+      const now = performance.now();
+      if (now - lastTapAt < 300 && Math.hypot(q.x - lastTapX, q.y - lastTapY) < 36) {
+        lastTapAt = 0;
+        if (V.s < minS * 2.4) {
+          const target = Math.min(8, Math.max(V.s * 2.2, minS * 2.6));
+          const w = toWorld(q.x, q.y);
+          animateTo({ cx: w.x, cy: w.y, s: target }, 320);
+        } else {
+          fitAll(true);
+        }
+      } else {
+        lastTapAt = now; lastTapX = q.x; lastTapY = q.y;
+        tapAt(q.x, q.y);
+      }
+    }
+  }
   if (ptrs.size === 1) { const a = [...ptrs.values()][0]; gesture = { type: "drag", sx: a.x, sy: a.y, lx: a.x, ly: a.y, t: 0, moved: 99 }; }
   else if (ptrs.size === 0) { gesture = null; view.classList.remove("drag"); }
 }
@@ -2067,30 +2334,51 @@ function onWheel(e) {
   const dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY;
   zoomAt(q.x, q.y, Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0018)));
 }
-document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
+document.addEventListener("gesturestart", function (e) { e.preventDefault(); }, { passive: false });
+document.addEventListener("gesturechange", function (e) { e.preventDefault(); }, { passive: false });
+document.addEventListener("gestureend", function (e) { e.preventDefault(); }, { passive: false });
+document.addEventListener("touchmove", function (e) {
+  if (e.touches && e.touches.length > 1) { e.preventDefault(); return; }
+  if (e.target && e.target.closest && e.target.closest("#view") && !e.target.closest(".overlay")) e.preventDefault();
+}, { passive: false });
+
+function unlockAudio() {
+  ac();
+  if (!unlockAudio.did && AC) {
+    unlockAudio.did = true;
+    try {
+      const b = AC.createBuffer(1, 1, 22050);
+      const s = AC.createBufferSource();
+      s.buffer = b; s.connect(AC.destination); s.start(0);
+    } catch (err) {}
+  }
+}
+["pointerdown", "touchstart", "click"].forEach(function (ev) {
+  document.addEventListener(ev, unlockAudio, { capture: true, passive: true });
+});
 
 function toast(t, ms) {
   const e = $("toast"); if (!e) return;
   e.textContent = t; e.classList.add("show");
   clearTimeout(toast.t); toast.t = setTimeout(function () { e.classList.remove("show"); }, ms || 1800);
 }
+function minHitPx() { return isTouchish() ? 36 : 26; }
 function hitTurkey(sx, sy) {
   if (!gs) return false;
   const half = gs.turkey.size / 2 * V.s;
-  if (half < 5) return false;
   const q = toScreen(gs.turkey.x, gs.turkey.y);
-  const hr = Math.max(half * 1.2, 26);
+  const hr = Math.max(half * 1.25, minHitPx());
   return Math.hypot(q.x - sx, q.y - sy) <= hr;
 }
 function hitDecoy(sx, sy) {
   if (!gs) return null;
+  const minH = Math.max(22, minHitPx() - 8);
   for (let i = 0; i < (gs.decoys || []).length; i++) {
     const d = gs.decoys[i];
     const size = 52 * d.scale;
     const half = size / 2 * V.s;
-    if (half < 5) continue;
     const q = toScreen(d.x, d.y);
-    if (Math.hypot(q.x - sx, q.y - sy) <= Math.max(half * 1.15, 22)) return d;
+    if (Math.hypot(q.x - sx, q.y - sy) <= Math.max(half * 1.15, minH)) return d;
   }
   return null;
 }
@@ -2155,7 +2443,6 @@ function loadLevelScene(n) {
   const lv = LEVELS[n - 1];
   const built = buildScene(lv);
   book.classList.add("playing");
-  $("view").innerHTML = built.svg;
   paintPlayhead(lv);
   gs = {
     n: n, t0: 0, hints: 2, finished: false, waiting: true,
@@ -2164,11 +2451,38 @@ function loadLevelScene(n) {
   };
   screen = "play";
   layoutBook();
-  measure();
-  V = { cx: SW / 2, cy: SH / 2, s: minS };
-  renderView();
-  updateHint();
-  return lv;
+  const view = $("view");
+  view.innerHTML = "";
+  const loading = document.createElement("div");
+  loading.id = "sceneLoading";
+  loading.className = "on";
+  loading.textContent = "Loading the page…";
+  view.appendChild(loading);
+  const layer = document.createElement("div");
+  layer.id = "sceneLayer";
+  layer.style.width = SW + "px";
+  layer.style.height = SH + "px";
+  view.appendChild(layer);
+  return rasterizeSvg(built.svg).then(function (res) {
+    if (res.ok) {
+      layer.appendChild(res.canvas);
+    } else {
+      layer.innerHTML = built.svg;
+      const svg = layer.querySelector("svg");
+      if (svg) {
+        svg.setAttribute("viewBox", "0 0 " + SW + " " + SH);
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+        svg.style.width = "100%";
+        svg.style.height = "100%";
+      }
+    }
+    loading.classList.remove("on");
+    measure();
+    applyInitialView();
+    syncRotateTip();
+    return gs;
+  });
 }
 function showIntro(lv) {
   $("introChap").innerHTML = "<small>Chapter " + lv.n + " of 10</small>";
@@ -2188,22 +2502,27 @@ function beginPlay() {
   updateTimer();
 }
 function startLevel(n, doFlip, opts) {
-  const lv = LEVELS[n - 1]; if (!lv) return;
+  const lv = LEVELS[n - 1]; if (!lv) return Promise.resolve();
   gameGen += 1;
   clearTimeout(showWin.t);
   $("winBox").classList.remove("on");
   $("endBox").classList.remove("on");
   $("introBox").classList.remove("on");
   const go = function () {
-    loadLevelScene(n);
-    if (opts && opts.play) beginPlay();
-    else showIntro(lv);
+    return loadLevelScene(n).then(function () {
+      if (opts && opts.play) beginPlay();
+      else showIntro(lv);
+    });
   };
-  if (doFlip && book.classList.contains("playing") && !reduce) flipPlay(go, function () { measure(); renderView(); });
-  else if (doFlip && book.classList.contains("open") && !book.classList.contains("playing") && !reduce) {
-    /* contents -> play: just load (cover already open) */
-    go();
-  } else go();
+  if (doFlip && book.classList.contains("playing") && liteMotion() && !reduce) {
+    return slideThen(go);
+  }
+  if (doFlip && book.classList.contains("playing") && !reduce) {
+    return new Promise(function (resolve) {
+      flipPlay(go, function () { measure(); renderView(); resolve(); });
+    });
+  }
+  return go();
 }
 
 function foundTurkey() {
@@ -2224,14 +2543,6 @@ function foundTurkey() {
   for (let i = 0; i < 12; i++) {
     const a = i / 12 * Math.PI * 2, d = 50 + Math.random() * 40;
     fx("spark", q.x, q.y, ["✨","⭐","🍁","💛"][i % 4], Math.cos(a) * d, Math.sin(a) * d);
-  }
-  const hero = document.getElementById("turkey-real");
-  if (hero) {
-    const halo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    halo.setAttribute("cx", "0"); halo.setAttribute("cy", "0"); halo.setAttribute("r", "28");
-    halo.setAttribute("fill", "rgba(47,210,122,.22)");
-    halo.setAttribute("stroke", "#2fd27a"); halo.setAttribute("stroke-width", "3");
-    hero.insertBefore(halo, hero.firstChild);
   }
   SFX.found();
   if (gs.bonusHit) SFX.bonus();
@@ -2275,7 +2586,10 @@ function goContents(doFlip) {
   $("introBox").classList.remove("on");
   clearTimers();
   gs = null;
-  const go = function () { renderContents(); };
+  const go = function () { disposeBmp(); renderContents(); };
+  if (doFlip && book.classList.contains("playing") && liteMotion() && !reduce) {
+    return slideThen(function () { book.classList.remove("playing"); go(); });
+  }
   if (doFlip && book.classList.contains("playing") && !reduce) {
     flipPlay(function () { book.classList.remove("playing"); renderContents(); });
   } else { book.classList.remove("playing"); go(); }
@@ -2285,7 +2599,8 @@ function confetti() {
   const cv = $("confetti"), x = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
   const cols = ["#c44914","#e6c15a","#7b5cff","#2fd27a","#ff7a3d","#fff","#3fb5ff"];
   const P = [];
-  for (let i = 0; i < 110; i++) P.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*0.3, vx: Math.random()*6-3, vy: 3+Math.random()*4, a: Math.random()*6, r: 6+Math.random()*7, c: cols[i%cols.length] });
+  const nP = isPhone() ? 36 : 110;
+  for (let i = 0; i < nP; i++) P.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*0.3, vx: Math.random()*6-3, vy: 3+Math.random()*4, a: Math.random()*6, r: 6+Math.random()*7, c: cols[i%cols.length] });
   const run = ++confetti.run; let n = 0;
   (function frame() {
     if (run !== confetti.run) { x.clearRect(0, 0, cv.width, cv.height); return; }
@@ -2304,8 +2619,8 @@ function paintCoverArt() {
     "</svg>";
 }
 
-$("openBtn").addEventListener("click", function () { ac(); SFX.click(); renderContents(); openBook(); });
-$("muteBtn").addEventListener("click", function () { ac(); setMuted(!muted); SFX.click(); });
+$("openBtn").addEventListener("click", function () { unlockAudio(); SFX.click(); renderContents(); openBook(); });
+$("muteBtn").addEventListener("click", function () { unlockAudio(); setMuted(!muted); SFX.click(); });
 $("introGo").addEventListener("click", function () { SFX.click(); beginPlay(); });
 $("zin").addEventListener("click", function () { SFX.click(); zoomSmooth(1.7); });
 $("zout").addEventListener("click", function () { SFX.click(); zoomSmooth(1 / 1.7); });
@@ -2323,7 +2638,7 @@ $("winAgain").addEventListener("click", function () {
 $("winContents").addEventListener("click", function () { SFX.click(); confetti.run = (confetti.run || 0) + 1; goContents(true); });
 $("endContents").addEventListener("click", function () { SFX.click(); $("endBox").classList.remove("on"); confetti.run = (confetti.run || 0) + 1; goContents(true); });
 window.addEventListener("resize", layoutBook);
-window.addEventListener("orientationchange", function () { setTimeout(layoutBook, 80); });
+window.addEventListener("orientationchange", function () { setTimeout(layoutBook, 80); setTimeout(layoutBook, 300); });
 bindViewPointers();
 setMuted(muted);
 paintCoverArt();
@@ -2334,24 +2649,31 @@ window.__turkey = {
   openBook: function (cb) { renderContents(); openBook(cb); },
   showContents: function () { if (!book.classList.contains("open")) { renderContents(); openBook(); } else goContents(false); },
   startLevel: function (n, flip) {
-    const run = function () { startLevel(n, false, { play: true }); };
-    if (!book.classList.contains("open")) { renderContents(); openBook(function () { run(); }); }
-    else startLevel(n, !!flip, { play: true });
+    const run = function () { return startLevel(n, false, { play: true }); };
+    if (!book.classList.contains("open")) {
+      return new Promise(function (resolve) {
+        renderContents();
+        openBook(function () { run().then(resolve); });
+      });
+    }
+    return startLevel(n, !!flip, { play: true });
   },
   dismissIntro: beginPlay,
   tapTurkey: function () { if (!gs) return false; const q = toScreen(gs.turkey.x, gs.turkey.y); tapAt(q.x, q.y); return true; },
   tapWrong: function () { if (!gs) return; tapAt(10, 10); },
   hint: useHint,
   foundTurkey: foundTurkey,
-  nextLevel: function () { if (gs && gs.n < 10) startLevel(gs.n + 1, true, { play: true }); },
+  nextLevel: function () { if (gs && gs.n < 10) return startLevel(gs.n + 1, true, { play: true }); },
   setFlip: setFlipProgress,
   prepareFlipShot: function (from, to) {
-    startLevel(from, false, { play: true });
-    const old = $("view").innerHTML;
-    $("playLeafFront").innerHTML = '<div style="position:absolute;inset:0;overflow:hidden">' + old + '</div><div class="leaf-shade"></div>';
-    $("playLeafBack").innerHTML = '<div style="position:absolute;inset:0;background:#1a120c"></div><div class="leaf-shade"></div>';
-    startLevel(to, false, { play: true });
-    setFlipProgress(0.42);
+    return startLevel(from, false, { play: true }).then(function () {
+      $("playLeafFront").innerHTML = "";
+      $("playLeafFront").appendChild(snapshotLayer());
+      $("playLeafBack").innerHTML = '<div style="position:absolute;inset:0;background:#1a120c"></div><div class="leaf-shade"></div>';
+      return startLevel(to, false, { play: true }).then(function () {
+        setFlipProgress(0.42);
+      });
+    });
   },
   goContents: goContents,
   showWin: showWin, showEnd: showEnd,
@@ -2362,7 +2684,13 @@ window.__turkey = {
   get save() { return save; },
   get V() { return V; },
   get reduce() { return reduce; },
+  get minS() { return minS; },
+  get hasBitmap() { return !!sceneBmp; },
+  isPhone: isPhone, isPortrait: isPortrait,
   toScreen: toScreen, measure: measure, renderView: renderView,
+  applyInitialView: applyInitialView,
+  panBy: function (dx, dy) { V.cx -= dx / V.s; V.cy -= dy / V.s; renderView(); },
+  zoomAt: zoomAt,
   resetSave: function () { save = defaultSave(); persist(); },
   unlockAll: function () { save.unlocked = 10; persist(); }
 };
