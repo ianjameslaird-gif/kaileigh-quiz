@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Find the Turkey · Kai's Kool Kwiz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🦃%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Fredoka", "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", Arial, sans-serif;
+    color: #3a2a5d;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    overflow: hidden;
+    background: #3d2430;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 95; width: 100%; height: 100%; }
+
+  /* ===== Desk ===== */
+  #desk {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: max(8px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+    background:
+      radial-gradient(ellipse at 50% 120%, rgba(255,186,80,.28), transparent 50%),
+      linear-gradient(180deg, #6e3a48 0 38%, #8a5a32 38% 40.4%, #c9a36c 40.4% 100%);
+    overflow: hidden;
+  }
+  .wall-leaf { position: absolute; font-size: 34px; opacity: .7; pointer-events: none; z-index: 0; }
+  .topline {
+    position: absolute; top: max(8px, env(safe-area-inset-top)); left: 10px; right: 10px;
+    display: flex; justify-content: space-between; align-items: center; z-index: 40;
+    pointer-events: none;
+  }
+  .topline > * { pointer-events: auto; }
+  .pill { display: inline-block; text-decoration: none; font-weight: 700; font-size: 18px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 18px; padding: 7px 12px; box-shadow: 0 5px 0 #d4c8ff; }
+  .pill:active { transform: translateY(4px); box-shadow: 0 1px 0 #d4c8ff; }
+  .roundbtn { font-size: 24px; width: 50px; height: 50px; border-radius: 50%; border: 4px solid #fff; background: #ffe066; box-shadow: 0 4px 0 #d4a900; flex: none; padding: 0; line-height: 1; }
+  .roundbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #d4a900; }
+
+  /* ===== Book stage ===== */
+  #bookStage {
+    position: relative;
+    z-index: 2;
+    perspective: 2200px;
+    perspective-origin: 50% 48%;
+    display: flex; align-items: center; justify-content: center;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  #book {
+    --cw: min(400px, 86vw);
+    --ch: min(580px, 74vh);
+    position: relative;
+    width: var(--cw);
+    height: var(--ch);
+    transform-style: preserve-3d;
+    transition: width .9s cubic-bezier(.2,.7,.2,1), height .9s cubic-bezier(.2,.7,.2,1);
+    flex: none;
+  }
+  #book.open {
+    --sw: min(1120px, 96vw);
+    --sh: min(720px, 86vh);
+    width: var(--sw);
+    height: var(--sh);
+  }
+  #book.single.open {
+    width: min(520px, 94vw);
+    height: min(calc(min(520px, 94vw) / 1.32 + 78px), 88vh);
+  }
+  .book-shadow {
+    position: absolute; left: 6%; right: 6%; bottom: -22px; height: 30px;
+    background: rgba(40,18,8,.4); filter: blur(14px); border-radius: 50%; z-index: 0; pointer-events: none;
+  }
+  .page-edge {
+    position: absolute; top: 10px; bottom: 10px; width: 11px; z-index: 1; pointer-events: none;
+    background: repeating-linear-gradient(90deg, #f3e2bf 0 2px, #e6d0a4 2px 3px, #f7ead0 3px 5px);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 2px 0 0 #d4bc8a;
+  }
+  .page-edge.right-edge { right: -9px; }
+  #book.closed .page-edge.right-edge { right: -12px; width: 14px; }
+  #book.single.open .page-edge.right-edge { right: -8px; }
+
+  .spread {
+    position: absolute; inset: 0;
+    display: flex; transform-style: preserve-3d;
+    border-radius: 4px 10px 10px 4px;
+    overflow: visible;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+  #book.open .spread { opacity: 1; pointer-events: auto; }
+
+  .page {
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.45), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(120,70,20,.035) 0 2px, transparent 2px 5px),
+      linear-gradient(180deg, #f7ead0, #f0dcb6);
+    color: #3a2414;
+    position: relative;
+    overflow: hidden;
+  }
+  .page.left, .cover-inside {
+    width: 50%; height: 100%;
+    border-radius: 3px 0 0 3px;
+    box-shadow: inset -18px 0 28px -18px rgba(80,40,10,.22);
+    padding: 16px 18px 16px 22px;
+  }
+  .page.right {
+    width: 50%; height: 100%;
+    border-radius: 0 8px 8px 0;
+    box-shadow: inset 18px 0 28px -18px rgba(80,40,10,.18);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  #book.single.open .page.right { width: 100%; border-radius: 0 8px 8px 0; }
+  .spine {
+    width: 16px; flex: none; height: 100%;
+    background: linear-gradient(90deg, #5a121c, #8c1c2b 40%, #5a121c 70%, #3d0c14);
+    box-shadow: inset 0 0 8px rgba(0,0,0,.45);
+    z-index: 4;
+  }
+  #book.single.open .spine { width: 12px; }
+
+  /* Cover: sits on the right half, hinged at the spine */
+  .cover {
+    position: absolute; top: 0; bottom: 0; right: 0;
+    width: 100%;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    z-index: 20;
+    border-radius: 4px 10px 10px 4px;
+    transition: transform 1.05s cubic-bezier(.15,.62,.2,1), width .9s cubic-bezier(.2,.7,.2,1);
+  }
+  #book.open .cover { width: 50%; transform: rotateY(-180deg); pointer-events: none; }
+  #book.single.open .cover { width: 100%; transform: rotateY(-180deg); pointer-events: none; }
+  #book.opened .cover { z-index: 1; }
+  .cover-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: inherit;
+  }
+  .cover-front {
+    background:
+      radial-gradient(ellipse at 50% 30%, #b42a3d, #7a1422 55%, #5a0e18);
+    border: 8px solid #c9a24a;
+    box-shadow:
+      inset 0 0 0 4px #7a1422,
+      inset 0 0 0 8px #e6c15a,
+      0 8px 18px rgba(0,0,0,.35);
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    padding: 16px 14px 18px;
+    color: #f8e7b0;
+    overflow: hidden;
+  }
+  .cover-front .brand { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #e6c15a; margin-top: 4px; }
+  .cover-front h1 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 800; font-size: clamp(34px, 8vw, 52px);
+    line-height: .95; text-align: center; margin: 8px 0 4px;
+    color: #fff6d4; text-shadow: 0 2px 0 #5a0e18, 0 4px 0 rgba(0,0,0,.25);
+  }
+  .cover-front .subtitle {
+    font-family: "Playfair Display", Georgia, serif; font-style: italic;
+    font-size: clamp(16px, 3.6vw, 22px); color: #e6c15a; margin: 0 0 6px;
+  }
+  .cover-art { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; }
+  .cover-art svg { width: min(86%, 280px); height: auto; max-height: 100%; }
+  .cover-front .for { font-size: clamp(16px, 3.4vw, 20px); font-weight: 700; color: #fff6d4; margin-top: 4px; }
+  .cover-front .goldline { width: 70%; height: 2px; background: linear-gradient(90deg, transparent, #e6c15a, transparent); margin: 6px 0; }
+  .cover-inside {
+    transform: rotateY(180deg);
+    width: 100%; height: 100%;
+    border-radius: 8px 0 0 8px;
+    box-shadow: inset -18px 0 28px -18px rgba(80,40,10,.22);
+    padding: 16px 18px 16px 22px;
+    background:
+      radial-gradient(ellipse at 80% 10%, rgba(255,255,255,.45), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(120,70,20,.035) 0 2px, transparent 2px 5px),
+      linear-gradient(180deg, #f7ead0, #f0dcb6);
+    overflow: auto;
+  }
+  #book.single .cover-inside { /* hidden as a page; single uses header on the right page */ }
+
+  /* Hidden leftover left page slot used in spread when cover has finished opening:
+     the visible left page is the cover inside. We also keep #pageL as that inside. */
+
+  /* Flipping leaf (right page turn) */
+  .leaf {
+    position: absolute; inset: 0;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    z-index: 12;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .leaf.on { visibility: visible; pointer-events: none; }
+  .leaf .face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.45), transparent 55%),
+      linear-gradient(180deg, #f7ead0, #f0dcb6);
+    overflow: hidden;
+    border-radius: 0 8px 8px 0;
+  }
+  .leaf .face.back { transform: rotateY(180deg); border-radius: 8px 0 0 8px; }
+  .leaf.flip { transition: transform .9s cubic-bezier(.2,.7,.2,1); transform: rotateY(-180deg); }
+  .leaf-shade {
+    position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    background: linear-gradient(90deg, rgba(60,30,10,.18), transparent 24%, transparent 76%, rgba(60,30,10,.08));
+  }
+
+  #pageRContent, #pageUnder { position: absolute; inset: 0; }
+  #pageUnder { z-index: 1; }
+  #pageRContent { z-index: 2; }
+
+  /* ===== Open-button under closed book ===== */
+  #openBtn, .btn {
+    font-weight: 700; font-size: clamp(22px, 4.5vw, 30px);
+    border: 5px solid #fff; border-radius: 24px; padding: 12px 26px;
+    color: #fff; background: #7b5cff; box-shadow: 0 7px 0 #4b33b8; margin: 8px 4px; z-index: 5;
+  }
+  .btn.go, #openBtn { background: #2fd27a; box-shadow: 0 7px 0 #17984f; }
+  .btn.blue { background: #3fb5ff; box-shadow: 0 7px 0 #1f86c7; }
+  .btn.orange { background: #ff7a3d; box-shadow: 0 7px 0 #c9541d; }
+  .btn:active, #openBtn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+  #openRow {
+    flex: none; display: flex; flex-direction: column; align-items: center;
+    margin-top: 28px; z-index: 5; min-height: 90px;
+  }
+  #book.open ~ #openRow, #desk.reading #openRow { visibility: hidden; height: 0; min-height: 0; margin: 0; overflow: hidden; }
+  .cover-sub { font-size: 18px; font-weight: 600; color: #fff6d4; text-shadow: 0 2px 0 rgba(60,20,20,.4); margin: 6px 0 0; }
+
+  /* ===== Inside typography ===== */
+  .chap { font-family: "Playfair Display", Georgia, serif; font-weight: 800; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.05; color: #8c1c2b; margin: 0 0 6px; }
+  .chap small { display: block; font-size: .45em; letter-spacing: .12em; text-transform: uppercase; color: #c44914; font-family: Fredoka, sans-serif; font-weight: 700; margin-bottom: 4px; }
+  .story { font-size: clamp(16px, 1.7vw, 20px); font-weight: 600; line-height: 1.35; color: #3a2414; margin: 8px 0 12px; }
+  .refcard {
+    background: #fff8e8; border: 4px solid #e6c15a; border-radius: 18px;
+    padding: 8px 8px 10px; text-align: center; box-shadow: 0 4px 0 #c9a24a;
+  }
+  .refcard .lab { font-size: 15px; font-weight: 700; color: #8c1c2b; }
+  .refcard .hinty { font-size: 14px; font-weight: 600; color: #6b4a28; margin-top: 2px; }
+  .howto { font-size: 15px; font-weight: 600; color: #6b4a28; margin-top: 12px; line-height: 1.35; }
+  .howto li { margin: 4px 0; }
+
+  /* Contents list */
+  .toc { display: flex; flex-direction: column; gap: 7px; height: 100%; overflow: auto; padding: 14px 14px 14px 8px; }
+  .toc h2 { font-family: "Playfair Display", Georgia, serif; font-size: clamp(28px, 4vw, 42px); color: #8c1c2b; margin: 0 0 4px; text-align: center; }
+  .toc .belongs { text-align: center; font-size: 15px; font-weight: 600; color: #6b4a28; margin: 0 0 8px; }
+  .ch {
+    display: flex; align-items: center; gap: 10px; text-align: left;
+    border: 3px solid #e6c15a; border-radius: 16px; background: #fff8e8;
+    padding: 7px 10px; color: #3a2414; box-shadow: 0 3px 0 #e0c48a; width: 100%;
+  }
+  .ch:active { transform: translateY(2px); box-shadow: 0 1px 0 #e0c48a; }
+  .ch .num { font-family: "Playfair Display", Georgia, serif; font-weight: 800; font-size: 22px; color: #c44914; min-width: 28px; }
+  .ch .nm { flex: 1; font-weight: 700; font-size: clamp(15px, 2vw, 18px); }
+  .ch .st { font-size: 16px; letter-spacing: 1px; }
+  .ch.locked { opacity: .55; filter: grayscale(.3); cursor: default; }
+  .ch.current { border-color: #2fd27a; box-shadow: 0 3px 0 #17984f; background: #e8fff2; }
+
+  /* Play header + scene */
+  .playhead {
+    display: flex; align-items: center; gap: 6px; flex: none;
+    padding: 6px 8px 6px 10px;
+    background: rgba(255,248,232,.92);
+    border-bottom: 3px solid #e6c15a;
+    min-height: 56px;
+  }
+  .playhead .ttl { flex: 1; min-width: 0; font-weight: 700; font-size: clamp(14px, 2.4vw, 20px); color: #8c1c2b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tpill { font-weight: 700; font-size: clamp(13px, 2.2vw, 17px); background: #fff; border-radius: 14px; padding: 5px 8px; box-shadow: 0 2px 0 #e0c48a; white-space: nowrap; }
+  .tpill.bonus { background: #ffe066; color: #7a4a00; }
+  .tpill.bonus.out { background: #eee; color: #888; }
+  #hintBtn, #contentsBtn, #zoomFit {
+    font-weight: 700; font-size: clamp(14px, 2.2vw, 17px); color: #fff;
+    background: #ffb800; border: 3px solid #fff; border-radius: 16px;
+    padding: 5px 10px; box-shadow: 0 3px 0 #c98f00; height: 42px; white-space: nowrap;
+  }
+  #hintBtn:disabled { background: #c9c3d9; box-shadow: 0 3px 0 #9a93ad; }
+  #contentsBtn { background: #7b5cff; box-shadow: 0 3px 0 #4b33b8; font-size: 18px; width: 42px; padding: 0; }
+  .mini-ref { width: 42px; height: 42px; border-radius: 10px; border: 3px solid #e6c15a; background: #fff8e8; overflow: hidden; flex: none; }
+  .mini-ref svg { width: 100%; height: 100%; }
+
+  .scene-wrap { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; height: 100%; }
+  #view { flex: 1; position: relative; overflow: hidden; touch-action: none; cursor: grab; background: #d9f0ff; min-height: 0; }
+  #view.drag { cursor: grabbing; }
+  #view svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .zoombar { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 5; }
+  .zbtn { width: 48px; height: 48px; border-radius: 50%; border: 4px solid #fff; background: #7b5cff; color: #fff; font-size: 28px; font-weight: 700; box-shadow: 0 4px 0 #4b33b8; padding: 0; line-height: 1; }
+  .zbtn.all { background: #2fd27a; box-shadow: 0 4px 0 #17984f; font-size: 20px; }
+  .zbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #4b33b8; }
+
+  .fx { position: absolute; pointer-events: none; z-index: 8; }
+  .ring { border-radius: 50%; border: 6px solid #ffb800; box-shadow: 0 0 0 4px #fff, 0 0 18px #ffb800; transform: translate(-50%,-50%); animation: ringpulse .8s ease-in-out infinite; }
+  @keyframes ringpulse { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 1; } 50% { transform: translate(-50%,-50%) scale(1.25); opacity: .6; } }
+  .spark { font-size: 30px; transform: translate(-50%,-50%); animation: fly .9s ease-out forwards; }
+  @keyframes fly { from { transform: translate(-50%,-50%) scale(.4); opacity: 1; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.2); opacity: 0; } }
+  .miss { width: 40px; height: 40px; border-radius: 50%; border: 4px solid rgba(255,255,255,.9); transform: translate(-50%,-50%); animation: missa .45s ease-out forwards; }
+  @keyframes missa { from { transform: translate(-50%,-50%) scale(.3); opacity: 1; } to { transform: translate(-50%,-50%) scale(1.4); opacity: 0; } }
+  #toast { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: #fff; color: #8c1c2b; font-weight: 700; font-size: clamp(16px, 3.4vw, 22px); border-radius: 18px; padding: 8px 14px; box-shadow: 0 4px 0 #e0c48a; z-index: 9; pointer-events: none; opacity: 0; transition: opacity .25s; white-space: nowrap; max-width: 92%; overflow: hidden; text-overflow: ellipsis; }
+  #toast.show { opacity: 1; }
+
+  @keyframes bob {
+    0%,100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-5px) rotate(2deg); }
+  }
+  g.bob { animation: bob 2.4s ease-in-out infinite; }
+
+  /* Win plate */
+  .overlay { position: fixed; inset: 0; background: rgba(58,42,93,.45); display: none; align-items: center; justify-content: center; z-index: 90; padding: 16px; }
+  .overlay.on { display: flex; }
+  .box { background: #fffdf6; border: 6px solid #e6c15a; border-radius: 30px; padding: 20px 18px; text-align: center; max-width: 520px; width: 100%; max-height: 96vh; overflow-y: auto; animation: pop .35s ease-out; box-shadow: 0 18px 40px rgba(40,20,70,.35); position: relative; z-index: 1; }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .box h1 { font-family: "Playfair Display", Georgia, serif; font-size: clamp(30px, 7vw, 48px); margin: 6px 0 10px; color: #8c1c2b; line-height: 1.05; }
+  .box p { font-size: clamp(18px, 4vw, 24px); margin: 8px 0; font-weight: 600; }
+  .stars { font-size: clamp(40px, 10vw, 64px); letter-spacing: 6px; line-height: 1.1; margin: 4px 0 8px; }
+  .stars .dim { opacity: .25; filter: grayscale(1); }
+  .bigtime { font-size: clamp(30px, 8vw, 48px); font-weight: 700; color: #c44914; margin: 4px 0; }
+
+  /* Reduced motion: no 3D, simple fade/slide */
+  .leaf.slide-out { transition: transform .35s ease, opacity .35s ease; transform: translateX(-28%) ; opacity: 0; }
+  #book.reduce .cover { transition: opacity .4s ease, transform .4s ease; }
+  #book.reduce.open .cover { transform: none; opacity: 0; }
+  #book.reduce { transition: width .4s ease, height .4s ease; }
+
+  @media (prefers-reduced-motion: reduce) {
+    g.bob { animation: none; }
+    .cover, #book, .leaf { transition-duration: .01s !important; }
+    .box { animation: none; }
+  }
+  @media (max-width: 420px) {
+    .roundbtn { width: 44px; height: 44px; font-size: 22px; }
+    .pill { font-size: 16px; padding: 6px 10px; }
+    .zbtn { width: 44px; height: 44px; font-size: 24px; }
+    .playhead { gap: 4px; padding: 5px 6px; }
+    #hintBtn { height: 38px; padding: 4px 8px; }
+  }
+
+  .spread { display: block; }
+  .spine {
+    position: absolute; left: 50%; top: 0; bottom: 0; width: 16px;
+    transform: translateX(-50%); z-index: 6; flex: none; height: auto;
+  }
+  .page.right {
+    position: absolute; left: 50%; top: 0; right: 0; bottom: 0;
+    width: auto; height: auto;
+  }
+  #book.open .cover, #book.opened .cover { z-index: 5; }
+  #book.opened .cover { pointer-events: auto; }
+  #book.single.open .page.right { left: 12px; right: 0; width: auto; border-radius: 0 8px 8px 0; }
+  #book.single.open .spine { left: 0; width: 12px; transform: none; }
+  #book.single.opened .cover { opacity: 0; pointer-events: none; z-index: 1; }
+  #book.single .cover-inside { display: none; }
+  #pageRContent, #pageUnder { position: absolute; inset: 0; overflow: hidden; }
+  .scene-wrap { height: 100%; width: 100%; }
+  #pageL { -webkit-overflow-scrolling: touch; }
+
+  /* 3d-flip-fix */
+  #book, #book .spread, #book .page.right, #book .leaf, #book .cover {
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+  }
+  #book .page.right { overflow: visible; }
+  #pageRContent, #pageUnder, .scene-wrap, #view { overflow: hidden; border-radius: 0 0 8px 0; }
+  .leaf .zoombar { display: none !important; }
+  .leaf .face.front::after, .leaf .face.back::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+    background: linear-gradient(90deg, rgba(40,20,10,.2), transparent 18%, transparent 80%, rgba(40,20,10,.12));
+  }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div id="desk">
+  <span class="wall-leaf" style="left:4%;top:18%">🍁</span>
+  <span class="wall-leaf" style="right:6%;top:22%;font-size:28px">🍂</span>
+  <span class="wall-leaf" style="left:8%;bottom:10%;font-size:30px">🍁</span>
+  <span class="wall-leaf" style="right:10%;bottom:14%">🍂</span>
+  <span class="wall-leaf" style="left:16%;top:8%;font-size:22px;opacity:.5">🍃</span>
+  <span class="wall-leaf" style="right:18%;top:10%;font-size:22px;opacity:.5">🍁</span>
+
+  <div class="topline">
+    <a class="pill" href="../">🏠 Kai's Kool Kwiz</a>
+    <button class="roundbtn" id="muteBtn" aria-label="Sound on or off">🔊</button>
+  </div>
+
+  <div id="bookStage">
+    <div id="book" class="closed">
+      <div class="book-shadow"></div>
+      <div class="page-edge right-edge"></div>
+      <div class="spread" id="spread">
+        <div class="spine" aria-hidden="true"></div>
+        <div class="page right" id="pageR">
+          <div id="pageUnder"></div>
+          <div id="pageRContent"></div>
+          <div class="leaf" id="leaf">
+            <div class="face front" id="leafFront"><div class="leaf-shade"></div></div>
+            <div class="face back" id="leafBack"><div class="leaf-shade"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="cover" id="cover">
+        <div class="cover-face cover-front" id="coverFront">
+          <div class="brand">Kai's Kool Kwiz</div>
+          <div class="goldline"></div>
+          <h1>Find the<br>Turkey</h1>
+          <div class="subtitle">A Thanksgiving Story</div>
+          <div class="cover-art" id="coverArt"></div>
+          <div class="goldline"></div>
+          <div class="for">for Kaileigh</div>
+        </div>
+        <div class="cover-face cover-inside" id="pageL"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="openRow">
+    <button class="btn go" id="openBtn">▶ Open the book</button>
+    <p class="cover-sub" id="coverHint">A Thanksgiving hunt for Kaileigh</p>
+  </div>
+</div>
+
+<div class="overlay" id="winBox">
+  <div class="box">
+    <div style="font-size:60px">🦃</div>
+    <h1>You found him, Kaileigh!</h1>
+    <div class="stars" id="winStars" aria-label="Star rating">⭐⭐⭐</div>
+    <p id="winSub">Gobble gobble! What a finder!</p>
+    <div class="bigtime" id="winTime">⏱ 00:00</div>
+    <p id="winBonus"></p>
+    <p id="winBest"></p>
+    <button class="btn go" id="winNext">📖 Next page</button><br>
+    <button class="btn orange" id="winAgain">🔁 Try this page again</button><br>
+    <button class="btn blue" id="winContents">📜 Contents</button>
+  </div>
+</div>
+
+<div class="overlay" id="endBox">
+  <div class="box">
+    <div style="font-size:60px">📖</div>
+    <h1>The End</h1>
+    <div class="stars" id="endStars">⭐⭐⭐</div>
+    <p id="endSub">You found the turkey on every page, Kaileigh!</p>
+    <p id="endTotal"></p>
+    <button class="btn go" id="endContents">📜 Contents</button><br>
+    <a class="pill" href="../" style="font-size:20px;padding:10px 18px;margin-top:10px;display:inline-block">🏠 Home</a>
+  </div>
+</div>
+
+<script>
+const $ = function (id) { return document.getElementById(id); };
+const MUTE_KEY = "kkk_turkey_muted";
+const SAVE_KEY = "kkk_turkey_save_v1";
+const SW = 1200, SH = 800; // scene world size
+const VIEW_BG = {
+  1: "linear-gradient(180deg,#7ec8ff 0%,#d8f0ff 45%,#6bb34a 45%,#5a9e3c 100%)",
+  2: "linear-gradient(180deg,#ffb36a 0%,#ffe7b0 45%,#c9853a 45%,#b8742e 100%)",
+  3: "linear-gradient(180deg,#f3e0c4 0%,#f3e0c4 50%,#c4a07a 50%)",
+  4: "linear-gradient(180deg,#f7e6cf 0%,#f3d7b0 50%,#6b3f1a 50%)",
+  5: "linear-gradient(180deg,#7eb6e8 0%,#f7d9a8 45%,#8a6a3a 45%,#7a5a2e 100%)",
+  6: "linear-gradient(180deg,#87c8ff 0%,#cce8ff 45%,#7aae4a 45%,#5a8e32 100%)",
+  7: "linear-gradient(180deg,#6eb6ff 0%,#ffe0a0 45%,#8a8a90 45%,#6a6a70 100%)",
+  8: "linear-gradient(180deg,#f0a05a 0%,#f7d9a0 45%,#4a7a32 45%,#3e6a28 100%)",
+  9: "linear-gradient(180deg,#6b3040 0%,#6b3040 50%,#3e2414 50%)",
+  10: "linear-gradient(180deg,#142044 0%,#3a2a58 45%,#2a2438 45%,#1a1428 100%)"
+};
+
+
+const REDUCE_MQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+let reduce = REDUCE_MQ.matches;
+REDUCE_MQ.addEventListener && REDUCE_MQ.addEventListener("change", function (e) { reduce = e.matches; layoutBook(); });
+
+/* ================= Save ================= */
+function defaultSave() {
+  return { unlocked: 1, stars: [0,0,0,0,0,0,0,0,0,0], bestTime: [null,null,null,null,null,null,null,null,null,null] };
+}
+function loadSave() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (s && typeof s === "object" && Array.isArray(s.stars)) {
+      const d = defaultSave();
+      d.unlocked = Math.max(1, Math.min(10, s.unlocked || 1));
+      for (let i = 0; i < 10; i++) {
+        d.stars[i] = Math.max(0, Math.min(3, s.stars[i] || 0));
+        d.bestTime[i] = (s.bestTime && s.bestTime[i] != null) ? s.bestTime[i] : null;
+      }
+      return d;
+    }
+  } catch (e) {}
+  return defaultSave();
+}
+function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+let save = loadSave();
+
+/* ================= Sound ================= */
+let AC = null, muted = false;
+try { muted = localStorage.getItem(MUTE_KEY) === "1"; } catch (e) {}
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); return AC; }
+function tone(f, t0, dur, type, vol, f2) {
+  const a = ac(); if (!a || muted) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(f, a.currentTime + t0);
+  if (f2) o.frequency.exponentialRampToValueAtTime(f2, a.currentTime + t0 + dur);
+  g.gain.setValueAtTime(0.0001, a.currentTime + t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.2, a.currentTime + t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + t0 + dur);
+  o.connect(g); g.connect(a.destination); o.start(a.currentTime + t0); o.stop(a.currentTime + t0 + dur + 0.05);
+}
+function paperSound() {
+  const a = ac(); if (!a || muted) return;
+  const len = 0.32, n = Math.floor(a.sampleRate * len);
+  const buf = a.createBuffer(1, n, a.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) {
+    const t = i / n;
+    const env = Math.pow(Math.sin(Math.PI * t), 0.7) * (0.35 + 0.65 * Math.random());
+    d[i] = (Math.random() * 2 - 1) * env * (t < 0.15 ? 1 : 0.7);
+  }
+  const src = a.createBufferSource(); src.buffer = buf;
+  const f = a.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1600 + Math.random() * 600; f.Q.value = 0.65;
+  const g = a.createGain(); g.gain.value = 0.45;
+  src.connect(f); f.connect(g); g.connect(a.destination); src.start();
+}
+const SFX = {
+  click() { tone(660, 0, 0.06, "square", 0.05); },
+  miss() { tone(280, 0, 0.16, "sine", 0.08, 180); },
+  found() { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.08, 0.22, "triangle", 0.2); }); },
+  hint() { tone(880, 0, 0.15, "sine", 0.15, 1320); tone(1320, 0.15, 0.2, "sine", 0.12, 990); },
+  win() { [523, 659, 784, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.13, 0.25, "triangle", 0.22); }); tone(1047, 0.8, 0.6, "sine", 0.15); },
+  bonus() { [784, 988, 1175].forEach(function (f, i) { tone(f, i * 0.09, 0.2, "triangle", 0.16); }); },
+  lock() { tone(200, 0, 0.12, "sine", 0.07, 140); }
+};
+function say(text) {
+  if (muted || !window.speechSynthesis) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(String(text).replace(/Kaileigh/gi, "Kai Lee")); u.rate = 1.06; u.pitch = 1.15; speechSynthesis.speak(u); } catch (e) {}
+}
+function setMuted(m) {
+  muted = m;
+  try { localStorage.setItem(MUTE_KEY, m ? "1" : "0"); } catch (e) {}
+  const b = $("muteBtn"); if (b) b.textContent = m ? "🔇" : "🔊";
+  if (m && window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
+}
+
+function fmt(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(s / 60);
+  return String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
+
+/* ================= SVG helpers ================= */
+function rng(seed) { let s = (seed >>> 0) || 1; return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+function em(ch, x, y, size, rot, extra) {
+  return '<g transform="translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ') scale(' + (size / 100).toFixed(4) + ')" ' + (extra || "") + '><text x="0" y="0" font-size="100" text-anchor="middle" dominant-baseline="central" font-family="Apple Color Emoji, Noto Color Emoji, Segoe UI Emoji, sans-serif">' + ch + "</text></g>";
+}
+function el(cx, cy, rx, ry, fill, extra) {
+  return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + rx + '" ry="' + ry + '" fill="' + fill + '" ' + (extra || "") + "/>";
+}
+function rec(x, y, w, h, fill, extra, rx) {
+  return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + fill + '" ' + (rx ? 'rx="' + rx + '" ' : "") + (extra || "") + "/>";
+}
+function path(d, fill, extra) {
+  return '<path d="' + d + '" fill="' + (fill || "none") + '" ' + (extra || "") + "/>";
+}
+
+/* The real turkey: black pilgrim hat + gold buckle + red wattle + blue scarf.
+   Coordinate system: origin at mid-body, facing right, ~100 units tall. */
+function turkeyMarkup(opt) {
+  opt = opt || {};
+  const kind = opt.kind || "real";
+  const palName = opt.pal || (kind === "white" ? "white" : "real");
+  const PALS = {
+    real:  { body:"#c46a2c", dark:"#8a3d12", wing:"#e08948", head:"#d4783a", breast:"#a84e1c", beak:"#f4c430", tail:["#c62828","#ef6c00","#f9a825","#2e7d32","#6d4c41"] },
+    white: { body:"#f4eee3", dark:"#d4c8b4", wing:"#fffaf2", head:"#f0e0cc", breast:"#e8dcc8", beak:"#f4c430", tail:["#ef9a9a","#ffcc80","#fff59d","#a5d6a7","#bcaaa4"] },
+    dark:  { body:"#6a3a18", dark:"#3e2210", wing:"#8a5224", head:"#7a4620", breast:"#4e2a10", beak:"#e6b325", tail:["#8b1e1e","#bf360c","#c6a700","#1b5e20","#3e2723"] }
+  };
+  const p = PALS[palName] || PALS.real;
+  let tail = "";
+  const tails = p.tail;
+  const angles = [-70, -45, -22, 0, 22, 45, 68];
+  for (let i = 0; i < angles.length; i++) {
+    const col = tails[i % tails.length];
+    tail += '<g transform="rotate(' + angles[i] + ')"><ellipse cx="0" cy="-58" rx="12" ry="32" fill="' + col + '" stroke="#5a2a10" stroke-width="1.2"/></g>';
+  }
+  const wing = el(8, 6, 22, 14, p.wing, 'stroke="' + p.dark + '" stroke-width="1.2"');
+  const body = el(0, 8, 28, 24, p.body, 'stroke="' + p.dark + '" stroke-width="1.5"') +
+    el(-4, 12, 16, 14, p.breast);
+  const legs = '<g stroke="#c9a024" stroke-width="3" fill="none" stroke-linecap="round"><path d="M-8 28 L-10 40 L-16 42"/><path d="M8 28 L10 40 L16 42"/></g>';
+  let head = el(26, -10, 14, 13, p.head, 'stroke="' + p.dark + '" stroke-width="1.2"');
+  if (kind !== "back") {
+    head += el(32, -13, 3.2, 3.4, "#fff") + el(33, -13, 1.6, 1.8, "#1a1a1a");
+    head += path("M38 -10 L48 -7 L38 -4 Z", p.beak, 'stroke="#c9a024" stroke-width="0.8"');
+  } else {
+    head = el(-26, -10, 14, 13, p.head, 'stroke="' + p.dark + '" stroke-width="1.2"');
+  }
+  let wattle = "";
+  if (kind !== "back" && kind !== "nowattle") {
+    wattle = el(34, -2, 4, 8, "#e53935") + el(28, -16, 3.5, 6, "#e53935");
+  }
+  let scarf = "";
+  if (kind === "real") {
+    scarf = path("M16 0 Q26 10 22 18 Q18 8 12 4 Z", "#3b6fd6", 'stroke="#234a9a" stroke-width="1"') +
+      rec(12, -2, 22, 7, "#3b6fd6", 'stroke="#234a9a" stroke-width="1"', 3);
+  }
+  let hat = "";
+  if (kind === "real" || kind === "white") {
+    hat = rec(16, -36, 28, 14, "#1a1a1a", "", 2) +
+      rec(10, -24, 40, 6, "#1a1a1a", "", 2) +
+      rec(26, -31, 10, 7, "#f1c40f", 'stroke="#c9a024" stroke-width="0.8"', 1);
+  } else if (kind === "chef") {
+    hat = el(26, -38, 16, 14, "#fff") + rec(14, -30, 24, 10, "#fff", 'stroke="#ddd" stroke-width="0.8"', 2);
+  } else if (kind === "bluehat") {
+    hat = path("M14 -22 L28 -48 L42 -22 Z", "#3b6fd6", 'stroke="#234a9a" stroke-width="1.2"') +
+      el(28, -48, 5, 5, "#ff4fa3");
+  }
+  const bob = opt.bob ? ' class="bob"' : "";
+  const flip = opt.flip ? -1 : 1;
+  const s = opt.scale || 1;
+  const id = opt.id ? ' id="' + opt.id + '"' : "";
+  const cls = opt.cls ? ' class="' + opt.cls + '"' : "";
+  return '<g' + id + cls + ' data-kind="' + kind + '" transform="translate(' + (opt.x || 0) + ' ' + (opt.y || 0) + ') scale(' + (s * flip) + ',' + s + ')"><g' + bob + '>' +
+    tail + legs + body + wing + scarf + head + wattle + hat +
+    "</g></g>";
+}
+
+function turkeyHitSize(scale) { return 90 * (scale || 1); }
+
+function refTurkeySVG(w, h) {
+  w = w || 200; h = h || 200;
+  return '<svg viewBox="0 0 120 130" width="' + w + '" height="' + h + '" xmlns="http://www.w3.org/2000/svg">' +
+    rec(0, 0, 120, 130, "transparent") +
+    turkeyMarkup({ x: 54, y: 78, scale: 0.95, kind: "real", bob: false }) +
+    "</svg>";
+}
+
+/* Props */
+function pumpkin(x, y, s, col) {
+  col = col || "#ef7a1a";
+  const d = "#c45a0a";
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
+    el(-10, 0, 14, 16, col) + el(10, 0, 14, 16, col) + el(0, 0, 16, 18, col, 'stroke="' + d + '" stroke-width="1.5"') +
+    rec(-3, -22, 6, 10, "#3e7a22", "", 2) +
+    "</g>";
+}
+function pie(x, y, s) {
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
+    el(0, 6, 26, 10, "#c47a2a") + el(0, 2, 24, 9, "#f0c35a") +
+    path("M-18 0 Q0 -16 18 0", "#d48a30") +
+    rec(-2, -14, 4, 10, "#3e7a22", "", 1) +
+    "</g>";
+}
+function hay(x, y, s, rot) {
+  return '<g transform="translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ') scale(' + s + ')">' +
+    rec(-28, -16, 56, 32, "#e6c15a", 'stroke="#c9a024" stroke-width="2"', 8) +
+    rec(-20, -6, 40, 6, "#c9a024", "", 2) +
+    "</g>";
+}
+function tree(x, y, s, col) {
+  col = col || "#c44914";
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')">' +
+    rec(-6, -10, 12, 40, "#6b3f1a") +
+    el(0, -28, 28, 26, col) + el(-16, -16, 16, 14, col) + el(16, -18, 16, 14, col) +
+    "</g>";
+}
+function fence(x, y, w, s) {
+  let o = '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')">';
+  o += rec(0, 10, w, 6, "#d4b07a");
+  o += rec(0, 28, w, 6, "#d4b07a");
+  for (let i = 0; i < w; i += 22) o += rec(i, 0, 8, 44, "#c9a06a", "", 2);
+  return o + "</g>";
+}
+function person(x, y, s, shirt, hair, flip) {
+  return '<g transform="translate(' + x + ' ' + y + ') scale(' + ((flip ? -s : s)) + ',' + s + ')">' +
+    el(0, -28, 10, 10, "#f0c9a0") +
+    el(0, -34, 11, 8, hair || "#3a2414") +
+    rec(-12, -18, 24, 22, shirt || "#3b6fd6", "", 4) +
+    rec(-10, 4, 8, 16, "#3a2414", "", 2) + rec(2, 4, 8, 16, "#3a2414", "", 2) +
+    "</g>";
+}
+
+/* ================= Levels ================= */
+const LEVELS = [
+  { n: 1, title: "The Garden Picnic", story: "Kaileigh laid a picnic in the garden. A hungry turkey popped by to nibble the corn!", seed: 101, turkey: { x: 860, y: 545, scale: 1.15, flip: false }, bob: true, decoys: [], birds: [{ch:"🐔",x:240,y:560,s:48},{ch:"🦆",x:1080,y:600,s:46}], occlude: 0, bonus: 0, timeLimit: 25000, clutter: 14 },
+  { n: 2, title: "The Pumpkin Patch", story: "Rows and rows of pumpkins! The turkey is hiding somewhere in the patch.", seed: 202, turkey: { x: 230, y: 500, scale: 0.95, flip: true }, bob: true, decoys: [{kind:"nohat",x:980,y:520,scale:0.9,pal:"real"}], birds: [{ch:"🦉",x:700,y:260,s:44}], occlude: 0, bonus: 0, timeLimit: 30000, clutter: 22 },
+  { n: 3, title: "Granny's Kitchen", story: "Pies are cooling on the counter. Don't mix our turkey up with the one in the oven!", seed: 303, turkey: { x: 980, y: 430, scale: 0.82, flip: false }, bob: true, decoys: [{kind:"chef",x:300,y:470,scale:0.8,pal:"white"}], birds: [{ch:"🐔",x:160,y:500,s:40},{ch:"🐤",x:200,y:530,s:28}], occlude: 0, bonus: 0, timeLimit: 35000, clutter: 20 },
+  { n: 4, title: "The Family Feast", story: "Everyone is at the table. Our turkey has a black hat and a blue scarf — he is a guest, not dinner!", seed: 404, turkey: { x: 150, y: 430, scale: 0.72, flip: false }, bob: false, decoys: [{kind:"nohat",x:640,y:390,scale:0.7},{kind:"white",x:1080,y:500,scale:0.7}], birds: [{ch:"🐔",x:900,y:240,s:36}], occlude: 0.12, bonus: 0, timeLimit: 40000, clutter: 24 },
+  { n: 5, title: "The Hayride", story: "Bump, bump went the wagon. The turkey ducked behind the hay — but his hat still peeks out.", seed: 505, turkey: { x: 620, y: 455, scale: 0.64, flip: true }, bob: false, decoys: [{kind:"nohat",x:200,y:520,scale:0.7},{kind:"bluehat",x:1040,y:500,scale:0.62}], birds: [{ch:"🦆",x:160,y:620,s:40},{ch:"🦉",x:980,y:250,s:38},{ch:"🐦",x:400,y:220,s:28}], occlude: 0.22, bonus: 0, timeLimit: 45000, clutter: 28 },
+  { n: 6, title: "The Farmyard Party", story: "Chickens, ducks and look-alike turkeys everywhere! Look for the black hat with the gold buckle.", seed: 606, turkey: { x: 1060, y: 310, scale: 0.55, flip: false }, bob: false, decoys: [{kind:"nohat",x:300,y:520,scale:0.55},{kind:"white",x:520,y:560,scale:0.5},{kind:"chef",x:800,y:500,scale:0.52},{kind:"back",x:180,y:400,scale:0.5,pal:"dark"}], birds: [{ch:"🐔",x:420,y:480,s:40},{ch:"🐔",x:700,y:600,s:36},{ch:"🦆",x:240,y:620,s:38},{ch:"🦉",x:900,y:220,s:34},{ch:"🐤",x:960,y:590,s:26}], occlude: 0.18, bonus: 0, timeLimit: 50000, clutter: 32 },
+  { n: 7, title: "The Thanksgiving Parade", story: "Bands, banners and floats fill the street. Can you spot him in the crowd? A bonus timer is on!", seed: 707, turkey: { x: 430, y: 620, scale: 0.48, flip: true }, bob: false, decoys: [{kind:"nohat",x:200,y:500,scale:0.48},{kind:"white",x:780,y:430,scale:0.45},{kind:"bluehat",x:1100,y:560,scale:0.48},{kind:"chef",x:80,y:360,scale:0.42}], birds: [{ch:"🦉",x:600,y:180,s:32},{ch:"🐦",x:300,y:160,s:24},{ch:"🐔",x:980,y:640,s:32}], occlude: 0.28, bonus: 45, timeLimit: 55000, clutter: 36 },
+  { n: 8, title: "The Autumn Forest", story: "Leaves, trees and shadows. The turkey is tucked behind a trunk — look for his gold buckle.", seed: 808, turkey: { x: 250, y: 430, scale: 0.42, flip: false }, bob: false, decoys: [{kind:"nohat",x:700,y:500,scale:0.42},{kind:"nohat",x:980,y:600,scale:0.4,pal:"dark"},{kind:"white",x:520,y:300,scale:0.38},{kind:"back",x:1100,y:380,scale:0.4},{kind:"bluehat",x:80,y:620,scale:0.4}], birds: [{ch:"🦉",x:400,y:200,s:34},{ch:"🦉",x:880,y:240,s:30},{ch:"🐦",x:600,y:140,s:22},{ch:"🦆",x:150,y:680,s:32}], occlude: 0.38, bonus: 40, timeLimit: 60000, clutter: 40 },
+  { n: 9, title: "The Grand Banquet", story: "A huge feast in a grand hall. Our turkey is small, and a pie is in the way. Hunt carefully!", seed: 909, turkey: { x: 900, y: 520, scale: 0.36, flip: true }, bob: false, decoys: [{kind:"nohat",x:200,y:480,scale:0.36},{kind:"white",x:400,y:360,scale:0.34},{kind:"chef",x:620,y:300,scale:0.34},{kind:"bluehat",x:80,y:300,scale:0.32},{kind:"back",x:1100,y:300,scale:0.34},{kind:"nohat",x:740,y:620,scale:0.33,pal:"dark"}], birds: [{ch:"🐔",x:320,y:640,s:28},{ch:"🦆",x:1080,y:640,s:28},{ch:"🦉",x:560,y:200,s:26}], occlude: 0.48, bonus: 35, timeLimit: 70000, clutter: 44 },
+  { n: 10, title: "The Harvest Fair at Night", story: "Lanterns glow, stalls bustle, and the turkey is tiny. Find his black hat before the lanterns fade!", seed: 1010, turkey: { x: 640, y: 268, scale: 0.30, flip: false }, bob: false, decoys: [{kind:"nohat",x:180,y:500,scale:0.3},{kind:"white",x:400,y:560,scale:0.3},{kind:"chef",x:860,y:500,scale:0.28},{kind:"bluehat",x:1040,y:360,scale:0.28},{kind:"back",x:300,y:300,scale:0.28,pal:"dark"},{kind:"nohat",x:980,y:640,scale:0.28},{kind:"white",x:80,y:360,scale:0.26},{kind:"chef",x:760,y:640,scale:0.28}], birds: [{ch:"🦉",x:200,y:180,s:26},{ch:"🦉",x:1000,y:200,s:24},{ch:"🐦",x:500,y:140,s:18},{ch:"🐔",x:1120,y:600,s:24},{ch:"🦆",x:60,y:640,s:24}], occlude: 0.52, bonus: 30, timeLimit: 80000, clutter: 50 }
+];
+
+function starRating(lv, timeMs, hints, bonusHit) {
+  let s = 3;
+  if (hints >= 1) s--;
+  if (hints >= 2) s--;
+  if (timeMs > lv.timeLimit && !bonusHit) s--;
+  if (s < 1) s = 1;
+  return s;
+}
+
+function scatterEmoji(R, chars, n, reg, smin, smax, avoid) {
+  let o = "";
+  avoid = avoid || [];
+  for (let i = 0; i < n; i++) {
+    let x, y, ok, tries = 0;
+    do {
+      x = reg[0] + R() * reg[2];
+      y = reg[1] + R() * reg[3];
+      ok = true;
+      for (let a = 0; a < avoid.length; a++) {
+        if (Math.hypot(x - avoid[a].x, y - avoid[a].y) < (avoid[a].r || 80)) { ok = false; break; }
+      }
+    } while (!ok && ++tries < 20);
+    const ch = chars[Math.floor(R() * chars.length)];
+    const s = smin + R() * (smax - smin);
+    const rot = (R() * 50) - 25;
+    o += em(ch, x, y, s, rot);
+  }
+  return o;
+}
+
+function backdrop(n) {
+  if (n === 1) {
+    return rec(0,0,SW,SH,"url(#sky1)") +
+      '<defs><linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ec8ff"/><stop offset="1" stop-color="#d8f0ff"/></linearGradient></defs>' +
+      el(1060, 90, 50, 50, "#ffe14d") +
+      el(200, 80, 70, 28, "#fff") + el(250, 90, 50, 22, "#fff") +
+      el(700, 70, 60, 24, "#fff") +
+      rec(0, 430, SW, 370, "#7ec65a") +
+      path("M0 460 Q300 400 600 450 T1200 430 L1200 800 L0 800 Z", "#6bb34a") +
+      rec(0, 200, 160, 260, "#e24b3c") + path("M-10 200 L80 120 L170 200 Z", "#a8302a") +
+      rec(60, 320, 40, 80, "#6b3f1a") + rec(20, 240, 36, 36, "#8ec8ff") +
+      fence(180, 400, 400, 1.1) +
+      rec(700, 520, 280, 160, "#f4e4c1", 'stroke="#c9a024" stroke-width="4"', 8) +
+      rec(700, 520, 280, 160, "transparent", 'stroke="#c44914" stroke-width="0" stroke-dasharray="18 14"') +
+      '<path d="M700 520 h280 v160 h-280 z" fill="url(#chk)" opacity=".35"/>' +
+      '<defs><pattern id="chk" width="28" height="28" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#c44914"/><rect x="14" y="14" width="14" height="14" fill="#c44914"/></pattern></defs>';
+  }
+  if (n === 2) {
+    return rec(0,0,SW,SH,"url(#sky2)") +
+      '<defs><linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb36a"/><stop offset="1" stop-color="#ffe7b0"/></linearGradient></defs>' +
+      el(180, 90, 44, 44, "#ffef8a") +
+      rec(0, 380, SW, 420, "#c9853a") +
+      path("M0 400 Q200 340 400 390 T800 370 T1200 400 L1200 800 L0 800 Z", "#d4923e") +
+      rec(820, 200, 280, 220, "#b33a2a") + rec(840, 230, 40, 50, "#7ec8ff") + rec(1040, 230, 40, 50, "#7ec8ff") +
+      rec(930, 320, 50, 100, "#6b3f1a") + path("M800 200 L960 110 L1160 200 Z", "#7a2418") +
+      rec(760, 250, 40, 160, "#c9c3d0") + el(780, 230, 28, 40, "#c9c3d0") +
+      rec(760, 250, 40, 160, "transparent", 'stroke="#8a8490" stroke-width="2"') +
+      rec(748, 300, 16, 50, "#8a5a2b") + rec(836, 300, 16, 50, "#8a5a2b") +
+      em("🌻", 790, 220, 36);
+  }
+  if (n === 3) {
+    return rec(0,0,SW,SH,"#f3e0c4") +
+      rec(0, 0, SW, 80, "#c44914") +
+      rec(40, 100, 320, 280, "#8ec8ff", 'stroke="#fff" stroke-width="10"') +
+      rec(80, 130, 100, 220, "#a8d8ff") + rec(220, 130, 100, 220, "#a8d8ff") +
+      rec(0, 500, SW, 300, "#c4a07a") +
+      rec(40, 430, 500, 24, "#8a5a2b") +
+      rec(700, 430, 460, 24, "#8a5a2b") +
+      rec(760, 200, 160, 230, "#d0d6e0") + rec(780, 220, 120, 160, "#9aa3b2") + rec(820, 360, 40, 70, "#6b3f1a") +
+      rec(40, 250, 80, 180, "#e8c9a0") + rec(46, 256, 68, 50, "#f0d8b4") + rec(46, 316, 68, 50, "#f0d8b4") + rec(46, 376, 68, 50, "#f0d8b4") +
+      rec(980, 80, 180, 140, "#eee") + rec(1000, 100, 60, 80, "#ccc") + rec(1080, 100, 60, 80, "#ccc");
+  }
+  if (n === 4) {
+    return rec(0,0,SW,SH,"#f7e6cf") +
+      rec(0,0,SW,SH,"#f3d7b0") +
+      '<defs><pattern id="wp" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="4" fill="#e8b88a"/></pattern></defs>' +
+      rec(0,0,SW,420,"url(#wp)") + rec(0,0,SW,420,"#f7e6cf") +
+      rec(0,0,SW,420,"transparent") +
+      rec(80, 60, 280, 220, "#8ec8ff", 'stroke="#fff" stroke-width="10"') +
+      rec(840, 60, 280, 220, "#8ec8ff", 'stroke="#fff" stroke-width="10"') +
+      rec(0, 500, SW, 300, "#6b3f1a") +
+      rec(200, 430, 800, 36, "#5a3014", "", 4) +
+      rec(230, 466, 740, 200, "#8a5a2b", "", 6) +
+      el(600, 80, 16, 16, "#f1c40f") +
+      rec(560, 20, 80, 14, "#c9a024") + rec(590, 34, 20, 40, "#c9a024") +
+      el(540, 90, 8, 8, "#ffe066") + el(660, 90, 8, 8, "#ffe066") + el(600, 120, 8, 8, "#ffe066");
+  }
+  if (n === 5) {
+    return rec(0,0,SW,SH,"url(#sky5)") +
+      '<defs><linearGradient id="sky5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7eb6e8"/><stop offset="1" stop-color="#f7d9a8"/></linearGradient></defs>' +
+      rec(0, 420, SW, 380, "#8a6a3a") +
+      path("M0 500 Q400 420 800 510 T1200 490 L1200 800 L0 800 Z", "#7a5a2e") +
+      rec(480, 360, 420, 160, "#8a4a1a", "", 10) +
+      rec(500, 300, 80, 80, "#6b3f1a", "", 4) + rec(800, 300, 80, 80, "#6b3f1a", "", 4) +
+      el(540, 380, 28, 28, "#2a2a2a") + el(840, 380, 28, 28, "#2a2a2a") +
+      rec(-20, 200, 160, 280, "#3e7a22") + rec(1040, 180, 200, 300, "#c44914");
+  }
+  if (n === 6) {
+    return rec(0,0,SW,SH,"url(#sky6)") +
+      '<defs><linearGradient id="sky6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#87c8ff"/><stop offset="1" stop-color="#cce8ff"/></linearGradient></defs>' +
+      rec(0, 460, SW, 340, "#7aae4a") +
+      rec(80, 180, 360, 300, "#c44914") + path("M60 180 L260 70 L440 180 Z", "#8a2418") +
+      rec(220, 360, 70, 120, "#6b3f1a") + rec(120, 230, 70, 70, "#8ec8ff") + rec(320, 230, 70, 70, "#8ec8ff") +
+      rec(500, 280, 180, 200, "#e8d8b0") + rec(530, 360, 50, 120, "#8a5a2b") + rec(500, 260, 180, 24, "#c44914") +
+      rec(980, 200, 70, 280, "#d0d0d0") + el(1015, 200, 40, 20, "#c0c0c0") +
+      fence(40, 430, 1100, 1);
+  }
+  if (n === 7) {
+    return rec(0,0,SW,SH,"url(#sky7)") +
+      '<defs><linearGradient id="sky7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6eb6ff"/><stop offset="1" stop-color="#ffe0a0"/></linearGradient></defs>' +
+      rec(0, 500, SW, 300, "#8a8a90") +
+      rec(0, 490, SW, 16, "#c9c9ce") +
+      rec(20, 140, 200, 350, "#e24b3c") + rec(40, 180, 50, 60, "#8ec8ff") + rec(140, 180, 50, 60, "#8ec8ff") +
+      rec(260, 100, 180, 390, "#7b5cff") + rec(280, 140, 50, 70, "#fff") + rec(360, 140, 50, 70, "#fff") +
+      rec(900, 120, 220, 370, "#12b5a0") + rec(930, 160, 60, 70, "#d8f8ff") + rec(1030, 160, 60, 70, "#d8f8ff") +
+      rec(480, 300, 320, 180, "#ff7a3d", "", 16) + rec(500, 250, 80, 60, "#ffe066", "", 8) +
+      rec(200, 200, 800, 50, "#c44914") +
+      '<text x="600" y="238" font-size="36" font-family="Fredoka, sans-serif" font-weight="700" text-anchor="middle" fill="#fff6d4">HAPPY THANKSGIVING</text>';
+  }
+  if (n === 8) {
+    return rec(0,0,SW,SH,"url(#sky8)") +
+      '<defs><linearGradient id="sky8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0a05a"/><stop offset="1" stop-color="#f7d9a0"/></linearGradient></defs>' +
+      rec(0, 560, SW, 240, "#4a7a32") +
+      path("M0 600 Q400 540 800 620 T1200 580 L1200 800 L0 800 Z", "#3e6a28") +
+      path("M80 620 Q300 640 400 700 T200 760 T80 620", "#6aa0c8") +
+      rec(180, 300, 36, 320, "#6b3f1a") +
+      rec(700, 280, 44, 340, "#5a3014") +
+      rec(980, 260, 40, 360, "#6b3f1a");
+  }
+  if (n === 9) {
+    return rec(0,0,SW,SH,"#4a2030") +
+      rec(0, 0, SW, 520, "#6b3040") +
+      rec(80, 40, 320, 260, "#1a3050") + rec(90, 50, 140, 240, "#8ec8ff") + rec(250, 50, 140, 240, "#8ec8ff") +
+      rec(800, 40, 320, 260, "#1a3050") + rec(810, 50, 140, 240, "#8ec8ff") + rec(970, 50, 140, 240, "#8ec8ff") +
+      rec(40, 20, 60, 500, "#8c1c2b") + rec(1100, 20, 60, 500, "#8c1c2b") +
+      rec(0, 520, SW, 280, "#3e2414") +
+      rec(140, 500, 920, 28, "#5a3014", "", 4) +
+      rec(160, 528, 880, 180, "#6b3f1a", "", 6) +
+      el(600, 70, 18, 18, "#f1c40f") + rec(560, 20, 80, 16, "#c9a024") +
+      el(520, 110, 7, 7, "#ffe066") + el(680, 110, 7, 7, "#ffe066") +
+      rec(580, 200, 40, 300, "#3a1020");
+  }
+  /* 10 night fair */
+  return rec(0,0,SW,SH,"url(#sky10)") +
+    '<defs><linearGradient id="sky10" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#142044"/><stop offset="1" stop-color="#3a2a58"/></linearGradient></defs>' +
+    el(1020, 90, 42, 42, "#f0e6b0") +
+    rec(0, 520, SW, 280, "#2a2438") +
+    rec(80, 340, 220, 220, "#c44914") + path("M60 340 L190 240 L320 340 Z", "#8a2418") +
+    rec(460, 360, 260, 200, "#7b5cff") + path("M440 360 L590 250 L740 360 Z", "#4b33b8") +
+    rec(860, 350, 240, 210, "#12b5a0") + path("M840 350 L980 250 L1120 350 Z", "#0b7a6c") +
+    rec(0, 510, SW, 14, "#e6c15a");
+}
+
+function buildOccluder(lv, T) {
+  const o = lv.occlude || 0;
+  if (o <= 0) return "";
+  const s = T.scale;
+  /* Draw a prop overlapping the turkey from the bottom or side, leaving the hat mostly visible. */
+  if (lv.n === 4) return rec(T.x - 40, T.y + 10, 100, 50, "#8a5a2b", "", 6);
+  if (lv.n === 5) return hay(T.x + 10, T.y + 28, 1.1 + s, -8);
+  if (lv.n === 6) return pumpkin(T.x + 18, T.y + 22, 0.9, "#ef7a1a");
+  if (lv.n === 7) return rec(T.x - 30, T.y + 16, 90, 46, "#ff7a3d", "", 10) + em("🥁", T.x + 20, T.y + 20, 36);
+  if (lv.n === 8) return rec(T.x - 50, T.y - 10, 36, 220, "#6b3f1a") + el(T.x - 32, T.y - 80, 50, 44, "#c44914");
+  if (lv.n === 9) return pie(T.x + 6, T.y + 18, 1.35);
+  if (lv.n === 10) return rec(T.x - 36, T.y + 8, 80, 40, "#7b5cff", "", 8) + em("🎪", T.x + 8, T.y - 40, 48);
+  return pumpkin(T.x + 16, T.y + 24, 1, "#ef7a1a");
+}
+
+function buildScene(lv) {
+  const R = rng(lv.seed);
+  const T = lv.turkey;
+  const avoid = [{ x: T.x, y: T.y, r: 90 * T.scale + 40 }];
+  (lv.decoys || []).forEach(function (d) { avoid.push({ x: d.x, y: d.y, r: 70 }); });
+  let mid = "", front = "", birds = "";
+
+  if (lv.n === 1) {
+    mid += em("🧺", 760, 500, 64) + em("🌽", 820, 500, 50) + em("🍎", 900, 500, 36) + em("🥖", 780, 580, 48);
+    mid += pumpkin(400, 560, 1.1) + pumpkin(460, 580, 0.8, "#f0a030");
+    mid += scatterEmoji(R, ["🍁","🍂","🌼","🍃"], lv.clutter, [40, 440, 1100, 300], 22, 40, avoid);
+  } else if (lv.n === 2) {
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 10; c++) {
+        const x = 80 + c * 110 + (r % 2) * 30 + (R() * 16 - 8);
+        const y = 430 + r * 80 + (R() * 12 - 6);
+        if (Math.hypot(x - T.x, y - T.y) < 70) continue;
+        mid += pumpkin(x, y, 0.7 + R() * 0.45, R() > 0.3 ? "#ef7a1a" : "#f0a030");
+      }
+    }
+    mid += em("🌾", 600, 400, 70) + em("🌽", 540, 420, 48);
+    mid += scatterEmoji(R, ["🍁","🍂"], 18, [20, 360, 1160, 400], 20, 36, avoid);
+  } else if (lv.n === 3) {
+    mid += pie(200, 418, 1.1) + pie(280, 418, 1) + pie(820, 418, 1.2) + pie(900, 418, 0.9);
+    mid += em("🥘", 400, 418, 50) + em("🧂", 470, 410, 30) + em("🥛", 520, 410, 32);
+    mid += em("🥧", 110, 418, 44) + em("🍞", 1080, 418, 40) + em("🧈", 600, 418, 32);
+    mid += em("🍳", 840, 340, 40) + pumpkin(80, 560, 1) + pumpkin(160, 600, 0.7);
+    mid += scatterEmoji(R, ["🍁","🍎","🥕","🌽","🍂"], lv.clutter, [40, 520, 1100, 250], 22, 40, avoid);
+    mid += em("🍗", 500, 560, 48); /* roasted decoy */
+  } else if (lv.n === 4) {
+    mid += person(300, 500, 1.3, "#c44914", "#3a2414") + person(400, 500, 1.2, "#3b6fd6", "#6b3f1a") +
+      person(820, 500, 1.25, "#2e7d32", "#1a1a1a") + person(920, 500, 1.1, "#ff7a3d", "#c47a2a", true);
+    mid += person(500, 500, 1.0, "#7b5cff", "#f0c430"); /* kid */
+    mid += pie(500, 455, 1) + pie(620, 455, 1.1) + em("🥗", 700, 450, 40) + em("🥖", 420, 450, 40) + em("🥘", 780, 450, 44);
+    mid += em("🍗", 560, 450, 46) + em("🍷", 360, 445, 28).replace("🍷","🧃") + em("🧃", 360, 445, 30);
+    mid += pumpkin(80, 620, 1.2) + pumpkin(1140, 620, 1) + em("🕯️", 240, 440, 30) + em("🕯️", 960, 440, 30);
+    mid += scatterEmoji(R, ["🍁","🍂","🌽","🍎"], 16, [40, 540, 1120, 230], 20, 34, avoid);
+  } else if (lv.n === 5) {
+    mid += hay(300, 500, 1.3, -6) + hay(400, 530, 1.1, 8) + hay(860, 510, 1.4, -4) + hay(980, 560, 1, 12);
+    mid += tree(80, 380, 1.6, "#c44914") + tree(1100, 360, 1.8, "#e65100") + tree(200, 340, 1.2, "#ef6c00");
+    mid += scatterEmoji(R, ["🍁","🍂","🍃","🌾","🌽"], lv.clutter, [20, 300, 1160, 460], 22, 44, avoid);
+  } else if (lv.n === 6) {
+    mid += em("🐄", 600, 500, 70) + em("🐷", 740, 560, 56) + em("🐴", 420, 500, 66) + em("🐑", 900, 540, 50);
+    mid += pumpkin(140, 560, 1) + pumpkin(1000, 580, 0.9) + hay(620, 600, 1, 0);
+    mid += scatterEmoji(R, ["🍁","🍂","🌽","🍎","🌾"], lv.clutter, [20, 440, 1160, 330], 20, 40, avoid);
+  } else if (lv.n === 7) {
+    for (let i = 0; i < 14; i++) mid += person(80 + i * 80 + (i%3)*10, 530 + (i%2)*16, 0.85 + (i%3)*0.08, ["#c44914","#3b6fd6","#2e7d32","#ff7a3d","#7b5cff"][i%5], "#3a2414", i%2===0);
+    mid += em("🎈", 520, 260, 40) + em("🎈", 700, 240, 36) + em("🎺", 560, 400, 36) + em("🥁", 640, 400, 36);
+    mid += em("🚩", 200, 300, 40) + em("🚩", 1000, 300, 40);
+    mid += scatterEmoji(R, ["🍁","🍂","🎉","🎊","⭐"], lv.clutter, [20, 200, 1160, 560], 18, 36, avoid);
+  } else if (lv.n === 8) {
+    mid += tree(120, 400, 2.2, "#c44914") + tree(400, 360, 2.6, "#e65100") + tree(620, 390, 2.0, "#ef6c00") +
+      tree(860, 350, 2.4, "#c44914") + tree(1100, 380, 2.1, "#bf360c") + tree(500, 420, 1.6, "#d84315");
+    mid += em("🍄", 300, 640, 32) + em("🍄", 800, 660, 28) + em("🧺", 600, 660, 48);
+    mid += scatterEmoji(R, ["🍁","🍂","🍃"], lv.clutter + 10, [0, 200, 1200, 560], 22, 50, avoid);
+  } else if (lv.n === 9) {
+    mid += person(280, 560, 1.1, "#c44914") + person(360, 560, 1.05, "#3b6fd6") + person(860, 560, 1.1, "#2e7d32", "#1a1a1a", true) + person(960, 560, 1, "#ff7a3d");
+    mid += pie(400, 515, 1.1) + pie(520, 515, 1) + pie(700, 515, 1.2) + em("🥘", 600, 510, 44) + em("🥗", 780, 510, 36);
+    mid += em("🕯️", 240, 500, 28) + em("🕯️", 1000, 500, 28) + em("🕯️", 600, 470, 32);
+    mid += em("🍗", 480, 510, 40) + pumpkin(60, 680, 1) + pumpkin(1140, 680, 0.9);
+    mid += scatterEmoji(R, ["🍁","🍂","🥧","🍎","🌽"], lv.clutter, [40, 540, 1120, 240], 18, 34, avoid);
+  } else {
+    mid += em("🎡", 200, 300, 90) + em("🎠", 1050, 430, 80) + em("🎟️", 500, 500, 36);
+    mid += em("🍭", 400, 500, 32) + em("🍩", 800, 500, 32) + em("🌽", 300, 540, 36);
+    for (let i = 0; i < 18; i++) mid += el(80 + i * 60, 500, 5, 5, "#ffe066") + rec(80 + i * 60, 500, 2, 30, "#e6c15a");
+    mid += scatterEmoji(R, ["⭐","✨","🍁","🍂","🏮"], lv.clutter, [20, 80, 1160, 680], 16, 32, avoid);
+    /* stars in the sky */
+    for (let i = 0; i < 30; i++) mid += el(20 + R() * 1160, 20 + R() * 220, 1.4 + R() * 2, 1.4 + R() * 2, "#fff8d0");
+  }
+
+  (lv.birds || []).forEach(function (b) { birds += em(b.ch, b.x, b.y, b.s); });
+
+  let decoys = "";
+  (lv.decoys || []).forEach(function (d, i) {
+    decoys += turkeyMarkup({
+      x: d.x, y: d.y, scale: d.scale, flip: d.flip, kind: d.kind || "nohat", pal: d.pal, bob: false,
+      id: "decoy-" + i, cls: "decoy"
+    });
+  });
+
+  const hero = turkeyMarkup({
+    x: T.x, y: T.y, scale: T.scale, flip: T.flip, kind: "real", bob: !!lv.bob,
+    id: "turkey-real", cls: "hero-turkey"
+  });
+  const occ = buildOccluder(lv, T);
+
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + SW + ' ' + SH + '" preserveAspectRatio="xMidYMid meet" id="sceneSvg">' +
+    backdrop(lv.n) + mid + birds + decoys + hero + occ +
+    "</svg>";
+  return { svg: svg, turkey: { x: T.x, y: T.y, scale: T.scale, size: turkeyHitSize(T.scale) } };
+}
+
+/* ================= Book layout ================= */
+const book = $("book"), desk = $("desk"), cover = $("cover");
+function isSingle() {
+  return window.innerWidth < 740 || (window.innerHeight > window.innerWidth * 1.05 && window.innerWidth < 1000);
+}
+function layoutBook() {
+  book.classList.toggle("single", isSingle());
+  book.classList.toggle("reduce", reduce);
+  if (screen === "play" && st) {
+    measure(); renderView();
+  }
+}
+
+/* ================= State ================= */
+let screen = "cover"; // cover | contents | play
+let st = null; // play state
+let opening = false;
+let flipping = false;
+let timerId = null, gameGen = 0;
+let fxRing = null, anim = null;
+let V = { cx: SW/2, cy: SH/2, s: 1 }, VW = 1, VH = 1, minS = 1;
+const viewHost = { get el() { return $("view"); } };
+
+function setChrome(reading) {
+  desk.classList.toggle("reading", !!reading);
+}
+
+/* ================= Contents & left page ================= */
+function starsHtml(n) {
+  let s = "";
+  for (let i = 1; i <= 3; i++) s += i <= n ? "⭐" : "☆";
+  return s;
+}
+
+function renderLeftHow() {
+  $("pageL").innerHTML =
+    '<div class="chap"><small>This book belongs to</small>Kaileigh</div>' +
+    '<div class="refcard">' +
+      '<div class="lab">Find this turkey!</div>' +
+      refTurkeySVG(180, 150) +
+      '<div class="hinty">Black hat • gold buckle • blue scarf</div>' +
+    "</div>" +
+    '<div class="howto"><b>How to play</b><ul>' +
+      "<li>🔍 Look carefully in the picture.</li>" +
+      "<li>👆 Tap the turkey with the black hat.</li>" +
+      "<li>🤏 Pinch or use + − to zoom and pan.</li>" +
+      "<li>💡 Use a hint if you get stuck.</li>" +
+    "</ul></div>";
+}
+
+function renderContents() {
+  screen = "contents";
+  st = null;
+  clearTimers();
+  renderLeftHow();
+  let rows = '<div class="toc"><h2>Contents</h2><p class="belongs">Ten pages of Thanksgiving hiding fun!</p>';
+  LEVELS.forEach(function (lv, i) {
+    const locked = (i + 1) > save.unlocked;
+    const stars = save.stars[i] || 0;
+    const best = save.bestTime[i];
+    rows += '<button type="button" class="ch' + (locked ? " locked" : "") + '" data-level="' + (i + 1) + '" ' + (locked ? "disabled" : "") + ">" +
+      '<span class="num">' + lv.n + "</span>" +
+      '<span class="nm">' + (locked ? "🔒 " : "") + lv.title + (best != null ? '<br><span style="font-size:12px;font-weight:600;color:#6b4a28">Best ' + fmt(best) + "</span>" : "") + "</span>" +
+      '<span class="st">' + (stars ? starsHtml(stars) : (locked ? "" : "○")) + "</span>" +
+      "</button>";
+  });
+  rows += "</div>";
+  if (isSingle()) {
+    $("pageL").innerHTML = "";
+    $("pageRContent").innerHTML = rows;
+  } else {
+    $("pageRContent").innerHTML = rows;
+  }
+  $("pageRContent").querySelectorAll(".ch").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const n = +btn.getAttribute("data-level");
+      if (n > save.unlocked) { SFX.lock(); return; }
+      SFX.click();
+      startLevel(n, true);
+    });
+  });
+}
+
+function leftForLevel(lv) {
+  return '<div class="chap"><small>Chapter ' + lv.n + " of 10</small>" + lv.title + "</div>" +
+    '<p class="story">' + lv.story + "</p>" +
+    '<div class="refcard">' +
+      '<div class="lab">Find this turkey!</div>' +
+      refTurkeySVG(200, 170) +
+      '<div class="hinty">He wears a black hat with a gold buckle and a blue scarf.</div>' +
+    "</div>" +
+    (lv.bonus ? '<p class="story" style="margin-top:10px">⏱ Bonus timer! Find him quickly for extra sparkle.</p>' : "");
+}
+
+function playPageHtml(lv, sceneSvg) {
+  const single = isSingle();
+  return '<div class="scene-wrap">' +
+    '<div class="playhead">' +
+      '<button type="button" id="contentsBtn" aria-label="Contents">📜</button>' +
+      '<div class="mini-ref" title="Find this turkey">' + refTurkeySVG(42, 42) + "</div>" +
+      '<div class="ttl">' + (single ? "Ch. " + lv.n + " · " : "") + lv.title + "</div>" +
+      '<div class="tpill" id="timer">⏱ 00:00</div>' +
+      (lv.bonus ? '<div class="tpill bonus" id="bonusPill">⭐ ' + lv.bonus + "s</div>" : "") +
+      '<button type="button" id="hintBtn">💡 2</button>' +
+    "</div>" +
+    '<div id="view">' +
+      sceneSvg +
+      '<div id="toast"></div>' +
+      '<div class="zoombar">' +
+        '<button type="button" class="zbtn" id="zin" aria-label="Zoom in">+</button>' +
+        '<button type="button" class="zbtn" id="zout" aria-label="Zoom out">−</button>' +
+        '<button type="button" class="zbtn all" id="zall" aria-label="Fit page">▣</button>' +
+      "</div>" +
+    "</div>" +
+  "</div>";
+}
+
+function bindPlayControls() {
+  const c = $("contentsBtn"); if (c) c.onclick = function () { SFX.click(); goContents(true); };
+  const h = $("hintBtn"); if (h) h.onclick = useHint;
+  const zi = $("zin"); if (zi) zi.onclick = function () { SFX.click(); zoomSmooth(1.7); };
+  const zo = $("zout"); if (zo) zo.onclick = function () { SFX.click(); zoomSmooth(1 / 1.7); };
+  const za = $("zall"); if (za) za.onclick = function () { SFX.click(); fitAll(true); };
+  bindViewPointers();
+}
+
+/* ================= Open cover ================= */
+function openBook(done) {
+  if (opening || book.classList.contains("open")) { if (done) done(); return; }
+  opening = true;
+  ac();
+  paperSound();
+  layoutBook();
+  if (reduce) {
+    book.classList.add("open", "opened", "reduce");
+    setChrome(true);
+    opening = false;
+    if (done) done();
+    return;
+  }
+  book.classList.add("open");
+  setChrome(true);
+  setTimeout(function () {
+    book.classList.add("opened");
+    opening = false;
+    if (done) done();
+  }, 1050);
+}
+
+/* ================= Page flip ================= */
+function snapshotNode(el) {
+  return el ? el.innerHTML : "";
+}
+function flipTo(prepare, done) {
+  if (flipping) return;
+  flipping = true;
+  const leaf = $("leaf"), front = $("leafFront"), back = $("leafBack");
+  const content = $("pageRContent");
+  const oldHtml = snapshotNode(content);
+  if (reduce) {
+    prepare();
+    flipping = false;
+    if (done) done();
+    return;
+  }
+  front.innerHTML = '<div style="position:absolute;inset:0;overflow:hidden">' + oldHtml + '</div><div class="leaf-shade"></div>';
+  prepare();
+  const newHtml = snapshotNode(content);
+  back.innerHTML = '<div style="position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#f7ead0,#f0dcb6)">' +
+    (isSingle() ? "" : snapshotNode($("pageL"))) +
+    '</div><div class="leaf-shade"></div>';
+  leaf.classList.add("on");
+  leaf.classList.remove("flip");
+  leaf.style.transition = "none";
+  leaf.style.transform = "rotateY(0deg)";
+  void leaf.offsetWidth;
+  paperSound();
+  requestAnimationFrame(function () {
+    leaf.style.transition = "transform .9s cubic-bezier(.2,.7,.2,1)";
+    leaf.classList.add("flip");
+    leaf.style.transform = "rotateY(-180deg)";
+  });
+  setTimeout(function () {
+    leaf.classList.remove("on", "flip");
+    leaf.style.transition = "";
+    leaf.style.transform = "";
+    front.innerHTML = ""; back.innerHTML = "";
+    flipping = false;
+    if (done) done();
+  }, 950);
+}
+
+function setFlipProgress(p) {
+  const leaf = $("leaf");
+  p = Math.max(0, Math.min(1, p));
+  leaf.classList.add("on");
+  leaf.classList.remove("flip");
+  leaf.style.transition = "none";
+  leaf.style.transform = "rotateY(" + (-180 * p) + "deg)";
+}
+
+/* ================= Play / camera ================= */
+function measure() {
+  const view = $("view"); if (!view) return;
+  const b = view.getBoundingClientRect();
+  VW = Math.max(1, b.width); VH = Math.max(1, b.height);
+  minS = Math.min(VW / SW, VH / SH) * 0.995;
+}
+function clampV() {
+  const maxS = 6;
+  V.s = Math.max(minS, Math.min(maxS, V.s));
+  const vw = VW / V.s, vh = VH / V.s, px = vw * 0.28, py = vh * 0.28;
+  const lox = Math.min(SW / 2, vw / 2 - px), hix = Math.max(SW / 2, SW - vw / 2 + px);
+  const loy = Math.min(SH / 2, vh / 2 - py), hiy = Math.max(SH / 2, SH - vh / 2 + py);
+  V.cx = vw >= SW ? SW / 2 : Math.max(lox, Math.min(hix, V.cx));
+  V.cy = vh >= SH ? SH / 2 : Math.max(loy, Math.min(hiy, V.cy));
+}
+function renderView() {
+  const svg = document.getElementById("sceneSvg"); if (!svg) return;
+  clampV();
+  const vw = VW / V.s, vh = VH / V.s;
+  svg.setAttribute("viewBox", (V.cx - vw / 2) + " " + (V.cy - vh / 2) + " " + vw + " " + vh);
+  if (fxRing) placeRing();
+}
+function toScreen(wx, wy) { return { x: (wx - V.cx) * V.s + VW / 2, y: (wy - V.cy) * V.s + VH / 2 }; }
+function toWorld(sx, sy) { return { x: (sx - VW / 2) / V.s + V.cx, y: (sy - VH / 2) / V.s + V.cy }; }
+function zoomAt(sx, sy, f) {
+  const w = toWorld(sx, sy);
+  V.s = Math.max(minS, Math.min(6, V.s * f));
+  V.cx = w.x - (sx - VW / 2) / V.s;
+  V.cy = w.y - (sy - VH / 2) / V.s;
+  renderView();
+}
+function stopAnim() { if (anim) { cancelAnimationFrame(anim.raf); anim = null; } }
+function animateTo(T, dur, done) {
+  stopAnim();
+  const A = { cx: V.cx, cy: V.cy, s: V.s }, t0 = performance.now();
+  anim = { raf: 0 };
+  const step = function (now) {
+    let t = Math.min(1, (now - t0) / dur);
+    const e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const s = Math.exp(Math.log(A.s) * (1 - e) + Math.log(T.s) * e);
+    const p0 = { x: (T.cx - A.cx) * A.s, y: (T.cy - A.cy) * A.s };
+    V.s = s; V.cx = T.cx - p0.x * (1 - e) / s; V.cy = T.cy - p0.y * (1 - e) / s;
+    renderView();
+    if (t < 1) anim.raf = requestAnimationFrame(step); else { anim = null; if (done) done(); }
+  };
+  anim.raf = requestAnimationFrame(step);
+}
+function zoomSmooth(f) { animateTo({ cx: V.cx, cy: V.cy, s: Math.max(minS, Math.min(6, V.s * f)) }, 280); }
+function fitAll(animated) {
+  const T = { cx: SW / 2, cy: SH / 2, s: minS };
+  if (animated && !reduce) animateTo(T, 500); else { stopAnim(); V = T; renderView(); }
+}
+
+const ptrs = new Map();
+let gesture = null, viewBound = false;
+function localPt(e, view) { const b = view.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
+function bindViewPointers() {
+  if (viewBound) return;
+  viewBound = true;
+  const root = $("pageR");
+  root.addEventListener("pointerdown", onPd);
+  root.addEventListener("pointermove", onPm);
+  root.addEventListener("pointerup", onPu);
+  root.addEventListener("pointercancel", onPu);
+  root.addEventListener("wheel", onWheel, { passive: false });
+}
+function onPd(e) {
+  const view = $("view"); if (!view || !e.target.closest("#view") || e.target.closest(".zoombar")) return;
+  if (!st || st.finished) return;
+  ac(); stopAnim();
+  try { view.setPointerCapture(e.pointerId); } catch (err) {}
+  ptrs.set(e.pointerId, localPt(e, view));
+  if (ptrs.size === 1) { const q = localPt(e, view); gesture = { type: "drag", sx: q.x, sy: q.y, lx: q.x, ly: q.y, t: performance.now(), moved: 0 }; }
+  else if (ptrs.size === 2) { const a = [...ptrs.values()]; gesture = { type: "pinch", d: Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y), mx: (a[0].x + a[1].x) / 2, my: (a[0].y + a[1].y) / 2 }; }
+}
+function onPm(e) {
+  const view = $("view"); if (!view || !ptrs.has(e.pointerId) || !gesture) return;
+  const q = localPt(e, view); ptrs.set(e.pointerId, q);
+  if (gesture.type === "drag" && ptrs.size === 1) {
+    const dx = q.x - gesture.lx, dy = q.y - gesture.ly; gesture.lx = q.x; gesture.ly = q.y;
+    gesture.moved = Math.max(gesture.moved, Math.hypot(q.x - gesture.sx, q.y - gesture.sy));
+    if (gesture.moved > 8) { view.classList.add("drag"); V.cx -= dx / V.s; V.cy -= dy / V.s; renderView(); }
+  } else if (gesture.type === "pinch" && ptrs.size >= 2) {
+    const a = [...ptrs.values()];
+    const d = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y), mx = (a[0].x + a[1].x) / 2, my = (a[0].y + a[1].y) / 2;
+    V.cx -= (mx - gesture.mx) / V.s; V.cy -= (my - gesture.my) / V.s;
+    if (gesture.d > 10) zoomAt(mx, my, d / gesture.d); else renderView();
+    gesture.d = d; gesture.mx = mx; gesture.my = my;
+  }
+}
+function onPu(e) {
+  const view = $("view"); if (!view || !ptrs.has(e.pointerId)) return;
+  const q = localPt(e, view); ptrs.delete(e.pointerId);
+  if (gesture && gesture.type === "drag" && ptrs.size === 0 && gesture.moved <= 10 && performance.now() - gesture.t < 700 && e.type === "pointerup") tapAt(q.x, q.y);
+  if (ptrs.size === 1) { const a = [...ptrs.values()][0]; gesture = { type: "drag", sx: a.x, sy: a.y, lx: a.x, ly: a.y, t: 0, moved: 99 }; }
+  else if (ptrs.size === 0) { gesture = null; view.classList.remove("drag"); }
+}
+function onWheel(e) {
+  if (!$("view") || !st || st.finished || !e.target.closest("#view")) return;
+  e.preventDefault(); stopAnim();
+  const q = localPt(e, $("view"));
+  const dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY;
+  zoomAt(q.x, q.y, Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0018)));
+}
+document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
+
+function toast(t, ms) {
+  const e = $("toast"); if (!e) return;
+  e.textContent = t; e.classList.add("show");
+  clearTimeout(toast.t); toast.t = setTimeout(function () { e.classList.remove("show"); }, ms || 1800);
+}
+
+function hitTurkey(sx, sy) {
+  if (!st) return false;
+  const half = st.turkey.size / 2 * V.s;
+  if (half < 6) return false;
+  const q = toScreen(st.turkey.x, st.turkey.y);
+  const hr = Math.max(half * 1.15, 28);
+  return Math.hypot(q.x - sx, q.y - sy) <= hr;
+}
+function hitDecoy(sx, sy) {
+  if (!st) return false;
+  const lv = LEVELS[st.n - 1];
+  for (let i = 0; i < (lv.decoys || []).length; i++) {
+    const d = lv.decoys[i];
+    const size = turkeyHitSize(d.scale);
+    const half = size / 2 * V.s;
+    if (half < 6) continue;
+    const q = toScreen(d.x, d.y);
+    const hr = Math.max(half * 1.1, 24);
+    if (Math.hypot(q.x - sx, q.y - sy) <= hr) return d;
+  }
+  return null;
+}
+function tapAt(sx, sy) {
+  if (!st || st.finished || flipping) return;
+  if (hitTurkey(sx, sy)) { foundTurkey(); return; }
+  const d = hitDecoy(sx, sy);
+  SFX.miss();
+  fx("miss", sx, sy);
+  if (d) {
+    const msg = d.kind === "nohat" || d.kind === "back" ? "No hat! That's not him." :
+      d.kind === "chef" ? "That's a chef, not our turkey!" :
+      d.kind === "white" ? "Wrong colours! Look for the blue scarf." :
+      d.kind === "bluehat" ? "Wrong hat! He has a black hat." :
+      "That's not him!";
+    toast(msg, 1600);
+  }
+}
+
+function fx(kind, x, y, ch, dx, dy) {
+  const view = $("view"); if (!view) return;
+  const d = document.createElement("div"); d.className = "fx " + kind; d.style.left = x + "px"; d.style.top = y + "px";
+  if (ch) d.textContent = ch;
+  if (dx !== undefined) { d.style.setProperty("--dx", dx + "px"); d.style.setProperty("--dy", dy + "px"); }
+  view.appendChild(d); setTimeout(function () { d.remove(); }, 1000);
+}
+function clearFx() { if (fxRing) { fxRing.el.remove(); clearTimeout(fxRing.t); fxRing = null; } }
+function placeRing() {
+  if (!fxRing || !st) return;
+  const q = toScreen(st.turkey.x, st.turkey.y);
+  const d = Math.max(80, st.turkey.size * V.s * 1.8);
+  Object.assign(fxRing.el.style, { left: q.x + "px", top: q.y + "px", width: d + "px", height: d + "px" });
+}
+
+function useHint() {
+  if (!st || st.finished || st.hints <= 0) return;
+  st.hints--;
+  updateHint();
+  SFX.hint();
+  say("Look here!");
+  clearFx();
+  const view = $("view"); if (!view) return;
+  const ring = document.createElement("div"); ring.className = "fx ring"; view.appendChild(ring);
+  fxRing = { el: ring, t: setTimeout(clearFx, 4500) };
+  const targetS = Math.max(minS, Math.min(6, 90 / st.turkey.size));
+  animateTo({ cx: st.turkey.x, cy: st.turkey.y, s: targetS }, 900);
+}
+
+function updateHint() {
+  const b = $("hintBtn"); if (b) { b.textContent = "💡 " + st.hints; b.disabled = st.hints <= 0 || !!(st && st.finished); }
+}
+function updateTimer() {
+  if (!st || !st.t0 || st.finished) return;
+  const t = $("timer"); if (t) t.textContent = "⏱ " + fmt(Date.now() - st.t0);
+  if (st.bonus && $("bonusPill")) {
+    const left = Math.max(0, st.bonus - (Date.now() - st.t0) / 1000);
+    const p = $("bonusPill");
+    p.textContent = left > 0 ? "⭐ " + Math.ceil(left) + "s" : "⭐ —";
+    p.classList.toggle("out", left <= 0);
+  }
+}
+function clearTimers() {
+  if (timerId) { clearInterval(timerId); timerId = null; }
+  stopAnim(); clearFx();
+  gameGen += 1;
+}
+
+function startLevel(n, doFlip) {
+  const lv = LEVELS[n - 1]; if (!lv) return;
+  gameGen += 1;
+  clearTimeout(showWin.t);
+  $("winBox").classList.remove("on");
+  $("endBox").classList.remove("on");
+  const go = function () {
+    const built = buildScene(lv);
+    if (!isSingle()) $("pageL").innerHTML = leftForLevel(lv);
+    $("pageRContent").innerHTML = playPageHtml(lv, built.svg);
+    bindPlayControls();
+    st = {
+      n: n, t0: Date.now(), hints: 2, finished: false,
+      turkey: built.turkey, bonus: lv.bonus || 0, bonusHit: false
+    };
+    screen = "play";
+    layoutBook();
+    measure();
+    V = { cx: SW / 2, cy: SH / 2, s: minS };
+    const view = $("view");
+    if (view) view.style.background = VIEW_BG[lv.n] || "#d9f0ff";
+    renderView();
+    updateHint();
+    updateTimer();
+    if (timerId) clearInterval(timerId);
+    timerId = setInterval(updateTimer, 200);
+    say("Find the turkey, Kai Lee! He is wearing a black hat.");
+  };
+  if (doFlip && book.classList.contains("open") && !reduce) flipTo(go, function () { measure(); renderView(); });
+  else go();
+}
+
+function foundTurkey() {
+  if (!st || st.finished) return;
+  st.finished = true;
+  const time = Math.max(0, Date.now() - st.t0);
+  st.time = time;
+  if (st.bonus && time <= st.bonus * 1000) st.bonusHit = true;
+  const lv = LEVELS[st.n - 1];
+  const stars = starRating(lv, time, 2 - st.hints, st.bonusHit);
+  st.stars = stars;
+  const idx = st.n - 1;
+  if (stars > (save.stars[idx] || 0)) save.stars[idx] = stars;
+  if (save.bestTime[idx] == null || time < save.bestTime[idx]) save.bestTime[idx] = time;
+  if (save.unlocked < 10 && st.n >= save.unlocked) save.unlocked = Math.min(10, st.n + 1);
+  persist();
+
+  const q = toScreen(st.turkey.x, st.turkey.y);
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * Math.PI * 2, d = 50 + Math.random() * 40;
+    fx("spark", q.x, q.y, ["✨","⭐","🍁","💛"][i % 4], Math.cos(a) * d, Math.sin(a) * d);
+  }
+  const hero = document.getElementById("turkey-real");
+  if (hero) {
+    const halo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    halo.setAttribute("cx", "0"); halo.setAttribute("cy", "0"); halo.setAttribute("r", "55");
+    halo.setAttribute("fill", "rgba(47,210,122,.22)");
+    halo.setAttribute("stroke", "#2fd27a"); halo.setAttribute("stroke-width", "5");
+    hero.insertBefore(halo, hero.firstChild);
+  }
+  SFX.found();
+  if (st.bonusHit) SFX.bonus();
+  const gen = gameGen;
+  clearTimeout(showWin.t);
+  showWin.t = setTimeout(function () {
+    if (gameGen !== gen || !st || !st.finished) return;
+    showWin();
+  }, 700);
+}
+
+function showWin() {
+  if (!st) return;
+  const stars = st.stars;
+  let html = "";
+  for (let i = 1; i <= 3; i++) html += i <= stars ? "⭐" : '<span class="dim">⭐</span>';
+  $("winStars").innerHTML = html;
+  $("winStars").setAttribute("aria-label", stars + " star" + (stars === 1 ? "" : "s"));
+  $("winTime").textContent = "⏱ " + fmt(st.time || 0);
+  const msgs = { 3: "Super spotting!", 2: "Great finding!", 1: "You found him!" };
+  $("winSub").textContent = msgs[stars] || msgs[1];
+  $("winBonus").textContent = st.bonusHit ? "⭐ Bonus time! You were super speedy!" : "";
+  const best = save.bestTime[st.n - 1];
+  $("winBest").textContent = best === st.time ? "🏆 New best time!" : ("Best: ⏱ " + fmt(best));
+  $("winNext").style.display = st.n < 10 ? "" : "none";
+  $("winBox").classList.add("on");
+  SFX.win();
+  say("You did it, Kai Lee!");
+  confetti();
+}
+
+function showEnd() {
+  $("winBox").classList.remove("on");
+  const total = save.stars.reduce(function (a, b) { return a + b; }, 0);
+  let html = "";
+  const avg = Math.round(total / 10);
+  for (let i = 1; i <= 3; i++) html += i <= Math.max(1, Math.min(3, Math.ceil(total / 10))) ? "⭐" : '<span class="dim">⭐</span>';
+  $("endStars").innerHTML = html;
+  $("endTotal").textContent = "You earned " + total + " out of 30 stars!";
+  $("endBox").classList.add("on");
+  SFX.win(); confetti();
+  say("You found every turkey, Kai Lee!");
+}
+
+function goContents(doFlip) {
+  $("winBox").classList.remove("on");
+  $("endBox").classList.remove("on");
+  clearTimers();
+  st = null;
+  const go = function () { renderContents(); };
+  if (doFlip && book.classList.contains("open") && !reduce) flipTo(go); else go();
+}
+
+/* ================= Confetti ================= */
+function confetti() {
+  const cv = $("confetti"), x = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ["#c44914","#e6c15a","#7b5cff","#2fd27a","#ff7a3d","#fff","#3fb5ff"];
+  const P = [];
+  for (let i = 0; i < 110; i++) P.push({ x: Math.random()*cv.width, y: -20 - Math.random()*cv.height*0.3, vx: Math.random()*6-3, vy: 3+Math.random()*4, a: Math.random()*6, r: 6+Math.random()*7, c: cols[i%cols.length] });
+  const run = ++confetti.run; let n = 0;
+  (function f() {
+    if (run !== confetti.run) { x.clearRect(0, 0, cv.width, cv.height); return; }
+    x.clearRect(0, 0, cv.width, cv.height);
+    for (let i = 0; i < P.length; i++) { const q = P[i]; q.x += q.vx; q.y += q.vy; q.a += .1; x.fillStyle = q.c; x.save(); x.translate(q.x, q.y); x.rotate(q.a); x.fillRect(-q.r, -q.r / 2, q.r * 2, q.r); x.restore(); }
+    if (++n < 200) requestAnimationFrame(f); else x.clearRect(0, 0, cv.width, cv.height);
+  })();
+}
+confetti.run = 0;
+
+/* ================= Cover art ================= */
+function paintCoverArt() {
+  $("coverArt").innerHTML = '<svg viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg">' +
+    el(130, 200, 110, 16, "rgba(0,0,0,.18)") +
+    pumpkin(40, 180, 1.1) + pumpkin(220, 184, 0.9, "#f0a030") +
+    em("🍁", 30, 40, 36, -20) + em("🍂", 230, 50, 32, 20) + em("🌽", 50, 120, 34, -10) +
+    turkeyMarkup({ x: 130, y: 130, scale: 1.45, kind: "real", bob: false }) +
+    "</svg>";
+}
+
+/* ================= Wire up ================= */
+$("openBtn").addEventListener("click", function () {
+  ac(); SFX.click();
+  renderContents();
+  openBook();
+});
+$("muteBtn").addEventListener("click", function () { ac(); setMuted(!muted); SFX.click(); });
+$("winNext").addEventListener("click", function () {
+  SFX.click();
+  $("winBox").classList.remove("on");
+  confetti.run = (confetti.run || 0) + 1;
+  if (!st) return;
+  if (st.n >= 10) showEnd();
+  else startLevel(st.n + 1, true);
+});
+$("winAgain").addEventListener("click", function () {
+  SFX.click(); $("winBox").classList.remove("on"); confetti.run = (confetti.run || 0) + 1;
+  if (st) startLevel(st.n, false);
+});
+$("winContents").addEventListener("click", function () { SFX.click(); confetti.run = (confetti.run || 0) + 1; goContents(true); });
+$("endContents").addEventListener("click", function () { SFX.click(); $("endBox").classList.remove("on"); confetti.run = (confetti.run || 0) + 1; goContents(true); });
+
+window.addEventListener("resize", function () { layoutBook(); });
+window.addEventListener("orientationchange", function () { setTimeout(layoutBook, 80); });
+
+setMuted(muted);
+paintCoverArt();
+layoutBook();
+
+/* test hook */
+window.__turkey = {
+  LEVELS: LEVELS, SW: SW, SH: SH,
+  openBook: function (cb) { renderContents(); openBook(cb); },
+  showContents: function () { if (!book.classList.contains("open")) { renderContents(); openBook(function () {}); } else goContents(false); },
+  startLevel: function (n, flip) { if (!book.classList.contains("open")) { renderContents(); openBook(function () { startLevel(n, false); }); } else startLevel(n, !!flip); },
+  tapTurkey: function () { if (!st) return false; const q = toScreen(st.turkey.x, st.turkey.y); tapAt(q.x, q.y); return true; },
+  tapWrong: function () { if (!st) return; tapAt(10, 10); },
+  hint: useHint,
+  foundTurkey: foundTurkey,
+  nextLevel: function () { if (st && st.n < 10) startLevel(st.n + 1, true); },
+  setFlip: setFlipProgress,
+  prepareFlipShot: function (from, to) {
+    /* Build a mid-flip: old page on leaf front, new under it */
+    startLevel(from, false);
+    const content = $("pageRContent");
+    const oldHtml = content.innerHTML;
+    const built = buildScene(LEVELS[to - 1]);
+    $("leafFront").innerHTML = '<div style="position:absolute;inset:0;overflow:hidden">' + oldHtml + '</div><div class="leaf-shade"></div>';
+    $("leafBack").innerHTML = '<div style="position:absolute;inset:0;background:#f7ead0"></div><div class="leaf-shade"></div>';
+    startLevel(to, false);
+    setFlipProgress(0.38);
+  },
+  goContents: goContents,
+  showWin: showWin,
+  showEnd: showEnd,
+  setReduce: function (v) { reduce = !!v; layoutBook(); },
+  starRating: starRating, fmt: fmt, buildScene: buildScene,
+  get state() { return st; },
+  get screen() { return screen; },
+  get save() { return save; },
+  get V() { return V; },
+  get reduce() { return reduce; },
+  toScreen: toScreen, measure: measure, renderView: renderView,
+  resetSave: function () { save = defaultSave(); persist(); },
+  unlockAll: function () { save.unlocked = 10; persist(); }
+};
+</script>
+
+<script>
+  /* Count a visit once per browser session; stay silent if it fails */
+  (function () {
+    var PAGE = "turkey";
+    var SK = "kq_hit_" + PAGE;
+    try { if (sessionStorage.getItem(SK) === "1") return; } catch (e) {}
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    if (ctrl) setTimeout(function () { ctrl.abort(); }, 8000);
+    fetch("https://yjzipkgorsudkugouvba.supabase.co/rest/v1/rpc/bump_hit", {
+      method: "POST",
+      headers: { "apikey": "sb_publishable_bJdh1REiNeXFwjz_hGGohg_Iz2bSpWs", "Content-Type": "application/json" },
+      body: JSON.stringify({ p_page: PAGE }),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function (r) {
+      if (r.ok) { try { sessionStorage.setItem(SK, "1"); } catch (e) {} }
+    }).catch(function () {});
+  })();
+</script>
+</body>
+</html>

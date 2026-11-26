@@ -210,6 +210,9 @@
   .gamecard.ws .gtitle { background: #ff4fa3; }
   .gamecard.mm { transform: rotate(1.15deg); box-shadow: 0 10px 0 #9ee7d0, 0 14px 30px rgba(123,92,255,.18); }
   .gamecard.mm .gtitle { background: #12b5a0; }
+  .gamecard.tk { transform: rotate(-1.05deg); box-shadow: 0 10px 0 #f0b27a, 0 14px 30px rgba(123,92,255,.18); }
+  .gamecard.tk .gtitle { background: #c44914; }
+
   .zoomplay:active { transform: translateY(5px); box-shadow: 0 2px 0 #17984f; }
   #scrollHint { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 40; display: none; flex-direction: column; align-items: center; font-family: inherit; font-weight: 700; font-size: 17px; color: #7b5cff; background: #fff; border: 4px solid #fff; border-radius: 22px; padding: 6px 14px 4px; box-shadow: 0 5px 0 #d4c8ff; cursor: pointer; animation: bob 1.1s ease-in-out infinite; }
   #scrollHint.show { display: flex; }
@@ -379,7 +382,7 @@
         <a class="zoomplay" href="wordsearch/">▶ Play!</a></div>
       </div>
       <div class="gamecard mm">
-        <div class="gtitle">🚪 Memory Match <span class="newtag">NEW!</span></div>
+        <div class="gtitle">🚪 Memory Match</div>
         <a href="memory/" aria-label="Play Memory Match"><svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" role="img">
           <defs>
             <linearGradient id="mmsky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd9ef"/><stop offset=".55" stop-color="#c9f0ff"/><stop offset="1" stop-color="#c9ffe4"/></linearGradient>
@@ -422,6 +425,55 @@
         </svg></a>
         <div class="gfoot"><p class="gdesc">Open the doors and find the pairs.<br>Easy, Medium and Hard! 🚪 🦁 🍎</p>
         <a class="zoomplay" href="memory/">▶ Play!</a></div>
+      </div>
+
+      <div class="gamecard tk">
+        <div class="gtitle">🦃 Find the Turkey <span class="newtag">NEW!</span></div>
+        <a href="turkey/" aria-label="Play Find the Turkey"><svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" role="img">
+          <defs>
+            <linearGradient id="tkwall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6e3a48"/><stop offset="1" stop-color="#8a5a32"/></linearGradient>
+            <linearGradient id="tkcover" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b42a3d"/><stop offset="1" stop-color="#7a1422"/></linearGradient>
+          </defs>
+          <rect width="600" height="300" fill="url(#tkwall)"/>
+          <rect y="210" width="600" height="90" fill="#c9a36c"/>
+          <text x="46" y="70" font-size="34">🍁</text>
+          <text x="550" y="80" font-size="30">🍂</text>
+          <text x="70" y="250" font-size="28">🌽</text>
+          <text x="530" y="255" font-size="32">🎃</text>
+          <!-- closed storybook -->
+          <g transform="translate(200,38)">
+            <rect x="8" y="12" width="200" height="230" rx="8" fill="#e8d2a0"/>
+            <rect x="14" y="16" width="200" height="230" rx="8" fill="#f3e2bf"/>
+            <rect width="200" height="230" rx="8" fill="url(#tkcover)" stroke="#c9a24a" stroke-width="6"/>
+            <rect x="10" y="10" width="180" height="210" rx="4" fill="none" stroke="#e6c15a" stroke-width="2"/>
+            <text x="100" y="44" text-anchor="middle" font-size="13" font-family="Fredoka, sans-serif" font-weight="700" fill="#e6c15a">KAI'S KOOL KWIZ</text>
+            <text x="100" y="78" text-anchor="middle" font-size="22" font-family="Georgia, serif" font-weight="700" fill="#fff6d4">Find the</text>
+            <text x="100" y="104" text-anchor="middle" font-size="22" font-family="Georgia, serif" font-weight="700" fill="#fff6d4">Turkey</text>
+            <!-- tiny turkey -->
+            <g transform="translate(100,155) scale(0.78)">
+              <ellipse cx="-18" cy="-30" rx="9" ry="24" fill="#c62828" transform="rotate(-55 -18 -30)"/>
+              <ellipse cx="-8" cy="-36" rx="9" ry="26" fill="#e65100" transform="rotate(-28 -8 -36)"/>
+              <ellipse cx="0" cy="-40" rx="10" ry="28" fill="#ef6c00"/>
+              <ellipse cx="8" cy="-36" rx="9" ry="26" fill="#f9a825" transform="rotate(28 8 -36)"/>
+              <ellipse cx="16" cy="-30" rx="9" ry="24" fill="#2e7d32" transform="rotate(50 16 -30)"/>
+              <ellipse cx="0" cy="6" rx="26" ry="20" fill="#c46a2c"/>
+              <ellipse cx="-4" cy="10" rx="14" ry="12" fill="#a84e1c"/>
+              <ellipse cx="8" cy="6" rx="16" ry="12" fill="#e08948"/>
+              <path d="M-8 24 L-10 36 L-16 38" stroke="#c9a024" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <path d="M8 24 L10 36 L16 38" stroke="#c9a024" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <ellipse cx="24" cy="-8" rx="12" ry="11" fill="#d4783a"/>
+              <circle cx="29" cy="-10" r="2.2" fill="#1a1a1a"/>
+              <polygon points="34,-8 44,-6 34,-3" fill="#f4c430"/>
+              <ellipse cx="28" cy="0" rx="3.2" ry="6" fill="#e53935"/>
+              <rect x="10" y="-2" width="20" height="6" rx="2" fill="#3b6fd6"/>
+              <rect x="14" y="-28" width="24" height="12" rx="2" fill="#1a1a1a"/>
+              <rect x="8" y="-18" width="36" height="5" rx="1" fill="#1a1a1a"/>
+              <rect x="22" y="-25" width="9" height="6" rx="1" fill="#f1c40f"/>
+            </g>
+          </g>
+        </svg></a>
+        <div class="gfoot"><p class="gdesc">A Thanksgiving storybook hunt.<br>Find the turkey on every page! 🦃 🍁 🥧</p>
+        <a class="zoomplay" href="turkey/">▶ Play!</a></div>
       </div>
       </div>
     </div>
