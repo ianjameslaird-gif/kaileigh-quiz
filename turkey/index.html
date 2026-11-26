@@ -79,6 +79,7 @@
     width: var(--sw); height: var(--sh);
   }
   #book.phone { transition: none; }
+  #book.playing { transition: none; }
   #book.phone.open:not(.playing) {
     width: min(96vw, 720px);
     height: min(58dvh, calc(min(96vw, 720px) * 0.62));
@@ -1911,6 +1912,8 @@ function layoutBook() {
   book.classList.toggle("portrait", isPortrait());
   book.classList.toggle("reduce", reduce);
   book.classList.toggle("lite", liteMotion());
+  if (book.classList.contains("playing")) book.style.transition = "none";
+  else book.style.transition = "";
   if (book.classList.contains("open")) {
     const stage = $("bookStage");
     const r = stage ? stage.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight * 0.7 };
@@ -1929,11 +1932,12 @@ function layoutBook() {
       book.style.width = Math.round(w) + "px";
       book.style.height = Math.round(h) + "px";
     }
+    if (book.classList.contains("playing")) void book.offsetWidth;
   } else {
     book.style.width = "";
     book.style.height = "";
   }
-  if (screen === "play" && gs) { measure(); renderView(); }
+  if (screen === "play" && gs) { refitView(); }
   syncRotateTip();
 }
 
@@ -2122,9 +2126,33 @@ function setFlipProgress(p) {
 
 function measure() {
   const view = $("view"); if (!view) return;
-  const b = view.getBoundingClientRect();
-  VW = Math.max(1, b.width); VH = Math.max(1, b.height);
+  VW = Math.max(1, view.clientWidth || view.getBoundingClientRect().width);
+  VH = Math.max(1, view.clientHeight || view.getBoundingClientRect().height);
   minS = Math.min(VW / SW, VH / SH) * 0.998;
+}
+function intendedScale() {
+  if (isPhone() && isPortrait()) {
+    return Math.max(minS, Math.min(8, Math.max(VW / SW, VH / SH) * 1.08));
+  }
+  return minS;
+}
+function refitView() {
+  const prevS = V.s, prevIntended = intendedScale();
+  measure();
+  if (prevS <= prevIntended * 1.02 + 1e-6) applyInitialView();
+  else renderView();
+}
+function watchViewSize() {
+  const view = $("view");
+  if (!view || typeof ResizeObserver === "undefined") return;
+  if (watchViewSize.obs) {
+    try { watchViewSize.obs.disconnect(); } catch (e) {}
+  }
+  watchViewSize.obs = new ResizeObserver(function () {
+    if (screen !== "play" || !gs) return;
+    refitView();
+  });
+  watchViewSize.obs.observe(view);
 }
 function clampV() {
   V.s = Math.max(minS, Math.min(8, V.s));
@@ -2136,6 +2164,7 @@ function clampV() {
 }
 function renderView() {
   const layer = document.getElementById("sceneLayer"); if (!layer) return;
+  measure();
   clampV();
   layer.style.transform = layerTransform();
   if (fxRing) placeRing();
@@ -2238,6 +2267,8 @@ function rasterizeSvg(svgMarkup) {
       try {
         const cv = document.createElement("canvas");
         cv.width = w; cv.height = h;
+        cv.style.width = SW + "px";
+        cv.style.height = SH + "px";
         cv.id = "sceneBmp";
         const ctx = cv.getContext("2d", { alpha: false });
         ctx.fillStyle = "#1a120c";
@@ -2478,8 +2509,10 @@ function loadLevelScene(n) {
       }
     }
     loading.classList.remove("on");
+    watchViewSize();
     measure();
     applyInitialView();
+    requestAnimationFrame(function () { requestAnimationFrame(function () { if (screen === "play" && gs) refitView(); }); });
     syncRotateTip();
     return gs;
   });
@@ -2638,7 +2671,15 @@ $("winAgain").addEventListener("click", function () {
 $("winContents").addEventListener("click", function () { SFX.click(); confetti.run = (confetti.run || 0) + 1; goContents(true); });
 $("endContents").addEventListener("click", function () { SFX.click(); $("endBox").classList.remove("on"); confetti.run = (confetti.run || 0) + 1; goContents(true); });
 window.addEventListener("resize", layoutBook);
-window.addEventListener("orientationchange", function () { setTimeout(layoutBook, 80); setTimeout(layoutBook, 300); });
+window.addEventListener("orientationchange", function () {
+  setTimeout(layoutBook, 80);
+  setTimeout(layoutBook, 300);
+  setTimeout(layoutBook, 600);
+});
+book.addEventListener("transitionend", function (e) {
+  if (!e || (e.propertyName !== "width" && e.propertyName !== "height" && e.propertyName !== "transform")) return;
+  if (screen === "play" && gs) layoutBook();
+});
 bindViewPointers();
 setMuted(muted);
 paintCoverArt();
@@ -2689,6 +2730,11 @@ window.__turkey = {
   isPhone: isPhone, isPortrait: isPortrait,
   toScreen: toScreen, measure: measure, renderView: renderView,
   applyInitialView: applyInitialView,
+  fitAll: fitAll,
+  get SW() { return SW; },
+  get SH() { return SH; },
+  get VW() { return VW; },
+  get VH() { return VH; },
   panBy: function (dx, dy) { V.cx -= dx / V.s; V.cy -= dy / V.s; renderView(); },
   zoomAt: zoomAt,
   resetSave: function () { save = defaultSave(); persist(); },
